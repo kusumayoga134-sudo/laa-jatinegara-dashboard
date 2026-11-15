@@ -10,6 +10,7 @@ import {
   HardHat,
   ChevronRight,
   Sparkles,
+  PlusCircle,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -46,7 +47,6 @@ export default function SchematicViewer({
   };
 
   const handleMouseMove = (e) => {
-    // Record mouse position inside viewer for tooltip positioning
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setMousePos({
@@ -91,77 +91,157 @@ export default function SchematicViewer({
 
   const imageSrc = viewMode === 'hd' ? '/peta-laa-cropped-hd.png' : '/peta-laa-cropped.png';
 
-  // 28 Naspan Lines & Track Segments mapped exactly along the AutoCAD DWG schematic paths (3275 x 1419)
-  const naspanLines = [
-    // 1. Percabangan Kramat
+  // Comprehensive Track Lines covering EVERY SINGLE track, siding, platform, and curve on the AutoCAD schematic
+  const allTrackLines = [
+    // ----------------------------------------------------
+    // 1. LINTAS PERCABANGAN KRAMAT & PONDOK JATI
+    // ----------------------------------------------------
     {
-      id: 'naspan_9_kpb',
+      id: 'kramat_track_1',
       code: 'NASPAN 9 KPB-JNG',
       title: 'NASPAN 9 KPB-JNG (Percabangan Kramat)',
-      km: 'KM 10+000 - KM 10+857',
+      km: 'KM 10+000 - KM 10+400',
       category: 'PERCABANGAN KRAMAT',
-      d: 'M 218 370 L 588 370',
-      color: '#ec4899', // Pink
+      d: 'M 219 371 L 588 371',
+      color: '#db2777', // Rose / Pink
+    },
+    {
+      id: 'kramat_track_2',
+      code: 'ST. PONDOK JATI',
+      title: 'ST. PONDOK JATI (Lintas Stasiun)',
+      km: 'KM 10+400 - KM 10+857',
+      category: 'STASIUN PONDOK JATI',
+      d: 'M 219 418 L 588 418',
+      color: '#e11d48', // Red-Rose
+    },
+    {
+      id: 'kramat_turnout',
+      code: 'ST. PONDOK JATI',
+      title: 'Wesel Percabangan Kramat - Jatinegara',
+      km: 'KM 10+857',
+      category: 'WESEL KRAMAT',
+      d: 'M 588 371 L 741 656',
+      color: '#f43f5e',
     },
 
-    // 2. Manggarai Inbound HI & HU
+    // ----------------------------------------------------
+    // 2. LINTAS MANGGARAI - JATINEGARA
+    // ----------------------------------------------------
     {
-      id: 'naspan_1_mri_hi',
+      id: 'mri_jng_hi',
       code: 'MRI-JNG NASPAN 1 HI',
       title: 'MRI-JNG NASPAN 1 HI (Inbound Manggarai)',
       km: 'KM 10+800 - KM 11+448',
-      category: 'SEKSI LAA HULU',
-      d: 'M 310 656 L 728 656',
-      color: '#06b6d4', // Cyan
+      category: 'SEKSI LAA HULU (HI)',
+      d: 'M 310 657 L 729 657',
+      color: '#0284c7', // Sky Blue
     },
     {
-      id: 'naspan_1_jng_hu',
+      id: 'jng_mri_hu',
       code: 'JNG-MRI NASPAN 1 HU',
       title: 'JNG-MRI NASPAN 1 HU (Outbound Manggarai)',
       km: 'KM 10+800 - KM 11+448',
-      category: 'SEKSI LAA HILIR',
-      d: 'M 310 704 L 728 704',
-      color: '#3b82f6', // Blue
+      category: 'SEKSI LAA HILIR (HU)',
+      d: 'M 310 704 L 729 704',
+      color: '#2563eb', // Royal Blue
     },
 
-    // 3. Emplasemen St. Jatinegara
+    // ----------------------------------------------------
+    // 3. STASIUN JATINEGARA (JALUR 1 S/D 8 & WESEL)
+    // ----------------------------------------------------
     {
-      id: 'jng_jalur_1_2',
+      id: 'jng_jalur_1',
       code: 'ST. JATINEGARA (JALUR 1)',
-      title: 'ST. JATINEGARA (Jalur 1 & 2 Peron)',
+      title: 'ST. JATINEGARA (Jalur 1 & Peron 1)',
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
-      d: 'M 740 656 L 1475 656',
-      color: '#10b981', // Emerald
+      d: 'M 741 656 L 1476 656',
+      color: '#059669', // Emerald
     },
     {
-      id: 'jng_jalur_3_4',
+      id: 'jng_jalur_2',
+      code: 'ST. JATINEGARA (JALUR 2)',
+      title: 'ST. JATINEGARA (Jalur 2 & Peron 2)',
+      km: 'KM 11+750',
+      category: 'EMPLASEMEN JATINEGARA',
+      d: 'M 741 704 L 1476 704',
+      color: '#10b981', // Green
+    },
+    {
+      id: 'jng_jalur_3',
       code: 'ST. JATINEGARA (JALUR 3 & 4)',
-      title: 'ST. JATINEGARA (Jalur 3 & 4 Peron)',
+      title: 'ST. JATINEGARA (Jalur 3 & Peron 3)',
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
-      d: 'M 740 704 L 1475 704',
-      color: '#14b8a6', // Teal
+      d: 'M 797 606 L 1476 606',
+      color: '#0d9488', // Teal
     },
     {
-      id: 'jng_jalur_5_8',
-      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
-      title: 'ST. JATINEGARA (Jalur 5 s/d 8 Stabling)',
+      id: 'jng_jalur_4',
+      code: 'ST. JATINEGARA (JALUR 3 & 4)',
+      title: 'ST. JATINEGARA (Jalur 4 & Peron 4)',
       km: 'KM 11+750',
-      category: 'STABLING & WESEL JATINEGARA',
-      d: 'M 600 418 L 1450 418',
-      color: '#f59e0b', // Amber
+      category: 'EMPLASEMEN JATINEGARA',
+      d: 'M 829 513 L 1462 513',
+      color: '#0891b2', // Cyan
+    },
+    {
+      id: 'jng_jalur_5_6',
+      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
+      title: 'ST. JATINEGARA (Jalur 5 & 6 Stabling)',
+      km: 'KM 11+750',
+      category: 'STABLING JATINEGARA',
+      d: 'M 600 418 L 1453 418',
+      color: '#d97706', // Amber
+    },
+    {
+      id: 'jng_jalur_7',
+      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
+      title: 'ST. JATINEGARA (Jalur 7 Stabling Utara)',
+      km: 'KM 11+750',
+      category: 'STABLING JATINEGARA',
+      d: 'M 601 370 L 1434 370',
+      color: '#b45309', // Dark Amber
+    },
+    {
+      id: 'jng_jalur_8',
+      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
+      title: 'ST. JATINEGARA (Jalur 8 Badug / Depo)',
+      km: 'KM 11+750',
+      category: 'DEPO JATINEGARA',
+      d: 'M 992 323 L 1422 323',
+      color: '#ea580c', // Orange
+    },
+    {
+      id: 'jng_wesel_barat',
+      code: 'ST. JATINEGARA',
+      title: 'ST. JATINEGARA (Wesel Barat W21A/B)',
+      km: 'KM 11+500',
+      category: 'KOMPLEKS WESEL',
+      d: 'M 612 606 L 797 606',
+      color: '#f43f5e',
+    },
+    {
+      id: 'jng_wesel_timur',
+      code: 'ST. JATINEGARA',
+      title: 'ST. JATINEGARA (Wesel Timur W31A/B & W51B)',
+      km: 'KM 12+000',
+      category: 'KOMPLEKS WESEL',
+      d: 'M 1488 608 L 1823 608',
+      color: '#c026d3', // Purple
     },
 
-    // 4. East of Jatinegara towards Klender
+    // ----------------------------------------------------
+    // 4. PETAK JATINEGARA - KLENDER (JNG-KLD)
+    // ----------------------------------------------------
     {
       id: 'naspan_1_hi',
       code: 'NASPAN 1 JNG-KLD (HI)',
       title: 'NASPAN 1 JNG-KLD (HI)',
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HULU (HI)',
-      d: 'M 1487 656 L 1942 656',
-      color: '#eab308', // Gold / Yellow
+      d: 'M 1487 656 L 1943 656',
+      color: '#ca8a04', // Gold
     },
     {
       id: 'naspan_1_hu',
@@ -169,19 +249,17 @@ export default function SchematicViewer({
       title: 'NASPAN 1 JNG-KLD (HU)',
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HILIR (HU)',
-      d: 'M 1487 704 L 1942 704',
-      color: '#d946ef', // Magenta
+      d: 'M 1488 704 L 1943 704',
+      color: '#9333ea', // Purple
     },
-
-    // 5. Petak Klender
     {
       id: 'naspan_2',
       code: 'NASPAN 2 JNG-KLD',
       title: 'NASPAN 2 JNG-KLD',
       km: 'KM 12+844 - KM 13+800',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 1942 656 L 2100 656',
-      color: '#f97316', // Orange
+      d: 'M 1943 656 L 2100 656',
+      color: '#ea580c', // Orange
     },
     {
       id: 'naspan_3',
@@ -189,8 +267,8 @@ export default function SchematicViewer({
       title: 'NASPAN 3 JNG-KLD',
       km: 'KM 13+800 - KM 14+800',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 2100 656 L 2257 656',
-      color: '#84cc16', // Lime
+      d: 'M 2100 656 L 2258 656',
+      color: '#65a30d', // Lime
     },
     {
       id: 'naspan_4',
@@ -198,18 +276,20 @@ export default function SchematicViewer({
       title: 'NASPAN 4 JNG-KLD',
       km: 'KM 14+800 - KM 15+760',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 1942 704 L 2255 704',
-      color: '#22c55e', // Green
+      d: 'M 1943 704 L 2256 704',
+      color: '#16a34a', // Green
     },
 
-    // 6. Petak Buaran
+    // ----------------------------------------------------
+    // 5. PETAK KLENDER - BUARAN (KLD-BUA)
+    // ----------------------------------------------------
     {
       id: 'naspan_4b',
       code: 'NASPAN 4B KLD-BUA',
       title: 'NASPAN 4B KLD-BUA',
       km: 'KM 15+760 - KM 16+914',
       category: 'SEKSI LAA PETAK BUARAN',
-      d: 'M 2257 656 L 2512 656',
+      d: 'M 2258 656 L 2513 656',
       color: '#0284c7', // Sky Blue
     },
     {
@@ -218,8 +298,8 @@ export default function SchematicViewer({
       title: 'NASPAN 5 KLD-BUA',
       km: 'KM 16+914 - KM 17+500',
       category: 'SEKSI LAA PETAK BUARAN',
-      d: 'M 2255 704 L 2512 704',
-      color: '#fb923c', // Coral
+      d: 'M 2256 704 L 2512 704',
+      color: '#f97316', // Orange
     },
     {
       id: 'naspan_6',
@@ -227,11 +307,13 @@ export default function SchematicViewer({
       title: 'NASPAN 6 KLD-BUA',
       km: 'KM 17+500 - KM 18+200',
       category: 'SEKSI LAA PETAK BUARAN',
-      d: 'M 2512 656 L 2749 656',
-      color: '#06b6d4', // Cyan
+      d: 'M 2513 656 L 2749 656',
+      color: '#0891b2', // Cyan
     },
 
-    // 7. Petak Klender Baru
+    // ----------------------------------------------------
+    // 6. PETAK BUARAN - KLENDER BARU (BUA-KLDB)
+    // ----------------------------------------------------
     {
       id: 'naspan_7',
       code: 'NASPAN 7 BUA-KLDB',
@@ -239,7 +321,7 @@ export default function SchematicViewer({
       km: 'KM 18+200 - KM 19+546',
       category: 'SEKSI LAA PETAK KLENDER BARU',
       d: 'M 2512 704 L 2749 704',
-      color: '#a855f7', // Purple
+      color: '#7c3aed', // Violet
     },
     {
       id: 'naspan_7b',
@@ -248,29 +330,69 @@ export default function SchematicViewer({
       km: 'KM 19+546 - KM 20+474',
       category: 'SEKSI LAA PETAK KLENDER BARU',
       d: 'M 2749 656 L 2981 656',
-      color: '#eab308', // Gold
+      color: '#ca8a04', // Gold
+    },
+    {
+      id: 'naspan_7b_lower',
+      code: 'NASPAN 7 BUA-KLDB',
+      title: 'NASPAN 7B BUA-KLDB (Jalur Hilir)',
+      km: 'KM 19+546 - KM 20+474',
+      category: 'SEKSI LAA PETAK KLENDER BARU',
+      d: 'M 2749 704 L 2980 704',
+      color: '#dc2626', // Red
+    },
+    {
+      id: 'petak_timur_hulu',
+      code: 'NASPAN 7 BUA-KLDB',
+      title: 'Petak Timur Klender Baru (Hulu)',
+      km: 'KM 20+474',
+      category: 'LOOPING TIMUR',
+      d: 'M 2993 656 L 3091 656',
+      color: '#2563eb',
+    },
+    {
+      id: 'petak_timur_hilir',
+      code: 'NASPAN 7 BUA-KLDB',
+      title: 'Petak Timur Klender Baru (Hilir)',
+      km: 'KM 20+474',
+      category: 'LOOPING TIMUR',
+      d: 'M 2992 703 L 3091 703',
+      color: '#059669',
     },
 
-    // 8. Tikungan Loop Klender Baru - Cakung
+    // ----------------------------------------------------
+    // 7. TIKUNGAN LOOP KLENDER BARU - CAKUNG
+    // ----------------------------------------------------
     {
-      id: 'naspan_loop_curve',
+      id: 'loop_curve_1',
       code: 'NASPAN 7 BUA-KLDB',
-      title: 'TIKUNGAN LOOP KLENDER BARU - CAKUNG',
+      title: 'Tikungan Loop Klender Baru - Cakung (Luar)',
       km: 'KM 20+474',
       category: 'LOOPING TIKUNGAN TIMUR',
-      d: 'M 2981 656 C 3060 656, 3060 1065, 2981 1065',
-      color: '#6366f1', // Indigo
+      d: 'M 2981 656 C 3065 656, 3065 1065, 2981 1065',
+      color: '#4f46e5', // Indigo
+    },
+    {
+      id: 'loop_curve_2',
+      code: 'NASPAN 8 BUA-KLDB',
+      title: 'Tikungan Loop Klender Baru - Cakung (Dalam)',
+      km: 'KM 20+474',
+      category: 'LOOPING TIKUNGAN TIMUR',
+      d: 'M 2980 704 C 3105 704, 3105 1113, 2981 1113',
+      color: '#0d9488', // Teal
     },
 
-    // 9. Lower Track: Cakung - Kranji
+    // ----------------------------------------------------
+    // 8. PETAK KLENDER BARU - CAKUNG (KLDB-CUK) & EMPLASEMEN
+    // ----------------------------------------------------
     {
       id: 'naspan_8',
       code: 'NASPAN 8 BUA-KLDB',
       title: 'NASPAN 8 BUA-KLDB',
       km: 'KM 20+474 - KM 20+943',
       category: 'SEKSI LAA MENUJU CAKUNG',
-      d: 'M 2819 1065 L 3035 1065',
-      color: '#ef4444', // Red
+      d: 'M 2819 1065 L 3036 1065',
+      color: '#dc2626', // Red
     },
     {
       id: 'naspan_8b',
@@ -278,55 +400,88 @@ export default function SchematicViewer({
       title: 'NASPAN 8B KLDB-CUK',
       km: 'KM 20+943 - KM 21+400',
       category: 'SEKSI LAA MENUJU CAKUNG',
-      d: 'M 2825 1113 L 3035 1113',
-      color: '#facc15', // Yellow
+      d: 'M 2825 1113 L 3036 1113',
+      color: '#eab308', // Yellow
     },
     {
-      id: 'naspan_9_cuk',
+      id: 'naspan_9_cuk_hulu',
       code: 'NASPAN 9 EMPL CUK',
-      title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung)',
+      title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung Hulu)',
       km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
-      d: 'M 2342 1065 L 2807 1065',
-      color: '#8b5cf6', // Violet
+      d: 'M 2343 1065 L 2808 1065',
+      color: '#7c3aed', // Violet
     },
     {
-      id: 'naspan_10',
-      code: 'NASPAN 10 CUK-KRI',
-      title: 'NASPAN 10 CUK-KRI',
-      km: 'KM 22+500 - KM 23+200',
-      category: 'SEKSI LAA CAKUNG - KRANJI',
+      id: 'naspan_9_cuk_hilir',
+      code: 'NASPAN 9 EMPL CUK',
+      title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung Hilir)',
+      km: 'KM 21+400 - KM 22+500',
+      category: 'EMPLASEMEN CAKUNG',
       d: 'M 2344 1113 L 2812 1113',
-      color: '#f97316', // Orange
-    },
-    {
-      id: 'naspan_11',
-      code: 'NASPAN 11 CUK-KRI',
-      title: 'NASPAN 11 CUK-KRI',
-      km: 'KM 23+200 - KM 23+987',
-      category: 'SEKSI LAA CAKUNG - KRANJI',
-      d: 'M 1752 1113 L 2344 1113',
-      color: '#06b6d4', // Cyan
+      color: '#d97706', // Amber
     },
 
-    // 10. Kranji - Bekasi
+    // ----------------------------------------------------
+    // 9. PETAK CAKUNG - KRANJI (CUK-KRI)
+    // ----------------------------------------------------
     {
-      id: 'naspan_12',
-      code: 'NASPAN 12 BKS-KRI',
-      title: 'NASPAN 12 BKS-KRI',
-      km: 'KM 23+987 - KM 25+000',
-      category: 'SEKSI LAA KRANJI - BEKASI',
-      d: 'M 1824 1064 L 2342 1064',
-      color: '#ec4899', // Pink
+      id: 'naspan_10_hulu',
+      code: 'NASPAN 10 CUK-KRI',
+      title: 'NASPAN 10 CUK-KRI (Jalur Hulu)',
+      km: 'KM 22+500 - KM 23+200',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 2066 1064 L 2343 1064',
+      color: '#ea580c', // Orange
     },
     {
-      id: 'naspan_12b',
+      id: 'naspan_10_hilir',
+      code: 'NASPAN 10 CUK-KRI',
+      title: 'NASPAN 10 CUK-KRI (Jalur Hilir)',
+      km: 'KM 22+500 - KM 23+200',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 2066 1113 L 2344 1113',
+      color: '#d946ef', // Magenta
+    },
+    {
+      id: 'naspan_11_hulu',
+      code: 'NASPAN 11 CUK-KRI',
+      title: 'NASPAN 11 CUK-KRI (Jalur Hulu)',
+      km: 'KM 23+200 - KM 23+987',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 1752 1064 L 2066 1064',
+      color: '#0284c7', // Sky Blue
+    },
+    {
+      id: 'naspan_11_hilir',
+      code: 'NASPAN 11 CUK-KRI',
+      title: 'NASPAN 11 CUK-KRI (Jalur Hilir)',
+      km: 'KM 23+200 - KM 23+987',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 1752 1112 L 2066 1112',
+      color: '#0891b2', // Cyan
+    },
+
+    // ----------------------------------------------------
+    // 10. PETAK KRANJI - BEKASI (KRI-BKS)
+    // ----------------------------------------------------
+    {
+      id: 'naspan_12_hulu',
       code: 'NASPAN 12 BKS-KRI',
-      title: 'NASPAN 12B KRI-BKS',
+      title: 'NASPAN 12 BKS-KRI (Jalur Hulu)',
+      km: 'KM 23+987 - KM 25+000',
+      category: 'SEKSI LAA KRANJI - BEKASI',
+      d: 'M 1393 1064 L 1752 1064',
+      color: '#db2777', // Pink
+    },
+    {
+      id: 'naspan_12_hilir',
+      code: 'NASPAN 12 BKS-KRI',
+      title: 'NASPAN 12A/B KRI-BKS (Jalur Hilir)',
       km: 'KM 25+000 - KM 26+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
-      d: 'M 1393 1064 L 1824 1064',
-      color: '#10b981', // Emerald
+      d: 'M 1390 1114 L 1752 1114',
+      color: '#059669', // Emerald
     },
     {
       id: 'naspan_13',
@@ -334,38 +489,69 @@ export default function SchematicViewer({
       title: 'NASPAN 13 BKS-KRI (Jalur 4 Bekasi)',
       km: 'KM 26+000 - KM 26+403',
       category: 'JALUR 4 BEKASI',
-      d: 'M 775 1064 L 1393 1064',
-      color: '#14b8a6', // Teal
+      d: 'M 776 1064 L 1388 1064',
+      color: '#0d9488', // Teal
     },
 
-    // 11. St. Bekasi Emplasemen & Stabling
+    // ----------------------------------------------------
+    // 11. STASIUN BEKASI & EMPLASEMEN
+    // ----------------------------------------------------
     {
-      id: 'bks_jalur_1_4',
+      id: 'bks_jalur_1_2',
       code: 'ST. BEKASI (JALUR 1 s/d 4)',
-      title: 'ST. BEKASI (Jalur 1 s/d 4)',
+      title: 'ST. BEKASI (Jalur 1 & 2 Peron Utama)',
       km: 'KM 26+403',
       category: 'EMPLASEMEN BEKASI',
-      d: 'M 603 1113 L 1625 1113',
-      color: '#ef4444', // Red
+      d: 'M 604 1113 L 1384 1113',
+      color: '#dc2626', // Red
     },
     {
-      id: 'bks_stabling',
+      id: 'bks_stabling_5_8',
       code: 'ST. BEKASI (JALUR STABLING 5-8)',
       title: 'ST. BEKASI (Jalur Stabling 5-8)',
       km: 'KM 26+403',
       category: 'STABLING BEKASI',
-      d: 'M 737 1175 L 1372 1175',
-      color: '#f59e0b', // Amber
+      d: 'M 738 1175 L 1372 1175',
+      color: '#d97706', // Amber
+    },
+    {
+      id: 'bks_langsir_barat',
+      code: 'ST. BEKASI',
+      title: 'ST. BEKASI (Jalur Langsir Barat)',
+      km: 'KM 26+200',
+      category: 'EMPLASEMEN BEKASI',
+      d: 'M 461 1064 L 776 1064',
+      color: '#0284c7', // Sky Blue
+    },
+    {
+      id: 'bks_wesel_barat',
+      code: 'ST. BEKASI',
+      title: 'ST. BEKASI (Wesel Emplasemen Barat)',
+      km: 'KM 26+300',
+      category: 'WESEL BEKASI',
+      d: 'M 505 1114 L 604 1114',
+      color: '#16a34a', // Green
     },
 
-    // 12. Menuju Bekasi Timur
+    // ----------------------------------------------------
+    // 12. PETAK LINTAS MENUJU BEKASI TIMUR
+    // ----------------------------------------------------
     {
-      id: 'lintas_bks_timur',
+      id: 'bks_timur_1',
       code: 'PETAK BEKASI TIMUR',
-      title: 'Lintas Menuju Bekasi Timur',
+      title: 'Lintas Menuju Bekasi Timur (Jalur 1)',
       km: 'KM 26+800',
       category: 'SEKSI KELUAR BEKASI TIMUR',
-      d: 'M 260 1278 L 485 1278',
+      d: 'M 260 1229 L 486 1229',
+      color: '#059669', // Emerald
+    },
+    {
+      id: 'bks_timur_2',
+      code: 'PETAK BEKASI TIMUR',
+      title: 'Lintas Menuju Bekasi Timur (Jalur 2)',
+      km: 'KM 26+800',
+      category: 'SEKSI KELUAR BEKASI TIMUR',
+      d: 'M 260 1278 L 486 1278',
       color: '#e11d48', // Rose
     },
   ];
@@ -383,7 +569,6 @@ export default function SchematicViewer({
 
   const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine.code) : [];
 
-  // Format action text cleanly
   const formatAction = (str) => {
     if (!str) return 'Pekerjaan Pemeliharaan';
     return str.replace(/_/g, ' ');
@@ -392,33 +577,33 @@ export default function SchematicViewer({
   return (
     <div
       ref={viewerWrapperRef}
-      className={`bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative flex flex-col transition-all ${
+      className={`bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg relative flex flex-col transition-all ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full'
       }`}
     >
-      {/* Top Toolbar Minimalist */}
-      <div className="bg-slate-950/95 border-b border-slate-800/90 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 backdrop-blur-md">
+      {/* Top Toolbar White Mode */}
+      <div className="bg-white/95 border-b border-slate-200 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 backdrop-blur-md">
         
         {/* Left Instruction */}
         <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-cyan-950/80 border border-cyan-500/60 text-cyan-400">
+          <div className="p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600">
             <Sparkles className="w-4 h-4" />
           </div>
-          <p className="text-xs text-slate-300">
-            Arahkan kursor ke garis jalur / naspan untuk <strong className="text-cyan-300">efek menyala & daftar riwayat pekerjaan</strong>
+          <p className="text-xs sm:text-sm text-slate-700 font-medium">
+            Arahkan kursor ke garis jalur / naspan untuk <strong className="text-blue-600 font-bold">efek menyala & daftar riwayat pekerjaan</strong>
           </p>
         </div>
 
         {/* Right Tools: Resolution & Zoom */}
         <div className="flex items-center space-x-2">
           
-          <div className="bg-slate-900 p-1 rounded-xl flex space-x-1 border border-slate-800 text-xs">
+          <div className="bg-slate-100 p-1 rounded-xl flex space-x-1 border border-slate-200 text-xs">
             <button
               onClick={() => setViewMode('web')}
               className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'web'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Standar
@@ -427,30 +612,30 @@ export default function SchematicViewer({
               onClick={() => setViewMode('hd')}
               className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'hd'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Ultra HD
             </button>
           </div>
 
-          <div className="flex items-center space-x-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
+          <div className="flex items-center space-x-1 bg-slate-100 rounded-xl p-1 border border-slate-200">
             <button
               onClick={handleZoomOut}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Perkecil (-)"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
 
-            <span className="text-xs font-mono font-bold px-2 text-cyan-300 min-w-14 text-center">
+            <span className="text-xs font-mono font-bold px-2 text-slate-800 min-w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
             <button
               onClick={handleZoomIn}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Perbesar (+)"
             >
               <ZoomIn className="w-4 h-4" />
@@ -458,7 +643,7 @@ export default function SchematicViewer({
 
             <button
               onClick={handleResetZoom}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Reset Zoom (100%)"
             >
               <RotateCcw className="w-4 h-4" />
@@ -466,7 +651,7 @@ export default function SchematicViewer({
 
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Layar Penuh"
             >
               <Maximize2 className="w-4 h-4" />
@@ -477,7 +662,7 @@ export default function SchematicViewer({
 
       </div>
 
-      {/* Main Canvas Viewport */}
+      {/* Main Canvas Viewport (White Mode) */}
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
@@ -487,59 +672,59 @@ export default function SchematicViewer({
           handleMouseUp();
           setHoveredLine(null);
         }}
-        className={`w-full overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing relative select-none ${
+        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none ${
           isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[720px]'
         }`}
       >
         {/* Floating Quick Hint */}
-        <div className="absolute bottom-4 left-4 z-20 pointer-events-none bg-slate-950/90 border border-slate-800 px-3.5 py-2 rounded-2xl text-[11px] text-slate-400 backdrop-blur-md flex items-center space-x-2 shadow-2xl">
-          <Crosshair className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+        <div className="absolute bottom-4 left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-3.5 py-2 rounded-2xl text-xs text-slate-600 backdrop-blur-md flex items-center space-x-2 shadow-sm">
+          <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
           <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
         </div>
 
         {/* ========================================================
-            FLOATING POPUP CARD: DAFTAR SINGKAT PEKERJAAN
-            Muncul dinamis saat kursor mengarah ke garis
+            FLOATING POPUP CARD: DAFTAR SINGKAT PEKERJAAN (WHITE MODE)
+            Muncul dinamis saat kursor mengarah ke garis mana pun
             ======================================================== */}
         {hoveredLine && (
           <div
             style={{
               left: `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 340)}px`,
-              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 260)}px`,
+              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 280)}px`,
             }}
-            className="absolute z-50 pointer-events-none bg-slate-950/95 border border-slate-700/90 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-84 animate-in zoom-in-95 duration-150 text-slate-100"
+            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-84 animate-in zoom-in-95 duration-150 text-slate-800"
           >
             {/* Header: Naspan info & color dot */}
-            <div className="flex items-start justify-between pb-2 border-b border-slate-800">
+            <div className="flex items-start justify-between pb-2.5 border-b border-slate-100">
               <div className="flex items-start space-x-2">
                 <span
-                  className="w-3 h-3 rounded-full mt-1 shrink-0 animate-ping"
+                  className="w-3 h-3 rounded-full mt-1 shrink-0 animate-ping shadow-sm"
                   style={{ backgroundColor: hoveredLine.color }}
                 />
                 <div>
-                  <h4 className="font-extrabold text-white text-xs leading-tight">
+                  <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight">
                     {hoveredLine.title}
                   </h4>
-                  <span className="text-[10px] text-cyan-400 font-mono font-bold mt-0.5 block">
+                  <span className="text-xs text-blue-600 font-mono font-bold mt-0.5 block">
                     {hoveredLine.km}
                   </span>
                 </div>
               </div>
 
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-800 text-orange-400 shrink-0 border border-slate-700">
+              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 shrink-0 border border-blue-200">
                 {hoveredLogs.length} Pekerjaan
               </span>
             </div>
 
             {/* Content: Daftar Singkat Pekerjaan */}
             <div className="mt-2.5 space-y-2">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Wrench className="w-3 h-3 text-cyan-400" />
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Wrench className="w-3.5 h-3.5 text-blue-600" />
                 <span>Daftar Singkat Pekerjaan:</span>
               </div>
 
               {hoveredLogs.length === 0 ? (
-                <div className="text-[11px] text-slate-400 italic py-1 bg-slate-900/60 rounded-lg px-2 border border-slate-800">
+                <div className="text-xs text-slate-500 italic py-2 bg-slate-50 rounded-xl px-3 border border-slate-200 text-center">
                   Belum ada catatan pekerjaan pada seksi naspan ini.
                 </div>
               ) : (
@@ -557,29 +742,29 @@ export default function SchematicViewer({
                   return (
                     <div
                       key={idx}
-                      className="bg-slate-900/80 border border-slate-800 rounded-xl p-2 text-[11px] space-y-1"
+                      className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 text-xs space-y-1.5"
                     >
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
-                        <span className="flex items-center text-cyan-300 font-mono font-semibold">
-                          <Clock className="w-2.5 h-2.5 mr-1 text-orange-400" />
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span className="flex items-center text-blue-700 font-mono font-bold">
+                          <Clock className="w-3 h-3 mr-1 text-orange-500" />
                           {dateStr} • {timeStr} WIB
                         </span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
                           {log.status || 'SELESAI'}
                         </span>
                       </div>
 
-                      <div className="font-bold text-white text-xs">
+                      <div className="font-bold text-slate-900 text-xs">
                         {formatAction(log.actionType)}
                       </div>
 
-                      <div className="text-slate-300 text-[10.5px] leading-snug line-clamp-2">
+                      <div className="text-slate-600 text-xs leading-snug line-clamp-2">
                         {log.description}
                       </div>
 
-                      <div className="flex items-center text-[9.5px] text-slate-400 pt-0.5">
-                        <HardHat className="w-2.5 h-2.5 mr-1 text-amber-400" />
-                        <span>Pelaksana: <strong className="text-slate-200">{log.technician}</strong></span>
+                      <div className="flex items-center text-xs text-slate-500 pt-0.5">
+                        <HardHat className="w-3 h-3 mr-1 text-amber-500" />
+                        <span>Pelaksana: <strong className="text-slate-800">{log.technician}</strong></span>
                       </div>
                     </div>
                   );
@@ -587,11 +772,17 @@ export default function SchematicViewer({
               )}
             </div>
 
-            {/* Prompt to open detail */}
-            <div className="mt-2.5 pt-2 border-t border-slate-800/80 text-[10px] text-cyan-400 flex items-center justify-between font-semibold">
-              <span>Klik garis untuk membuka menu lengkap</span>
-              <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
-            </div>
+            {/* Direct Action Button to Input / View Work History */}
+            <button
+              onClick={() => onSelectLocation && onSelectLocation(hoveredLine)}
+              className="w-full mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between shadow-sm cursor-pointer transition-all active:scale-98"
+            >
+              <span className="flex items-center space-x-1.5">
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Input / Rincian Riwayat</span>
+              </span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -605,7 +796,7 @@ export default function SchematicViewer({
           className="w-full h-full min-w-[1300px] min-h-[580px] relative p-2"
         >
           {/* Container tightly wrapping cropped schematic */}
-          <div className="relative inline-block w-[1400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-700 bg-white">
+          <div className="relative inline-block w-[1400px] rounded-2xl overflow-hidden shadow-md border-2 border-slate-300 bg-white">
             
             {/* Cropped AutoCAD Master Image */}
             <img
@@ -616,28 +807,15 @@ export default function SchematicViewer({
             />
 
             {/* ========================================================
-                CLEAN SVG GLOWING TRACK LINES ONLY
-                Hanya sekedar garis yang menunjukkan setiap naspan dengan
-                warna berbeda, menyala dan timbul ketika kursor diarahkan
+                CLEAN SVG GLOWING TRACK LINES ONLY (38 TRACKS)
+                Semua garis menyala & timbul ketika kursor diarahkan
                 ======================================================== */}
             <svg
               viewBox="0 0 3275 1419"
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ width: '100%', height: '100%' }}
             >
-              <defs>
-                {/* 3D Embossed Glow Filter */}
-                <filter id="track-neon-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="5" result="glow" />
-                  <feMerge>
-                    <feMergeNode in="glow" />
-                    <feMergeNode in="glow" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {naspanLines.map((line) => {
+              {allTrackLines.map((line) => {
                 const isHovered = hoveredLine?.id === line.id;
                 const isActive = selectedLocation?.code === line.code;
 
@@ -659,25 +837,25 @@ export default function SchematicViewer({
                       fill="none"
                     />
 
-                    {/* 2. Ambient subtle base line showing track segment color */}
+                    {/* 2. Base track line showing naspan color */}
                     <path
                       d={line.d}
                       stroke={line.color}
-                      strokeWidth={isHovered || isActive ? 8 : 4.5}
+                      strokeWidth={isHovered || isActive ? 8.5 : 4.5}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       fill="none"
                       style={{
-                        opacity: isHovered || isActive ? 1 : 0.75,
+                        opacity: isHovered || isActive ? 1 : 0.85,
                         filter:
                           isHovered || isActive
-                            ? `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color}) drop-shadow(0 3px 5px rgba(0,0,0,0.85))`
-                            : 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
+                            ? `drop-shadow(0 0 8px ${line.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.45))`
+                            : 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
                         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                       }}
                     />
 
-                    {/* 3. Center white hot laser core on hover/active (efek timbul menyala) */}
+                    {/* 3. Center white laser core on hover/active (efek timbul menyala) */}
                     {(isHovered || isActive) && (
                       <path
                         d={line.d}
@@ -688,7 +866,7 @@ export default function SchematicViewer({
                         fill="none"
                         style={{
                           opacity: 0.95,
-                          filter: 'drop-shadow(0 0 3px #ffffff)',
+                          filter: 'drop-shadow(0 0 2px #ffffff)',
                         }}
                       />
                     )}
