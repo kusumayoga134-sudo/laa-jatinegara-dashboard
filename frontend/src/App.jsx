@@ -75,9 +75,10 @@ export default function App() {
         onOpenAddWork={() =>
           setSelectedLocation({
             code: '',
-            title: 'Catat Pekerjaan Baru',
+            title: 'Menu Input Pekerjaan Baru',
             km: 'Seluruh Lintas LAA 1.9',
             category: 'INPUT PEKERJAAN',
+            isAddWork: true,
           })
         }
         onOpenAllLogs={() =>
