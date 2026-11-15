@@ -2188,14 +2188,14 @@ export default function SchematicViewer({
       }`}
     >
       {/* Top Toolbar White Mode */}
-      <div className="bg-white/95 border-b border-slate-200 px-3 sm:px-5 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 sm:gap-3 z-20 backdrop-blur-md">
+      <div className="bg-white/95 border-b border-slate-200 px-3 sm:px-5 py-2 sm:py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20 backdrop-blur-md">
         
         {/* Left Instruction */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 shrink-0">
           <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <p className="text-xs sm:text-sm text-slate-700 font-medium leading-tight">
+          <p className="text-[11px] sm:text-sm text-slate-700 font-medium leading-tight">
             <span>
               Setiap line / garis terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
             </span>
@@ -2203,12 +2203,12 @@ export default function SchematicViewer({
         </div>
 
         {/* Right Tools: Resolution & Zoom */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+        <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
           
           <div className="bg-slate-100 p-0.5 sm:p-1 rounded-xl flex space-x-0.5 sm:space-x-1 border border-slate-200 text-[11px] sm:text-xs">
             <button
               onClick={() => setViewMode('web')}
-              className={`px-2 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'web'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -2218,7 +2218,7 @@ export default function SchematicViewer({
             </button>
             <button
               onClick={() => setViewMode('hd')}
-              className={`px-2 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'hd'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -2295,14 +2295,14 @@ export default function SchematicViewer({
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[440px] sm:h-[580px] lg:h-[720px]'
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[480px] xs:h-[520px] sm:h-[580px] lg:h-[720px]'
         }`}
       >
         {/* Floating Quick Hint */}
-        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-[11px] sm:text-xs text-slate-600 backdrop-blur-md flex items-center space-x-1.5 sm:space-x-2 shadow-sm">
-          <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+        <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl text-[10px] sm:text-xs text-slate-600 backdrop-blur-md flex items-center space-x-1.5 shadow-sm">
+          <Crosshair className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600 shrink-0" />
           <span className="hidden sm:inline">Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
-          <span className="sm:hidden">Cubit 2 jari untuk zoom • Geser untuk navigasi</span>
+          <span className="sm:hidden">Geser 1 jari untuk navigasi • Cubit 2 jari untuk zoom</span>
         </div>
 
         {/* ========================================================
@@ -2318,7 +2318,7 @@ export default function SchematicViewer({
                 ? `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 340)}px`
                 : undefined,
             }}
-            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-2xl backdrop-blur-xl w-auto sm:w-88 max-w-sm left-3 right-3 sm:left-auto sm:right-auto bottom-3 sm:bottom-auto animate-in zoom-in-95 duration-150 text-slate-800"
+            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-2xl backdrop-blur-xl w-auto sm:w-88 max-w-sm left-3 right-3 sm:left-auto sm:right-auto bottom-3 sm:bottom-auto max-h-[75vh] overflow-y-auto animate-in zoom-in-95 duration-150 text-slate-800"
           >
             {/* Header: Naspan info & color dot */}
             <div className="flex items-start justify-between pb-2.5 border-b border-slate-100">
@@ -2452,10 +2452,10 @@ export default function SchematicViewer({
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
           }}
-          className="relative flex items-center justify-center shrink-0 p-2 sm:p-4"
+          className="relative flex items-center justify-center shrink-0 p-1 sm:p-4"
         >
           {/* Container tightly wrapping cropped schematic (Centered) */}
-          <div className="relative w-[min(calc(100vw-24px),1420px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
+          <div className="relative w-[1100px] sm:w-[1420px] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
             
             {/* Cropped AutoCAD Master Image */}
             <img

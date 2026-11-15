@@ -43,25 +43,25 @@ export default function Header({
         {/* ========================================================
             1. MOBILE VIEW (< md) - CLEAN, BALANCED & TOUCH-FRIENDLY
             ======================================================== */}
-        <div className="md:hidden flex flex-col space-y-2.5">
+        <div className="md:hidden flex flex-col space-y-2">
           {/* Top Bar: Danantara Logo (Left) & KAI Logo (Right) */}
           <div className="flex items-center justify-between gap-2">
             {/* Danantara Logo */}
-            <div className="bg-white rounded-xl px-2.5 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-9 w-28 shrink-0 overflow-hidden">
+            <div className="bg-white rounded-xl px-2 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-8 w-26 shrink-0 overflow-hidden">
               <img
                 src="/danantara-logo.png"
                 alt="Danantara Indonesia"
-                className="max-h-6 max-w-full object-contain"
+                className="max-h-5 max-w-full object-contain"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
 
             {/* KAI Logo */}
-            <div className="bg-white rounded-xl px-2.5 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-9 w-22 shrink-0 overflow-hidden">
+            <div className="bg-white rounded-xl px-2 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-8 w-20 shrink-0 overflow-hidden">
               <img
                 src="/kai-logo.png"
                 alt="KAI"
-                className="max-h-6 max-w-full object-contain"
+                className="max-h-5 max-w-full object-contain"
                 onError={(e) => { e.target.src = '/kai-logo.webp'; }}
               />
             </div>
@@ -72,7 +72,7 @@ export default function Header({
             <h1 className="text-xs sm:text-sm font-black text-slate-900 tracking-tight leading-tight">
               PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA
             </h1>
-            <p className="text-[10.5px] text-slate-600 truncate mt-0.5 font-semibold">
+            <p className="text-[10px] sm:text-[10.5px] text-slate-600 truncate mt-0.5 font-semibold">
               Lintas Jaringan LAA : Jatinegara - Bekasi
             </p>
           </div>
@@ -81,17 +81,17 @@ export default function Header({
           <div className="pt-0.5">
             <button
               onClick={onOpenAllLogs}
-              className="w-full bg-slate-50 active:scale-95 border border-slate-200 hover:border-orange-300 rounded-xl py-2 px-3 flex items-center justify-center space-x-2 shadow-xs cursor-pointer text-left"
+              className="w-full bg-slate-50 active:scale-95 border border-slate-200 hover:border-orange-300 rounded-xl py-1.5 px-3 flex items-center justify-center space-x-2 shadow-xs cursor-pointer text-left"
               title="Buka rekapitulasi pekerjaan"
             >
-              <div className="p-1.5 rounded-lg bg-orange-100 text-orange-600 shrink-0">
-                <ClipboardList className="w-4 h-4" />
+              <div className="p-1 rounded-lg bg-orange-100 text-orange-600 shrink-0">
+                <ClipboardList className="w-3.5 h-3.5" />
               </div>
               <div className="leading-tight flex items-center space-x-2">
                 <span className="text-[10px] text-slate-500 font-bold uppercase">
                   TOTAL PEKERJAAN:
                 </span>
-                <span className="font-mono font-black text-slate-900 text-sm">
+                <span className="font-mono font-black text-slate-900 text-xs sm:text-sm">
                   <span className="text-orange-600">{totalLogsCount}</span> Dicatat
                 </span>
               </div>

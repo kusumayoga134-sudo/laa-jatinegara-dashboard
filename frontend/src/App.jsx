@@ -84,7 +84,7 @@ export default function App() {
       />
 
       {/* Main AutoCAD Map Workspace (White Mode) */}
-      <main className="flex-1 max-w-[1700px] w-full mx-auto px-2 py-2 sm:px-6 sm:py-4">
+      <main className="flex-1 max-w-[1700px] w-full mx-auto px-1.5 py-1.5 sm:px-6 sm:py-4">
         <SchematicViewer
           logs={logs}
           selectedLocation={selectedLocation}
@@ -103,8 +103,8 @@ export default function App() {
       )}
 
       {/* Minimalist White Footer */}
-      <footer className="bg-white border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 mt-auto">
-        <div className="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="bg-white border-t border-slate-200 py-2.5 px-3 sm:py-3.5 sm:px-6 text-[11px] sm:text-xs text-slate-500 mt-auto">
+        <div className="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
           <div>
             <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA
           </div>
