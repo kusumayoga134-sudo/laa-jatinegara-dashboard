@@ -136,53 +136,6 @@ export default function App() {
       {/* Minimalist Clean Header */}
       <Header totalLogsCount={logs.length} />
 
-      {/* Minimalist Bar: Quick Location Selector & Instructions */}
-      <section className="bg-slate-900/70 border-b border-slate-800 px-4 py-2.5">
-        <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          
-          {/* Quick Select Dropdown */}
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center">
-              <Train className="w-3.5 h-3.5 mr-1 text-blue-400" /> Pilih Jalur / Lokasi:
-            </span>
-            <select
-              onChange={(e) => {
-                const found = quickLocations.find((l) => l.code === e.target.value);
-                if (found) setSelectedLocation(found);
-              }}
-              value={selectedLocation ? selectedLocation.code : ''}
-              className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-blue-500 w-full sm:w-80 cursor-pointer"
-            >
-              <option value="">-- Pilih dari Daftar / Klik Pada Peta --</option>
-              {quickLocations.map((loc) => (
-                <option key={loc.code} value={loc.code}>
-                  {loc.title} ({loc.km})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* All Works Quick Button */}
-          <div className="flex items-center space-x-2 shrink-0">
-            <button
-              onClick={() =>
-                setSelectedLocation({
-                  code: '',
-                  title: 'Semua Lintas UPT Resor LAA 1.9',
-                  km: 'KM 10+000 - KM 26+800',
-                  category: 'SELURUH PETAK JALUR LAA',
-                })
-              }
-              className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-sm"
-            >
-              <Wrench className="w-3.5 h-3.5 text-orange-400" />
-              <span>Lihat Semua Pekerjaan ({logs.length})</span>
-            </button>
-          </div>
-
-        </div>
-      </section>
-
       {/* Main AutoCAD Map Workspace */}
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-4">
         <SchematicViewer

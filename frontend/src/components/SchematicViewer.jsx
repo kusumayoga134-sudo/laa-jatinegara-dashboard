@@ -4,16 +4,15 @@ import {
   ZoomOut,
   RotateCcw,
   Maximize2,
-  MapPin,
   Crosshair,
   Wrench,
+  Clock,
+  HardHat,
+  ChevronRight,
   Sparkles,
-  Layers,
-  Flame,
 } from 'lucide-react';
 
 export default function SchematicViewer({
-  stations = [],
   logs = [],
   selectedLocation,
   onSelectLocation,
@@ -22,9 +21,10 @@ export default function SchematicViewer({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  
-  const [viewMode, setViewMode] = useState('web'); // 'web' (fast) or 'hd' (ultra sharp)
-  const [hoveredItem, setHoveredItem] = useState(null);
+
+  const [viewMode, setViewMode] = useState('web'); // 'web' or 'hd'
+  const [hoveredLine, setHoveredLine] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const containerRef = useRef(null);
@@ -40,12 +40,21 @@ export default function SchematicViewer({
 
   // Drag handlers
   const handleMouseDown = (e) => {
-    if (e.target.closest('button') || e.target.closest('.interactive-station') || e.target.closest('.glowing-track-line')) return;
+    if (e.target.closest('button')) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
   const handleMouseMove = (e) => {
+    // Record mouse position inside viewer for tooltip positioning
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+
     if (!isDragging) return;
     setPosition({
       x: e.clientX - dragStart.x,
@@ -69,7 +78,6 @@ export default function SchematicViewer({
     return () => el.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // Fullscreen toggle
   const toggleFullscreen = () => {
     if (!viewerWrapperRef.current) return;
     if (!document.fullscreenElement) {
@@ -83,140 +91,302 @@ export default function SchematicViewer({
 
   const imageSrc = viewMode === 'hd' ? '/peta-laa-cropped-hd.png' : '/peta-laa-cropped.png';
 
-  // Interactive Line Segments positioned precisely on the tightly-cropped AutoCAD map
-  const lineSegments = [
+  // 28 Naspan Lines & Track Segments mapped exactly along the AutoCAD DWG schematic paths (3275 x 1419)
+  const naspanLines = [
+    // 1. Percabangan Kramat
     {
-      id: 'line_kramat',
-      title: 'Lintas Percabangan Kramat',
-      code: 'ST. PONDOK JATI',
+      id: 'naspan_9_kpb',
+      code: 'NASPAN 9 KPB-JNG',
+      title: 'NASPAN 9 KPB-JNG (Percabangan Kramat)',
       km: 'KM 10+000 - KM 10+857',
-      category: 'JALUR PERCABANGAN KRAMAT',
-      style: { left: '2.5%', top: '32%', width: '13%', height: '7%' },
+      category: 'PERCABANGAN KRAMAT',
+      d: 'M 218 370 L 588 370',
+      color: '#ec4899', // Pink
     },
+
+    // 2. Manggarai Inbound HI & HU
     {
-      id: 'line_manggarai',
-      title: 'Lintas Utama Manggarai - Jatinegara',
-      code: 'ST. PONDOK JATI',
+      id: 'naspan_1_mri_hi',
+      code: 'MRI-JNG NASPAN 1 HI',
+      title: 'MRI-JNG NASPAN 1 HI (Inbound Manggarai)',
       km: 'KM 10+800 - KM 11+448',
-      category: 'JALUR UTAMA INBOUND',
-      style: { left: '2.5%', top: '48%', width: '13%', height: '7%' },
+      category: 'SEKSI LAA HULU',
+      d: 'M 310 656 L 728 656',
+      color: '#06b6d4', // Cyan
     },
     {
-      id: 'line_jng_emplasemen',
-      title: 'ST. JATINEGARA (Jalur 1 - 8 & Kompleks Wesel)',
-      code: 'ST. JATINEGARA',
+      id: 'naspan_1_jng_hu',
+      code: 'JNG-MRI NASPAN 1 HU',
+      title: 'JNG-MRI NASPAN 1 HU (Outbound Manggarai)',
+      km: 'KM 10+800 - KM 11+448',
+      category: 'SEKSI LAA HILIR',
+      d: 'M 310 704 L 728 704',
+      color: '#3b82f6', // Blue
+    },
+
+    // 3. Emplasemen St. Jatinegara
+    {
+      id: 'jng_jalur_1_2',
+      code: 'ST. JATINEGARA (JALUR 1)',
+      title: 'ST. JATINEGARA (Jalur 1 & 2 Peron)',
       km: 'KM 11+750',
-      category: 'EMPLASEMEN & PERON',
-      style: { left: '22%', top: '22%', width: '22%', height: '37%' },
+      category: 'EMPLASEMEN JATINEGARA',
+      d: 'M 740 656 L 1475 656',
+      color: '#10b981', // Emerald
     },
     {
-      id: 'line_naspan_1_hi',
-      title: 'NASPAN 1 JNG-KLD (HI)',
+      id: 'jng_jalur_3_4',
+      code: 'ST. JATINEGARA (JALUR 3 & 4)',
+      title: 'ST. JATINEGARA (Jalur 3 & 4 Peron)',
+      km: 'KM 11+750',
+      category: 'EMPLASEMEN JATINEGARA',
+      d: 'M 740 704 L 1475 704',
+      color: '#14b8a6', // Teal
+    },
+    {
+      id: 'jng_jalur_5_8',
+      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
+      title: 'ST. JATINEGARA (Jalur 5 s/d 8 Stabling)',
+      km: 'KM 11+750',
+      category: 'STABLING & WESEL JATINEGARA',
+      d: 'M 600 418 L 1450 418',
+      color: '#f59e0b', // Amber
+    },
+
+    // 4. East of Jatinegara towards Klender
+    {
+      id: 'naspan_1_hi',
       code: 'NASPAN 1 JNG-KLD (HI)',
+      title: 'NASPAN 1 JNG-KLD (HI)',
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HULU (HI)',
-      style: { left: '44%', top: '38%', width: '12%', height: '7%' },
+      d: 'M 1487 656 L 1942 656',
+      color: '#eab308', // Gold / Yellow
     },
     {
-      id: 'line_naspan_1_hu',
-      title: 'NASPAN 1 JNG-KLD (HU)',
+      id: 'naspan_1_hu',
       code: 'NASPAN 1 JNG-KLD (HU)',
+      title: 'NASPAN 1 JNG-KLD (HU)',
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HILIR (HU)',
-      style: { left: '44%', top: '46.5%', width: '12%', height: '7%' },
+      d: 'M 1487 704 L 1942 704',
+      color: '#d946ef', // Magenta
     },
+
+    // 5. Petak Klender
     {
-      id: 'line_naspan_2',
-      title: 'NASPAN 2 JNG-KLD',
+      id: 'naspan_2',
       code: 'NASPAN 2 JNG-KLD',
+      title: 'NASPAN 2 JNG-KLD',
       km: 'KM 12+844 - KM 13+800',
-      category: 'SEKSI LAA JALUR UTAMA',
-      style: { left: '56%', top: '42%', width: '11%', height: '11%' },
-    },
-    {
-      id: 'line_naspan_3_4',
-      title: 'NASPAN 3 & 4 JNG-KLD (Petak St. Klender)',
-      code: 'NASPAN 3 JNG-KLD',
-      km: 'KM 13+800 - KM 15+760',
       category: 'SEKSI LAA PETAK KLENDER',
-      style: { left: '67%', top: '39%', width: '10%', height: '14%' },
+      d: 'M 1942 656 L 2100 656',
+      color: '#f97316', // Orange
     },
     {
-      id: 'line_naspan_5_6',
-      title: 'NASPAN 5 & 6 KLD-BUA (Petak St. Buaran)',
-      code: 'NASPAN 5 KLD-BUA',
-      km: 'KM 16+914 - KM 18+200',
+      id: 'naspan_3',
+      code: 'NASPAN 3 JNG-KLD',
+      title: 'NASPAN 3 JNG-KLD',
+      km: 'KM 13+800 - KM 14+800',
+      category: 'SEKSI LAA PETAK KLENDER',
+      d: 'M 2100 656 L 2257 656',
+      color: '#84cc16', // Lime
+    },
+    {
+      id: 'naspan_4',
+      code: 'NASPAN 4 JNG-KLD',
+      title: 'NASPAN 4 JNG-KLD',
+      km: 'KM 14+800 - KM 15+760',
+      category: 'SEKSI LAA PETAK KLENDER',
+      d: 'M 1942 704 L 2255 704',
+      color: '#22c55e', // Green
+    },
+
+    // 6. Petak Buaran
+    {
+      id: 'naspan_4b',
+      code: 'NASPAN 4B KLD-BUA',
+      title: 'NASPAN 4B KLD-BUA',
+      km: 'KM 15+760 - KM 16+914',
       category: 'SEKSI LAA PETAK BUARAN',
-      style: { left: '77%', top: '39%', width: '10%', height: '14%' },
+      d: 'M 2257 656 L 2512 656',
+      color: '#0284c7', // Sky Blue
     },
     {
-      id: 'line_naspan_7_8',
-      title: 'NASPAN 7 & 8 BUA-KLDB (Petak Buaran - Klender Baru)',
+      id: 'naspan_5',
+      code: 'NASPAN 5 KLD-BUA',
+      title: 'NASPAN 5 KLD-BUA',
+      km: 'KM 16+914 - KM 17+500',
+      category: 'SEKSI LAA PETAK BUARAN',
+      d: 'M 2255 704 L 2512 704',
+      color: '#fb923c', // Coral
+    },
+    {
+      id: 'naspan_6',
+      code: 'NASPAN 6 KLD-BUA',
+      title: 'NASPAN 6 KLD-BUA',
+      km: 'KM 17+500 - KM 18+200',
+      category: 'SEKSI LAA PETAK BUARAN',
+      d: 'M 2512 656 L 2749 656',
+      color: '#06b6d4', // Cyan
+    },
+
+    // 7. Petak Klender Baru
+    {
+      id: 'naspan_7',
       code: 'NASPAN 7 BUA-KLDB',
-      km: 'KM 18+200 - KM 20+474',
-      category: 'SEKSI LAA LOOPING TIMUR',
-      style: { left: '87%', top: '41%', width: '9%', height: '32%' },
+      title: 'NASPAN 7 BUA-KLDB',
+      km: 'KM 18+200 - KM 19+546',
+      category: 'SEKSI LAA PETAK KLENDER BARU',
+      d: 'M 2512 704 L 2749 704',
+      color: '#a855f7', // Purple
     },
     {
-      id: 'line_naspan_9',
-      title: 'NASPAN 9 EMPL CUK (Emplasemen St. Cakung)',
+      id: 'naspan_7b',
+      code: 'NASPAN 7B BUA-KLDB',
+      title: 'NASPAN 7B BUA-KLDB',
+      km: 'KM 19+546 - KM 20+474',
+      category: 'SEKSI LAA PETAK KLENDER BARU',
+      d: 'M 2749 656 L 2981 656',
+      color: '#eab308', // Gold
+    },
+
+    // 8. Tikungan Loop Klender Baru - Cakung
+    {
+      id: 'naspan_loop_curve',
+      code: 'NASPAN 7 BUA-KLDB',
+      title: 'TIKUNGAN LOOP KLENDER BARU - CAKUNG',
+      km: 'KM 20+474',
+      category: 'LOOPING TIKUNGAN TIMUR',
+      d: 'M 2981 656 C 3060 656, 3060 1065, 2981 1065',
+      color: '#6366f1', // Indigo
+    },
+
+    // 9. Lower Track: Cakung - Kranji
+    {
+      id: 'naspan_8',
+      code: 'NASPAN 8 BUA-KLDB',
+      title: 'NASPAN 8 BUA-KLDB',
+      km: 'KM 20+474 - KM 20+943',
+      category: 'SEKSI LAA MENUJU CAKUNG',
+      d: 'M 2819 1065 L 3035 1065',
+      color: '#ef4444', // Red
+    },
+    {
+      id: 'naspan_8b',
+      code: 'NASPAN 8B KLDB-CUK',
+      title: 'NASPAN 8B KLDB-CUK',
+      km: 'KM 20+943 - KM 21+400',
+      category: 'SEKSI LAA MENUJU CAKUNG',
+      d: 'M 2825 1113 L 3035 1113',
+      color: '#facc15', // Yellow
+    },
+    {
+      id: 'naspan_9_cuk',
       code: 'NASPAN 9 EMPL CUK',
-      km: 'KM 20+474 - KM 21+400',
+      title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung)',
+      km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
-      style: { left: '72%', top: '62%', width: '11%', height: '16%' },
+      d: 'M 2342 1065 L 2807 1065',
+      color: '#8b5cf6', // Violet
     },
     {
-      id: 'line_naspan_10_11',
-      title: 'NASPAN 10 & 11 CUK-KRI (Petak Cakung - Kranji)',
+      id: 'naspan_10',
       code: 'NASPAN 10 CUK-KRI',
-      km: 'KM 21+400 - KM 23+987',
-      category: 'SEKSI LAA PERBATASAN',
-      style: { left: '54%', top: '62%', width: '18%', height: '16%' },
+      title: 'NASPAN 10 CUK-KRI',
+      km: 'KM 22+500 - KM 23+200',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 2344 1113 L 2812 1113',
+      color: '#f97316', // Orange
     },
     {
-      id: 'line_naspan_12_13',
-      title: 'NASPAN 12 & 13 BKS-KRI (Petak Kranji - Bekasi)',
+      id: 'naspan_11',
+      code: 'NASPAN 11 CUK-KRI',
+      title: 'NASPAN 11 CUK-KRI',
+      km: 'KM 23+200 - KM 23+987',
+      category: 'SEKSI LAA CAKUNG - KRANJI',
+      d: 'M 1752 1113 L 2344 1113',
+      color: '#06b6d4', // Cyan
+    },
+
+    // 10. Kranji - Bekasi
+    {
+      id: 'naspan_12',
       code: 'NASPAN 12 BKS-KRI',
-      km: 'KM 23+987 - KM 26+403',
-      category: 'SEKSI LAA ARAH BEKASI',
-      style: { left: '34%', top: '62%', width: '20%', height: '16%' },
+      title: 'NASPAN 12 BKS-KRI',
+      km: 'KM 23+987 - KM 25+000',
+      category: 'SEKSI LAA KRANJI - BEKASI',
+      d: 'M 1824 1064 L 2342 1064',
+      color: '#ec4899', // Pink
     },
     {
-      id: 'line_bks_emplasemen',
-      title: 'ST. BEKASI (Jalur 1 - 8 & Stabling Emplasemen)',
-      code: 'ST. BEKASI',
+      id: 'naspan_12b',
+      code: 'NASPAN 12 BKS-KRI',
+      title: 'NASPAN 12B KRI-BKS',
+      km: 'KM 25+000 - KM 26+000',
+      category: 'SEKSI LAA KRANJI - BEKASI',
+      d: 'M 1393 1064 L 1824 1064',
+      color: '#10b981', // Emerald
+    },
+    {
+      id: 'naspan_13',
+      code: 'NASPAN 13 BKS-KRI',
+      title: 'NASPAN 13 BKS-KRI (Jalur 4 Bekasi)',
+      km: 'KM 26+000 - KM 26+403',
+      category: 'JALUR 4 BEKASI',
+      d: 'M 775 1064 L 1393 1064',
+      color: '#14b8a6', // Teal
+    },
+
+    // 11. St. Bekasi Emplasemen & Stabling
+    {
+      id: 'bks_jalur_1_4',
+      code: 'ST. BEKASI (JALUR 1 s/d 4)',
+      title: 'ST. BEKASI (Jalur 1 s/d 4)',
       km: 'KM 26+403',
-      category: 'EMPLASEMEN & STABLING',
-      style: { left: '16%', top: '60%', width: '18%', height: '26%' },
+      category: 'EMPLASEMEN BEKASI',
+      d: 'M 603 1113 L 1625 1113',
+      color: '#ef4444', // Red
     },
     {
-      id: 'line_bks_timur',
-      title: 'Lintas Menuju Bekasi Timur',
+      id: 'bks_stabling',
+      code: 'ST. BEKASI (JALUR STABLING 5-8)',
+      title: 'ST. BEKASI (Jalur Stabling 5-8)',
+      km: 'KM 26+403',
+      category: 'STABLING BEKASI',
+      d: 'M 737 1175 L 1372 1175',
+      color: '#f59e0b', // Amber
+    },
+
+    // 12. Menuju Bekasi Timur
+    {
+      id: 'lintas_bks_timur',
       code: 'PETAK BEKASI TIMUR',
+      title: 'Lintas Menuju Bekasi Timur',
       km: 'KM 26+800',
-      category: 'JALUR KELUAR BEKASI TIMUR',
-      style: { left: '2.5%', top: '64%', width: '13.5%', height: '14%' },
+      category: 'SEKSI KELUAR BEKASI TIMUR',
+      d: 'M 260 1278 L 485 1278',
+      color: '#e11d48', // Rose
     },
   ];
 
-  // Station positions on cropped map
-  const croppedStations = [
-    { name: 'ST. PONDOK JATI', km: 'KM 10+400', x: 9.03, y: 35.13 },
-    { name: 'ST. JATINEGARA', km: 'KM 11+750', x: 36.72, y: 18.32 },
-    { name: 'ST. KLENDER', km: 'KM 15+027', x: 71.51, y: 41.52 },
-    { name: 'ST. BUARAN', km: 'KM 17+500', x: 87.98, y: 41.52 },
-    { name: 'ST. KLENDER BARU', km: 'KM 19+546', x: 90.35, y: 70.27 },
-    { name: 'ST. CAKUNG', km: 'KM 20+943', x: 76.87, y: 66.41 },
-    { name: 'ST. KRANJI', km: 'KM 23+987', x: 58.34, y: 66.91 },
-    { name: 'ST. BEKASI', km: 'KM 26+403', x: 33.22, y: 63.72 },
-  ];
+  // Helper to get matching logs for a line
+  const getLineLogs = (code) => {
+    if (!code) return [];
+    return logs.filter(
+      (l) =>
+        l.targetCode &&
+        (l.targetCode.toLowerCase().includes(code.toLowerCase()) ||
+          code.toLowerCase().includes(l.targetCode.toLowerCase()))
+    );
+  };
 
-  const getWorkCount = (code) => {
-    return logs.filter((l) =>
-      l.targetCode &&
-      (l.targetCode.toLowerCase().includes(code.toLowerCase()) ||
-        code.toLowerCase().includes(l.targetCode.toLowerCase()))
-    ).length;
+  const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine.code) : [];
+
+  // Format action text cleanly
+  const formatAction = (str) => {
+    if (!str) return 'Pekerjaan Pemeliharaan';
+    return str.replace(/_/g, ' ');
   };
 
   return (
@@ -227,30 +397,21 @@ export default function SchematicViewer({
       }`}
     >
       {/* Top Toolbar Minimalist */}
-      <div className="bg-slate-950/95 border-b border-slate-800/90 px-5 py-3 flex flex-wrap items-center justify-between gap-3 z-20 backdrop-blur-md">
+      <div className="bg-slate-950/95 border-b border-slate-800/90 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 backdrop-blur-md">
         
         {/* Left Instruction */}
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/60 text-cyan-400 shadow-sm shadow-cyan-500/30">
+        <div className="flex items-center space-x-2.5">
+          <div className="p-1.5 rounded-lg bg-cyan-950/80 border border-cyan-500/60 text-cyan-400">
             <Sparkles className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-xs font-black text-white flex items-center gap-2">
-              <span>Peta Wilayah LAA 1.9 Jatinegara</span>
-              <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-mono">
-                AutoCAD DWG Master
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Arahkan kursor ke garis jalur untuk efek visual menyala, lalu <strong className="text-cyan-300">klik untuk membuka riwayat pekerjaan</strong>
-            </p>
-          </div>
+          <p className="text-xs text-slate-300">
+            Arahkan kursor ke garis jalur / naspan untuk <strong className="text-cyan-300">efek menyala & daftar riwayat pekerjaan</strong>
+          </p>
         </div>
 
-        {/* Right Tools */}
+        {/* Right Tools: Resolution & Zoom */}
         <div className="flex items-center space-x-2">
           
-          {/* Resolution Toggle */}
           <div className="bg-slate-900 p-1 rounded-xl flex space-x-1 border border-slate-800 text-xs">
             <button
               onClick={() => setViewMode('web')}
@@ -274,7 +435,6 @@ export default function SchematicViewer({
             </button>
           </div>
 
-          {/* Zoom Buttons */}
           <div className="flex items-center space-x-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
             <button
               onClick={handleZoomOut}
@@ -323,26 +483,114 @@ export default function SchematicViewer({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={() => {
+          handleMouseUp();
+          setHoveredLine(null);
+        }}
         className={`w-full overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing relative select-none ${
-          isFullscreen ? 'h-[calc(100vh-65px)]' : 'h-[680px]'
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[720px]'
         }`}
       >
         {/* Floating Quick Hint */}
-        <div className="absolute bottom-4 left-4 z-20 pointer-events-none bg-slate-950/90 border border-slate-800 px-3.5 py-2 rounded-2xl text-[11px] text-slate-300 backdrop-blur-md flex items-center space-x-2.5 shadow-2xl">
-          <Crosshair className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span>Gunakan scroll mouse untuk Zoom • Tahan klik kiri untuk geser • Klik garis/stasiun untuk riwayat pekerjaan</span>
+        <div className="absolute bottom-4 left-4 z-20 pointer-events-none bg-slate-950/90 border border-slate-800 px-3.5 py-2 rounded-2xl text-[11px] text-slate-400 backdrop-blur-md flex items-center space-x-2 shadow-2xl">
+          <Crosshair className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
         </div>
 
-        {/* Floating Hover Indicator Banner */}
-        {hoveredItem && (
-          <div className="absolute top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none bg-slate-900/95 border-2 border-cyan-400 px-5 py-2.5 rounded-2xl text-xs text-white shadow-2xl backdrop-blur-md animate-in zoom-in-95 duration-100 flex items-center space-x-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-            <div>
-              <span className="font-extrabold text-cyan-300 text-sm tracking-tight">{hoveredItem.title}</span>
-              <span className="text-slate-300 ml-2 font-medium">
-                • {getWorkCount(hoveredItem.code)} Pekerjaan Dicatat • <strong className="text-orange-400 font-bold underline">Klik untuk membuka detail</strong>
+        {/* ========================================================
+            FLOATING POPUP CARD: DAFTAR SINGKAT PEKERJAAN
+            Muncul dinamis saat kursor mengarah ke garis
+            ======================================================== */}
+        {hoveredLine && (
+          <div
+            style={{
+              left: `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 340)}px`,
+              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 260)}px`,
+            }}
+            className="absolute z-50 pointer-events-none bg-slate-950/95 border border-slate-700/90 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-84 animate-in zoom-in-95 duration-150 text-slate-100"
+          >
+            {/* Header: Naspan info & color dot */}
+            <div className="flex items-start justify-between pb-2 border-b border-slate-800">
+              <div className="flex items-start space-x-2">
+                <span
+                  className="w-3 h-3 rounded-full mt-1 shrink-0 animate-ping"
+                  style={{ backgroundColor: hoveredLine.color }}
+                />
+                <div>
+                  <h4 className="font-extrabold text-white text-xs leading-tight">
+                    {hoveredLine.title}
+                  </h4>
+                  <span className="text-[10px] text-cyan-400 font-mono font-bold mt-0.5 block">
+                    {hoveredLine.km}
+                  </span>
+                </div>
+              </div>
+
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-800 text-orange-400 shrink-0 border border-slate-700">
+                {hoveredLogs.length} Pekerjaan
               </span>
+            </div>
+
+            {/* Content: Daftar Singkat Pekerjaan */}
+            <div className="mt-2.5 space-y-2">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <Wrench className="w-3 h-3 text-cyan-400" />
+                <span>Daftar Singkat Pekerjaan:</span>
+              </div>
+
+              {hoveredLogs.length === 0 ? (
+                <div className="text-[11px] text-slate-400 italic py-1 bg-slate-900/60 rounded-lg px-2 border border-slate-800">
+                  Belum ada catatan pekerjaan pada seksi naspan ini.
+                </div>
+              ) : (
+                hoveredLogs.slice(0, 3).map((log, idx) => {
+                  const dateStr = new Date(log.timestamp).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  });
+                  const timeStr = new Date(log.timestamp).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-slate-900/80 border border-slate-800 rounded-xl p-2 text-[11px] space-y-1"
+                    >
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                        <span className="flex items-center text-cyan-300 font-mono font-semibold">
+                          <Clock className="w-2.5 h-2.5 mr-1 text-orange-400" />
+                          {dateStr} • {timeStr} WIB
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                          {log.status || 'SELESAI'}
+                        </span>
+                      </div>
+
+                      <div className="font-bold text-white text-xs">
+                        {formatAction(log.actionType)}
+                      </div>
+
+                      <div className="text-slate-300 text-[10.5px] leading-snug line-clamp-2">
+                        {log.description}
+                      </div>
+
+                      <div className="flex items-center text-[9.5px] text-slate-400 pt-0.5">
+                        <HardHat className="w-2.5 h-2.5 mr-1 text-amber-400" />
+                        <span>Pelaksana: <strong className="text-slate-200">{log.technician}</strong></span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Prompt to open detail */}
+            <div className="mt-2.5 pt-2 border-t border-slate-800/80 text-[10px] text-cyan-400 flex items-center justify-between font-semibold">
+              <span>Klik garis untuk membuka menu lengkap</span>
+              <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
             </div>
           </div>
         )}
@@ -356,7 +604,7 @@ export default function SchematicViewer({
           }}
           className="w-full h-full min-w-[1300px] min-h-[580px] relative p-2"
         >
-          {/* Container exactly wrapping cropped schematic */}
+          {/* Container tightly wrapping cropped schematic */}
           <div className="relative inline-block w-[1400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-700 bg-white">
             
             {/* Cropped AutoCAD Master Image */}
@@ -368,92 +616,86 @@ export default function SchematicViewer({
             />
 
             {/* ========================================================
-                GLOWING & EMBOSSED INTERACTIVE TRACK LINES
+                CLEAN SVG GLOWING TRACK LINES ONLY
+                Hanya sekedar garis yang menunjukkan setiap naspan dengan
+                warna berbeda, menyala dan timbul ketika kursor diarahkan
                 ======================================================== */}
-            {lineSegments.map((seg) => {
-              const workCount = getWorkCount(seg.code);
-              const isActive = selectedLocation?.code === seg.code;
-              const isHovered = hoveredItem?.id === seg.id;
+            <svg
+              viewBox="0 0 3275 1419"
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ width: '100%', height: '100%' }}
+            >
+              <defs>
+                {/* 3D Embossed Glow Filter */}
+                <filter id="track-neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="5" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-              return (
-                <div
-                  key={seg.id}
-                  style={seg.style}
-                  onClick={() => onSelectLocation && onSelectLocation(seg)}
-                  onMouseEnter={() => setHoveredItem(seg)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className={`glowing-track-line ${isActive ? 'active' : ''}`}
-                  title={`${seg.title} • Klik untuk melihat riwayat pekerjaan`}
-                >
-                  {/* Internal animated laser shimmer line */}
-                  <div
-                    className={`absolute inset-x-2 top-1/2 -translate-y-1/2 h-1 rounded-full transition-all duration-300 ${
-                      isHovered || isActive
-                        ? 'bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 shadow-lg shadow-cyan-400/80 scale-y-125'
-                        : 'bg-transparent'
-                    }`}
-                  />
+              {naspanLines.map((line) => {
+                const isHovered = hoveredLine?.id === line.id;
+                const isActive = selectedLocation?.code === line.code;
 
-                  {/* 3D Embossed Badge on hover */}
-                  <div
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200 pointer-events-none ${
-                      isHovered || isActive ? 'opacity-100 scale-105' : 'opacity-0 scale-90'
-                    }`}
+                return (
+                  <g
+                    key={line.id}
+                    className="pointer-events-auto cursor-pointer"
+                    onMouseEnter={() => setHoveredLine(line)}
+                    onMouseLeave={() => setHoveredLine(null)}
+                    onClick={() => onSelectLocation && onSelectLocation(line)}
                   >
-                    <div className="bg-slate-950/95 border border-cyan-400/80 text-white px-3 py-1 rounded-xl text-[10px] font-bold shadow-2xl flex items-center space-x-1.5 backdrop-blur-md">
-                      <Wrench className="w-3 h-3 text-orange-400" />
-                      <span className="font-extrabold text-cyan-200">{seg.title}</span>
-                      <span className="px-1.5 py-0.2 rounded-full bg-orange-500 text-slate-950 text-[9px] font-black">
-                        {workCount}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                    {/* 1. Generous hit-area for effortless hovering */}
+                    <path
+                      d={line.d}
+                      stroke="transparent"
+                      strokeWidth="28"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
 
-            {/* ========================================================
-                STATION HOTSPOTS (NO DS MENUS)
-                ======================================================== */}
-            {croppedStations.map((st, i) => {
-              const workCount = getWorkCount(st.name);
-              const isActive = selectedLocation?.code === st.name;
+                    {/* 2. Ambient subtle base line showing track segment color */}
+                    <path
+                      d={line.d}
+                      stroke={line.color}
+                      strokeWidth={isHovered || isActive ? 8 : 4.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                      style={{
+                        opacity: isHovered || isActive ? 1 : 0.75,
+                        filter:
+                          isHovered || isActive
+                            ? `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color}) drop-shadow(0 3px 5px rgba(0,0,0,0.85))`
+                            : 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
+                        transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                    />
 
-              return (
-                <button
-                  key={i}
-                  onClick={() =>
-                    onSelectLocation &&
-                    onSelectLocation({
-                      code: st.name,
-                      title: st.name,
-                      name: st.name,
-                      km: st.km,
-                      category: 'STASIUN KERETA API',
-                      type: 'STATION',
-                    })
-                  }
-                  title={`Klik untuk melihat riwayat pekerjaan di ${st.name} (${st.km})`}
-                  style={{
-                    left: `${st.x}%`,
-                    top: `${st.y}%`,
-                  }}
-                  className={`interactive-station absolute -translate-x-1/2 -translate-y-1/2 px-3 py-1 rounded-xl text-[10px] font-black border transition-all cursor-pointer shadow-xl backdrop-blur-md flex items-center space-x-1.5 hover:scale-115 ${
-                    isActive
-                      ? 'bg-blue-600 text-white border-white ring-4 ring-cyan-400/50 scale-110 z-30'
-                      : 'bg-slate-900/90 hover:bg-blue-600 text-white border-blue-400/80 z-20'
-                  }`}
-                >
-                  <MapPin className="w-3 h-3 text-cyan-300" />
-                  <span>{st.name}</span>
-                  {workCount > 0 && (
-                    <span className="ml-1 px-1.5 py-0.2 rounded-full bg-orange-500 text-slate-950 text-[9px] font-black">
-                      {workCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    {/* 3. Center white hot laser core on hover/active (efek timbul menyala) */}
+                    {(isHovered || isActive) && (
+                      <path
+                        d={line.d}
+                        stroke="#ffffff"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        style={{
+                          opacity: 0.95,
+                          filter: 'drop-shadow(0 0 3px #ffffff)',
+                        }}
+                      />
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
 
           </div>
         </div>
