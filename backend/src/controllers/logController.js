@@ -2,10 +2,19 @@ const prisma = require('../db');
 
 exports.getAllLogs = async (req, res) => {
   try {
-    const { targetType, status, limit = 50 } = req.query;
+    const { targetType, status, targetCode, search, limit = 200 } = req.query;
     const where = {};
     if (targetType) where.targetType = targetType;
     if (status) where.status = status;
+    if (targetCode) where.targetCode = targetCode;
+    if (search) {
+      where.OR = [
+        { targetCode: { contains: search } },
+        { description: { contains: search } },
+        { technician: { contains: search } },
+        { actionType: { contains: search } },
+      ];
+    }
 
     const logs = await prisma.maintenanceLog.findMany({
       where,
@@ -22,7 +31,7 @@ exports.getAllLogs = async (req, res) => {
 
 exports.createLog = async (req, res) => {
   try {
-    const { targetType, targetCode, actionType, technician, description, status = 'COMPLETED' } = req.body;
+    const { targetType, targetCode, actionType, technician, description, status = 'COMPLETED', timestamp } = req.body;
 
     if (!targetCode || !actionType || !technician || !description) {
       return res.status(400).json({ success: false, message: 'Harap lengkapi semua field log' });
@@ -30,7 +39,8 @@ exports.createLog = async (req, res) => {
 
     const newLog = await prisma.maintenanceLog.create({
       data: {
-        targetType: targetType || 'SWITCH',
+        timestamp: timestamp ? new Date(timestamp) : new Date(),
+        targetType: targetType || 'LINE',
         targetCode,
         actionType,
         technician,
@@ -39,9 +49,9 @@ exports.createLog = async (req, res) => {
       },
     });
 
-    res.status(201).json({ success: true, message: 'Log berhasil dicatat', data: newLog });
+    res.status(201).json({ success: true, message: 'Catatan pekerjaan berhasil dicatat', data: newLog });
   } catch (error) {
     console.error('Error creating log:', error);
-    res.status(500).json({ success: false, message: 'Gagal membuat log perawatan' });
+    res.status(500).json({ success: false, message: 'Gagal membuat catatan pekerjaan' });
   }
 };
