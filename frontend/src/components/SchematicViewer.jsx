@@ -91,37 +91,35 @@ export default function SchematicViewer({
 
   const imageSrc = viewMode === 'hd' ? '/peta-laa-cropped-hd.png' : '/peta-laa-cropped.png';
 
-  // Comprehensive Track Lines covering EVERY SINGLE track, siding, platform, and curve on the AutoCAD schematic
+  // 46 Authentic Track Segments bounded strictly by Cross Marks (Tanda Garis Tersilang / AJ / AS)
+  // Colors match 100% with original AutoCAD DWG vector drawing
   const allTrackLines = [
     // ----------------------------------------------------
-    // 1. LINTAS PERCABANGAN KRAMAT & PONDOK JATI
+    // 1. LINTAS PERCABANGAN KRAMAT & ST. PONDOK JATI
     // ----------------------------------------------------
     {
-      id: 'kramat_track_1',
+      id: 'naspan_9_kpb',
       code: 'NASPAN 9 KPB-JNG',
       title: 'NASPAN 9 KPB-JNG (Percabangan Kramat)',
       km: 'KM 10+000 - KM 10+400',
       category: 'PERCABANGAN KRAMAT',
-      d: 'M 219 371 L 588 371',
-      color: '#db2777', // Rose / Pink
+      d: 'M 172 371 L 588 371',
+      xStart: 172,
+      xEnd: 588,
+      y: 371,
+      color: '#ff7fdf', // AutoCAD Pink
     },
     {
-      id: 'kramat_track_2',
+      id: 'pondok_jati_hilir',
       code: 'ST. PONDOK JATI',
-      title: 'ST. PONDOK JATI (Lintas Stasiun)',
+      title: 'ST. PONDOK JATI (Jalur Hilir)',
       km: 'KM 10+400 - KM 10+857',
       category: 'STASIUN PONDOK JATI',
-      d: 'M 219 418 L 588 418',
-      color: '#e11d48', // Red-Rose
-    },
-    {
-      id: 'kramat_turnout',
-      code: 'ST. PONDOK JATI',
-      title: 'Wesel Percabangan Kramat - Jatinegara',
-      km: 'KM 10+857',
-      category: 'WESEL KRAMAT',
-      d: 'M 588 371 L 741 656',
-      color: '#f43f5e',
+      d: 'M 172 418 L 588 418',
+      xStart: 172,
+      xEnd: 588,
+      y: 418,
+      color: '#ff0000', // AutoCAD Red
     },
 
     // ----------------------------------------------------
@@ -133,8 +131,23 @@ export default function SchematicViewer({
       title: 'MRI-JNG NASPAN 1 HI (Inbound Manggarai)',
       km: 'KM 10+800 - KM 11+448',
       category: 'SEKSI LAA HULU (HI)',
-      d: 'M 310 657 L 729 657',
-      color: '#0284c7', // Sky Blue
+      d: 'M 310 657 L 475 657',
+      xStart: 310,
+      xEnd: 475,
+      y: 657,
+      color: '#8a6ddd', // AutoCAD Lavender
+    },
+    {
+      id: 'jng_mri_naspan_2_hi',
+      code: 'MRI-JNG NASPAN 1 HI',
+      title: 'JNG-MRI NASPAN 2 HI (Inbound Manggarai)',
+      km: 'KM 11+448 - KM 11+750',
+      category: 'SEKSI LAA HULU (HI)',
+      d: 'M 487 657 L 729 657',
+      xStart: 487,
+      xEnd: 729,
+      y: 657,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
       id: 'jng_mri_hu',
@@ -142,8 +155,23 @@ export default function SchematicViewer({
       title: 'JNG-MRI NASPAN 1 HU (Outbound Manggarai)',
       km: 'KM 10+800 - KM 11+448',
       category: 'SEKSI LAA HILIR (HU)',
-      d: 'M 310 704 L 729 704',
-      color: '#2563eb', // Royal Blue
+      d: 'M 310 704 L 475 704',
+      xStart: 310,
+      xEnd: 475,
+      y: 704,
+      color: '#00ffff', // AutoCAD Cyan
+    },
+    {
+      id: 'jng_mri_hu_inbound',
+      code: 'JNG-MRI NASPAN 1 HU',
+      title: 'JNG-MRI NASPAN 1 HU (Jatinegara Barat)',
+      km: 'KM 11+448 - KM 11+750',
+      category: 'SEKSI LAA HILIR (HU)',
+      d: 'M 487 704 L 729 704',
+      xStart: 487,
+      xEnd: 729,
+      y: 704,
+      color: '#ff00ff', // AutoCAD Magenta
     },
 
     // ----------------------------------------------------
@@ -156,7 +184,10 @@ export default function SchematicViewer({
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
       d: 'M 741 656 L 1476 656',
-      color: '#059669', // Emerald
+      xStart: 741,
+      xEnd: 1476,
+      y: 656,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
       id: 'jng_jalur_2',
@@ -165,7 +196,10 @@ export default function SchematicViewer({
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
       d: 'M 741 704 L 1476 704',
-      color: '#10b981', // Green
+      xStart: 741,
+      xEnd: 1476,
+      y: 704,
+      color: '#ff00ff', // AutoCAD Magenta
     },
     {
       id: 'jng_jalur_3',
@@ -174,7 +208,10 @@ export default function SchematicViewer({
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
       d: 'M 797 606 L 1476 606',
-      color: '#0d9488', // Teal
+      xStart: 797,
+      xEnd: 1476,
+      y: 606,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
       id: 'jng_jalur_4',
@@ -183,16 +220,34 @@ export default function SchematicViewer({
       km: 'KM 11+750',
       category: 'EMPLASEMEN JATINEGARA',
       d: 'M 829 513 L 1462 513',
-      color: '#0891b2', // Cyan
+      xStart: 829,
+      xEnd: 1462,
+      y: 513,
+      color: '#cc6827', // AutoCAD Orange
     },
     {
-      id: 'jng_jalur_5_6',
+      id: 'jng_jalur_5',
       code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
-      title: 'ST. JATINEGARA (Jalur 5 & 6 Stabling)',
+      title: 'ST. JATINEGARA (Jalur 5 Stabling)',
+      km: 'KM 11+750',
+      category: 'STABLING JATINEGARA',
+      d: 'M 992 465 L 1484 465',
+      xStart: 992,
+      xEnd: 1484,
+      y: 465,
+      color: '#cc6827', // AutoCAD Orange
+    },
+    {
+      id: 'jng_jalur_6',
+      code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
+      title: 'ST. JATINEGARA (Jalur 6 Stabling)',
       km: 'KM 11+750',
       category: 'STABLING JATINEGARA',
       d: 'M 600 418 L 1453 418',
-      color: '#d97706', // Amber
+      xStart: 600,
+      xEnd: 1453,
+      y: 418,
+      color: '#cc6827', // AutoCAD Orange
     },
     {
       id: 'jng_jalur_7',
@@ -200,17 +255,23 @@ export default function SchematicViewer({
       title: 'ST. JATINEGARA (Jalur 7 Stabling Utara)',
       km: 'KM 11+750',
       category: 'STABLING JATINEGARA',
-      d: 'M 601 370 L 1434 370',
-      color: '#b45309', // Dark Amber
+      d: 'M 601 370 L 1477 370',
+      xStart: 601,
+      xEnd: 1477,
+      y: 370,
+      color: '#139a47', // AutoCAD Green
     },
     {
       id: 'jng_jalur_8',
       code: 'ST. JATINEGARA (JALUR 5 s/d 8)',
-      title: 'ST. JATINEGARA (Jalur 8 Badug / Depo)',
+      title: 'ST. JATINEGARA (Jalur 8 Depo / Badug)',
       km: 'KM 11+750',
       category: 'DEPO JATINEGARA',
       d: 'M 992 323 L 1422 323',
-      color: '#ea580c', // Orange
+      xStart: 992,
+      xEnd: 1422,
+      y: 323,
+      color: '#139a47', // AutoCAD Green
     },
     {
       id: 'jng_wesel_barat',
@@ -218,17 +279,23 @@ export default function SchematicViewer({
       title: 'ST. JATINEGARA (Wesel Barat W21A/B)',
       km: 'KM 11+500',
       category: 'KOMPLEKS WESEL',
-      d: 'M 612 606 L 797 606',
-      color: '#f43f5e',
+      d: 'M 612 606 L 791 606',
+      xStart: 612,
+      xEnd: 791,
+      y: 606,
+      color: '#cc6827',
     },
     {
       id: 'jng_wesel_timur',
       code: 'ST. JATINEGARA',
-      title: 'ST. JATINEGARA (Wesel Timur W31A/B & W51B)',
+      title: 'ST. JATINEGARA (Wesel Timur W31A/B)',
       km: 'KM 12+000',
       category: 'KOMPLEKS WESEL',
       d: 'M 1488 608 L 1823 608',
-      color: '#c026d3', // Purple
+      xStart: 1488,
+      xEnd: 1823,
+      y: 608,
+      color: '#f8d731',
     },
 
     // ----------------------------------------------------
@@ -241,7 +308,10 @@ export default function SchematicViewer({
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HULU (HI)',
       d: 'M 1487 656 L 1943 656',
-      color: '#ca8a04', // Gold
+      xStart: 1487,
+      xEnd: 1943,
+      y: 656,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
       id: 'naspan_1_hu',
@@ -250,7 +320,10 @@ export default function SchematicViewer({
       km: 'KM 11+750 - KM 12+844',
       category: 'SEKSI LAA HILIR (HU)',
       d: 'M 1488 704 L 1943 704',
-      color: '#9333ea', // Purple
+      xStart: 1488,
+      xEnd: 1943,
+      y: 704,
+      color: '#ff00ff', // AutoCAD Magenta
     },
     {
       id: 'naspan_2',
@@ -258,8 +331,11 @@ export default function SchematicViewer({
       title: 'NASPAN 2 JNG-KLD',
       km: 'KM 12+844 - KM 13+800',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 1943 656 L 2100 656',
-      color: '#ea580c', // Orange
+      d: 'M 1954 656 L 2079 656',
+      xStart: 1954,
+      xEnd: 2079,
+      y: 656,
+      color: '#0000ff', // AutoCAD Blue
     },
     {
       id: 'naspan_3',
@@ -267,17 +343,23 @@ export default function SchematicViewer({
       title: 'NASPAN 3 JNG-KLD',
       km: 'KM 13+800 - KM 14+800',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 2100 656 L 2258 656',
-      color: '#65a30d', // Lime
+      d: 'M 2091 656 L 2245 656',
+      xStart: 2091,
+      xEnd: 2245,
+      y: 656,
+      color: '#0000ff', // AutoCAD Blue
     },
     {
       id: 'naspan_4',
       code: 'NASPAN 4 JNG-KLD',
       title: 'NASPAN 4 JNG-KLD',
-      km: 'KM 14+800 - KM 15+760',
+      km: 'KM 12+844 - KM 15+760',
       category: 'SEKSI LAA PETAK KLENDER',
-      d: 'M 1943 704 L 2256 704',
-      color: '#16a34a', // Green
+      d: 'M 1954 704 L 2244 704',
+      xStart: 1954,
+      xEnd: 2244,
+      y: 704,
+      color: '#ff9f7f', // AutoCAD Peach
     },
 
     // ----------------------------------------------------
@@ -290,16 +372,22 @@ export default function SchematicViewer({
       km: 'KM 15+760 - KM 16+914',
       category: 'SEKSI LAA PETAK BUARAN',
       d: 'M 2258 656 L 2513 656',
-      color: '#0284c7', // Sky Blue
+      xStart: 2258,
+      xEnd: 2513,
+      y: 656,
+      color: '#0000ff', // AutoCAD Blue
     },
     {
       id: 'naspan_5',
       code: 'NASPAN 5 KLD-BUA',
       title: 'NASPAN 5 KLD-BUA',
-      km: 'KM 16+914 - KM 17+500',
+      km: 'KM 15+760 - KM 17+500',
       category: 'SEKSI LAA PETAK BUARAN',
       d: 'M 2256 704 L 2512 704',
-      color: '#f97316', // Orange
+      xStart: 2256,
+      xEnd: 2512,
+      y: 704,
+      color: '#ff9f7f', // AutoCAD Peach
     },
     {
       id: 'naspan_6',
@@ -307,101 +395,79 @@ export default function SchematicViewer({
       title: 'NASPAN 6 KLD-BUA',
       km: 'KM 17+500 - KM 18+200',
       category: 'SEKSI LAA PETAK BUARAN',
-      d: 'M 2513 656 L 2749 656',
-      color: '#0891b2', // Cyan
+      d: 'M 2524 656 L 2737 656',
+      xStart: 2524,
+      xEnd: 2737,
+      y: 656,
+      color: '#ff00ff', // AutoCAD Magenta
     },
 
     // ----------------------------------------------------
     // 6. PETAK BUARAN - KLENDER BARU (BUA-KLDB)
     // ----------------------------------------------------
     {
-      id: 'naspan_7',
+      id: 'naspan_7_buaran',
       code: 'NASPAN 7 BUA-KLDB',
-      title: 'NASPAN 7 BUA-KLDB',
+      title: 'NASPAN 7 BUA-KLDB (Petak Buaran)',
       km: 'KM 18+200 - KM 19+546',
       category: 'SEKSI LAA PETAK KLENDER BARU',
-      d: 'M 2512 704 L 2749 704',
-      color: '#7c3aed', // Violet
+      d: 'M 2523 704 L 2737 704',
+      xStart: 2523,
+      xEnd: 2737,
+      y: 704,
+      color: '#00ff00', // AutoCAD Green
     },
     {
-      id: 'naspan_7b',
-      code: 'NASPAN 7B BUA-KLDB',
-      title: 'NASPAN 7B BUA-KLDB',
+      id: 'naspan_7b_hulu',
+      code: 'NASPAN 7 BUA-KLDB',
+      title: 'NASPAN 7B BUA-KLDB (Hulu)',
       km: 'KM 19+546 - KM 20+474',
       category: 'SEKSI LAA PETAK KLENDER BARU',
-      d: 'M 2749 656 L 2981 656',
-      color: '#ca8a04', // Gold
+      d: 'M 2749 656 L 3091 656',
+      xStart: 2749,
+      xEnd: 3091,
+      y: 656,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
-      id: 'naspan_7b_lower',
+      id: 'naspan_7b_hilir',
       code: 'NASPAN 7 BUA-KLDB',
-      title: 'NASPAN 7B BUA-KLDB (Jalur Hilir)',
+      title: 'NASPAN 7B BUA-KLDB (Hilir)',
       km: 'KM 19+546 - KM 20+474',
       category: 'SEKSI LAA PETAK KLENDER BARU',
-      d: 'M 2749 704 L 2980 704',
-      color: '#dc2626', // Red
-    },
-    {
-      id: 'petak_timur_hulu',
-      code: 'NASPAN 7 BUA-KLDB',
-      title: 'Petak Timur Klender Baru (Hulu)',
-      km: 'KM 20+474',
-      category: 'LOOPING TIMUR',
-      d: 'M 2993 656 L 3091 656',
-      color: '#2563eb',
-    },
-    {
-      id: 'petak_timur_hilir',
-      code: 'NASPAN 7 BUA-KLDB',
-      title: 'Petak Timur Klender Baru (Hilir)',
-      km: 'KM 20+474',
-      category: 'LOOPING TIMUR',
-      d: 'M 2992 703 L 3091 703',
-      color: '#059669',
+      d: 'M 2749 704 L 3091 704',
+      xStart: 2749,
+      xEnd: 3091,
+      y: 704,
+      color: '#ff0000', // AutoCAD Red
     },
 
     // ----------------------------------------------------
-    // 7. TIKUNGAN LOOP KLENDER BARU - CAKUNG
-    // ----------------------------------------------------
-    {
-      id: 'loop_curve_1',
-      code: 'NASPAN 7 BUA-KLDB',
-      title: 'Tikungan Loop Klender Baru - Cakung (Luar)',
-      km: 'KM 20+474',
-      category: 'LOOPING TIKUNGAN TIMUR',
-      d: 'M 2981 656 C 3065 656, 3065 1065, 2981 1065',
-      color: '#4f46e5', // Indigo
-    },
-    {
-      id: 'loop_curve_2',
-      code: 'NASPAN 8 BUA-KLDB',
-      title: 'Tikungan Loop Klender Baru - Cakung (Dalam)',
-      km: 'KM 20+474',
-      category: 'LOOPING TIKUNGAN TIMUR',
-      d: 'M 2980 704 C 3105 704, 3105 1113, 2981 1113',
-      color: '#0d9488', // Teal
-    },
-
-    // ----------------------------------------------------
-    // 8. PETAK KLENDER BARU - CAKUNG (KLDB-CUK) & EMPLASEMEN
+    // 7. PETAK KLENDER BARU - CAKUNG & EMPLASEMEN CAKUNG
     // ----------------------------------------------------
     {
       id: 'naspan_8',
       code: 'NASPAN 8 BUA-KLDB',
-      title: 'NASPAN 8 BUA-KLDB',
+      title: 'NASPAN 8 BUA-KLDB (Menuju Cakung)',
       km: 'KM 20+474 - KM 20+943',
       category: 'SEKSI LAA MENUJU CAKUNG',
-      d: 'M 2819 1065 L 3036 1065',
-      color: '#dc2626', // Red
+      d: 'M 2819 1065 L 3103 1065',
+      xStart: 2819,
+      xEnd: 3103,
+      y: 1065,
+      color: '#ff0000', // AutoCAD Red
     },
     {
       id: 'naspan_8b',
-      code: 'NASPAN 8B KLDB-CUK',
-      title: 'NASPAN 8B KLDB-CUK',
+      code: 'NASPAN 8 BUA-KLDB',
+      title: 'NASPAN 8B KLDB-CUK (Menuju Cakung)',
       km: 'KM 20+943 - KM 21+400',
       category: 'SEKSI LAA MENUJU CAKUNG',
-      d: 'M 2825 1113 L 3036 1113',
-      color: '#eab308', // Yellow
+      d: 'M 2825 1113 L 3124 1113',
+      xStart: 2825,
+      xEnd: 3124,
+      y: 1113,
+      color: '#f8d731', // AutoCAD Yellow
     },
     {
       id: 'naspan_9_cuk_hulu',
@@ -410,7 +476,10 @@ export default function SchematicViewer({
       km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
       d: 'M 2343 1065 L 2808 1065',
-      color: '#7c3aed', // Violet
+      xStart: 2343,
+      xEnd: 2808,
+      y: 1065,
+      color: '#8a6ddd', // AutoCAD Lavender
     },
     {
       id: 'naspan_9_cuk_hilir',
@@ -419,11 +488,14 @@ export default function SchematicViewer({
       km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
       d: 'M 2344 1113 L 2812 1113',
-      color: '#d97706', // Amber
+      xStart: 2344,
+      xEnd: 2812,
+      y: 1113,
+      color: '#cc6827', // AutoCAD Orange
     },
 
     // ----------------------------------------------------
-    // 9. PETAK CAKUNG - KRANJI (CUK-KRI)
+    // 8. PETAK CAKUNG - KRANJI
     // ----------------------------------------------------
     {
       id: 'naspan_10_hulu',
@@ -431,8 +503,11 @@ export default function SchematicViewer({
       title: 'NASPAN 10 CUK-KRI (Jalur Hulu)',
       km: 'KM 22+500 - KM 23+200',
       category: 'SEKSI LAA CAKUNG - KRANJI',
-      d: 'M 2066 1064 L 2343 1064',
-      color: '#ea580c', // Orange
+      d: 'M 2072 1063 L 2331 1063',
+      xStart: 2072,
+      xEnd: 2331,
+      y: 1063,
+      color: '#8a6ddd', // AutoCAD Lavender
     },
     {
       id: 'naspan_10_hilir',
@@ -440,8 +515,11 @@ export default function SchematicViewer({
       title: 'NASPAN 10 CUK-KRI (Jalur Hilir)',
       km: 'KM 22+500 - KM 23+200',
       category: 'SEKSI LAA CAKUNG - KRANJI',
-      d: 'M 2066 1113 L 2344 1113',
-      color: '#d946ef', // Magenta
+      d: 'M 2066 1113 L 2332 1113',
+      xStart: 2066,
+      xEnd: 2332,
+      y: 1113,
+      color: '#cc6827', // AutoCAD Orange
     },
     {
       id: 'naspan_11_hulu',
@@ -449,8 +527,11 @@ export default function SchematicViewer({
       title: 'NASPAN 11 CUK-KRI (Jalur Hulu)',
       km: 'KM 23+200 - KM 23+987',
       category: 'SEKSI LAA CAKUNG - KRANJI',
-      d: 'M 1752 1064 L 2066 1064',
-      color: '#0284c7', // Sky Blue
+      d: 'M 1825 1064 L 2061 1064',
+      xStart: 1825,
+      xEnd: 2061,
+      y: 1064,
+      color: '#ff00ff', // AutoCAD Magenta
     },
     {
       id: 'naspan_11_hilir',
@@ -458,21 +539,27 @@ export default function SchematicViewer({
       title: 'NASPAN 11 CUK-KRI (Jalur Hilir)',
       km: 'KM 23+200 - KM 23+987',
       category: 'SEKSI LAA CAKUNG - KRANJI',
-      d: 'M 1752 1112 L 2066 1112',
-      color: '#0891b2', // Cyan
+      d: 'M 1639 1114 L 2051 1114',
+      xStart: 1639,
+      xEnd: 2051,
+      y: 1114,
+      color: '#00bfff', // AutoCAD Deep Sky Blue
     },
 
     // ----------------------------------------------------
-    // 10. PETAK KRANJI - BEKASI (KRI-BKS)
+    // 9. PETAK KRANJI - BEKASI
     // ----------------------------------------------------
     {
       id: 'naspan_12_hulu',
       code: 'NASPAN 12 BKS-KRI',
-      title: 'NASPAN 12 BKS-KRI (Jalur Hulu)',
+      title: 'NASPAN 12 BKS-KRI (Jalur Hulu Petak Kranji)',
       km: 'KM 23+987 - KM 25+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
-      d: 'M 1393 1064 L 1752 1064',
-      color: '#db2777', // Pink
+      d: 'M 1642 1064 L 1810 1064',
+      xStart: 1642,
+      xEnd: 1810,
+      y: 1064,
+      color: '#ff00ff', // AutoCAD Magenta
     },
     {
       id: 'naspan_12_hilir',
@@ -480,8 +567,23 @@ export default function SchematicViewer({
       title: 'NASPAN 12A/B KRI-BKS (Jalur Hilir)',
       km: 'KM 25+000 - KM 26+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
-      d: 'M 1390 1114 L 1752 1114',
-      color: '#059669', // Emerald
+      d: 'M 1390 1114 L 1626 1114',
+      xStart: 1390,
+      xEnd: 1626,
+      y: 1114,
+      color: '#ff0000', // AutoCAD Red
+    },
+    {
+      id: 'naspan_12b_hulu',
+      code: 'NASPAN 12 BKS-KRI',
+      title: 'NASPAN 12B KRI-BKS (Jalur Hulu Petak Bekasi)',
+      km: 'KM 25+000 - KM 26+000',
+      category: 'SEKSI LAA KRANJI - BEKASI',
+      d: 'M 1393 1064 L 1627 1064',
+      xStart: 1393,
+      xEnd: 1627,
+      y: 1064,
+      color: '#139a47', // AutoCAD Green
     },
     {
       id: 'naspan_13',
@@ -490,11 +592,14 @@ export default function SchematicViewer({
       km: 'KM 26+000 - KM 26+403',
       category: 'JALUR 4 BEKASI',
       d: 'M 776 1064 L 1388 1064',
-      color: '#0d9488', // Teal
+      xStart: 776,
+      xEnd: 1388,
+      y: 1064,
+      color: '#139a47', // AutoCAD Green
     },
 
     // ----------------------------------------------------
-    // 11. STASIUN BEKASI & EMPLASEMEN
+    // 10. STASIUN BEKASI & EMPLASEMEN
     // ----------------------------------------------------
     {
       id: 'bks_jalur_1_2',
@@ -503,7 +608,22 @@ export default function SchematicViewer({
       km: 'KM 26+403',
       category: 'EMPLASEMEN BEKASI',
       d: 'M 604 1113 L 1384 1113',
-      color: '#dc2626', // Red
+      xStart: 604,
+      xEnd: 1384,
+      y: 1113,
+      color: '#ff0000', // AutoCAD Red
+    },
+    {
+      id: 'bks_stabling_utara',
+      code: 'ST. BEKASI',
+      title: 'ST. BEKASI (Jalur Stabling Utara)',
+      km: 'KM 26+403',
+      category: 'STABLING BEKASI',
+      d: 'M 839 1012 L 1300 1012',
+      xStart: 839,
+      xEnd: 1300,
+      y: 1012,
+      color: '#139a47', // AutoCAD Green
     },
     {
       id: 'bks_stabling_5_8',
@@ -512,7 +632,10 @@ export default function SchematicViewer({
       km: 'KM 26+403',
       category: 'STABLING BEKASI',
       d: 'M 738 1175 L 1372 1175',
-      color: '#d97706', // Amber
+      xStart: 738,
+      xEnd: 1372,
+      y: 1175,
+      color: '#ec1f24', // AutoCAD Red
     },
     {
       id: 'bks_langsir_barat',
@@ -521,38 +644,50 @@ export default function SchematicViewer({
       km: 'KM 26+200',
       category: 'EMPLASEMEN BEKASI',
       d: 'M 461 1064 L 776 1064',
-      color: '#0284c7', // Sky Blue
+      xStart: 461,
+      xEnd: 776,
+      y: 1064,
+      color: '#139a47', // AutoCAD Green
     },
     {
       id: 'bks_wesel_barat',
       code: 'ST. BEKASI',
-      title: 'ST. BEKASI (Wesel Emplasemen Barat)',
+      title: 'ST. BEKASI (Wesel Barat)',
       km: 'KM 26+300',
       category: 'WESEL BEKASI',
-      d: 'M 505 1114 L 604 1114',
-      color: '#16a34a', // Green
+      d: 'M 505 1114 L 592 1114',
+      xStart: 505,
+      xEnd: 592,
+      y: 1114,
+      color: '#ec1f24', // AutoCAD Red
     },
 
     // ----------------------------------------------------
-    // 12. PETAK LINTAS MENUJU BEKASI TIMUR
+    // 11. PETAK LINTAS MENUJU BEKASI TIMUR
     // ----------------------------------------------------
     {
-      id: 'bks_timur_1',
+      id: 'bks_timur_hulu',
       code: 'PETAK BEKASI TIMUR',
-      title: 'Lintas Menuju Bekasi Timur (Jalur 1)',
+      title: 'Lintas Menuju Bekasi Timur (Jalur Hulu)',
       km: 'KM 26+800',
       category: 'SEKSI KELUAR BEKASI TIMUR',
       d: 'M 260 1229 L 486 1229',
-      color: '#059669', // Emerald
+      xStart: 260,
+      xEnd: 486,
+      y: 1229,
+      color: '#ec1f24', // AutoCAD Red
     },
     {
-      id: 'bks_timur_2',
+      id: 'bks_timur_hilir',
       code: 'PETAK BEKASI TIMUR',
-      title: 'Lintas Menuju Bekasi Timur (Jalur 2)',
+      title: 'Lintas Menuju Bekasi Timur (Jalur Hilir)',
       km: 'KM 26+800',
       category: 'SEKSI KELUAR BEKASI TIMUR',
       d: 'M 260 1278 L 486 1278',
-      color: '#e11d48', // Rose
+      xStart: 260,
+      xEnd: 486,
+      y: 1278,
+      color: '#ec1f24', // AutoCAD Red
     },
   ];
 
@@ -684,7 +819,6 @@ export default function SchematicViewer({
 
         {/* ========================================================
             FLOATING POPUP CARD: DAFTAR SINGKAT PEKERJAAN (WHITE MODE)
-            Muncul dinamis saat kursor mengarah ke garis mana pun
             ======================================================== */}
         {hoveredLine && (
           <div
@@ -698,7 +832,7 @@ export default function SchematicViewer({
             <div className="flex items-start justify-between pb-2.5 border-b border-slate-100">
               <div className="flex items-start space-x-2">
                 <span
-                  className="w-3 h-3 rounded-full mt-1 shrink-0 animate-ping shadow-sm"
+                  className="w-3.5 h-3.5 rounded-full mt-0.5 shrink-0 shadow-sm"
                   style={{ backgroundColor: hoveredLine.color }}
                 />
                 <div>
@@ -807,8 +941,10 @@ export default function SchematicViewer({
             />
 
             {/* ========================================================
-                CLEAN SVG GLOWING TRACK LINES ONLY (38 TRACKS)
-                Semua garis menyala & timbul ketika kursor diarahkan
+                AUTHENTIC SVG TRACK LINES (STRICTLY HORIZONTAL, NO CURVES)
+                - In default state: TRANSPARENT so original colors are 100% preserved
+                - On hover: GLOWS WITH EXACT AUTOCAD COLOR & 3D EMBOSSED EFFECT
+                - Cross marks (tanda garis tersilang) highlighted at ends of hovered naspan
                 ======================================================== */}
             <svg
               viewBox="0 0 3275 1419"
@@ -827,48 +963,100 @@ export default function SchematicViewer({
                     onMouseLeave={() => setHoveredLine(null)}
                     onClick={() => onSelectLocation && onSelectLocation(line)}
                   >
-                    {/* 1. Generous hit-area for effortless hovering */}
+                    {/* 1. Super generous 36px hit-area for effortless cursor detection */}
                     <path
                       d={line.d}
                       stroke="transparent"
-                      strokeWidth="28"
+                      strokeWidth="36"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       fill="none"
                     />
 
-                    {/* 2. Base track line showing naspan color */}
-                    <path
-                      d={line.d}
-                      stroke={line.color}
-                      strokeWidth={isHovered || isActive ? 8.5 : 4.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                      style={{
-                        opacity: isHovered || isActive ? 1 : 0.85,
-                        filter:
-                          isHovered || isActive
-                            ? `drop-shadow(0 0 8px ${line.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.45))`
-                            : 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
-                        transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-                      }}
-                    />
-
-                    {/* 3. Center white laser core on hover/active (efek timbul menyala) */}
+                    {/* 2. On Hover/Active: Glowing Line in EXACT authentic AutoCAD color */}
                     {(isHovered || isActive) && (
-                      <path
-                        d={line.d}
-                        stroke="#ffffff"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                        style={{
-                          opacity: 0.95,
-                          filter: 'drop-shadow(0 0 2px #ffffff)',
-                        }}
-                      />
+                      <>
+                        {/* Outer Glow Halo matching exact AutoCAD color */}
+                        <path
+                          d={line.d}
+                          stroke={line.color}
+                          strokeWidth="11"
+                          strokeLinecap="square"
+                          strokeLinejoin="miter"
+                          fill="none"
+                          style={{
+                            opacity: 0.85,
+                            filter: `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`,
+                          }}
+                        />
+
+                        {/* Core Solid Line in exact AutoCAD color */}
+                        <path
+                          d={line.d}
+                          stroke={line.color}
+                          strokeWidth="6"
+                          strokeLinecap="square"
+                          strokeLinejoin="miter"
+                          fill="none"
+                          style={{
+                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                          }}
+                        />
+
+                        {/* 3D Embossed White Laser Centerline */}
+                        <path
+                          d={line.d}
+                          stroke="#ffffff"
+                          strokeWidth="2.2"
+                          strokeLinecap="square"
+                          strokeLinejoin="miter"
+                          fill="none"
+                          style={{
+                            opacity: 0.95,
+                            filter: 'drop-shadow(0 0 2px #ffffff)',
+                          }}
+                        />
+
+                        {/* Tanda Garis Tersilang (X) at both ends of this NASPAN */}
+                        {line.xStart && line.y && (
+                          <g stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
+                            {/* Cross at start */}
+                            <line
+                              x1={line.xStart - 7}
+                              y1={line.y - 7}
+                              x2={line.xStart + 7}
+                              y2={line.y + 7}
+                              stroke={line.color}
+                              strokeWidth="3.5"
+                            />
+                            <line
+                              x1={line.xStart - 7}
+                              y1={line.y + 7}
+                              x2={line.xStart + 7}
+                              y2={line.y - 7}
+                              stroke={line.color}
+                              strokeWidth="3.5"
+                            />
+                            {/* Cross at end */}
+                            <line
+                              x1={line.xEnd - 7}
+                              y1={line.y - 7}
+                              x2={line.xEnd + 7}
+                              y2={line.y + 7}
+                              stroke={line.color}
+                              strokeWidth="3.5"
+                            />
+                            <line
+                              x1={line.xEnd - 7}
+                              y1={line.y + 7}
+                              x2={line.xEnd + 7}
+                              y2={line.y - 7}
+                              stroke={line.color}
+                              strokeWidth="3.5"
+                            />
+                          </g>
+                        )}
+                      </>
                     )}
                   </g>
                 );
