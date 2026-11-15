@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Station {
+  id           Int                  @id @default(autoincrement())
+  code         String               @unique
+  name         String
+  km           String
+  kmNumeric    Float
+  tracksCount  Int                  @default(2)
+  platforms    Int                  @default(2)
+  description  String?
+  status       String               @default("NORMAL") // NORMAL, ALERT, MAINTENANCE
+  xPos         Float                @default(0)
+  yPos         Float                @default(0)
+  switches     SwitchDevice[]
+  assets       InfrastructureAsset[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model SwitchDevice {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique // e.g. "DS 1", "DS 2", ... "DS 20"
+  name           String
+  defaultState   String    // "NO" (Normally Open) or "NC" (Normally Closed)
+  currentState   String    // "NO" or "NC"
+  isInterlocked  Boolean   @default(false)
+  lineType       String    // "HU" (Hilir), "HI" (Hulu), "EMPL" (Emplasemen)
+  locationKm     String    // e.g. "KM 11+200"
+  feedSection    String    // e.g. "MRI-JNG (HI)"
+  voltageRating  Float     @default(1500.0) // 1500 V DC
+  currentRating  Float     @default(2000.0) // 2000 A
+  voltageValue   Float     @default(1510.0) // Real-time voltage in Volts
+  currentLoad    Float     @default(450.0)  // Current in Amperes
+  temperature    Float     @default(36.5)   // Contact temperature in Celsius
+  status         String    @default("NORMAL") // NORMAL, WARNING, TRIP, LOCKED
+  lastOperated   DateTime  @default(now())
+  operatedBy     String    @default("Sistem Otomasi / Dispatcher")
+  mapCoordX      Float     @default(0)
+  mapCoordY      Float     @default(0)
+  stationId      Int
+  station        Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model TrackSection {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // e.g. "NASPAN 1 JNG-KLD"
+  trackType   String   // "HULU", "HILIR", "EMPLASEMEN"
+  startKm     String
+  endKm       String
+  isEnergized Boolean  @default(true)
+  voltage     Float    @default(1500.0)
+  status      String   @default("ENERGIZED") // ENERGIZED, DE-ENERGIZED, EARTHED
+  substation  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model InfrastructureAsset {
+  id             Int       @id @default(autoincrement())
+  type           String    // "AIR_JOINT", "AIR_SECTION", "FRP", "WESEL"
+  code           String    // e.g. "AJ KM 10+000", "AS KM 11+200", "FRP-JNG-01", "W11A"
+  name           String
+  locationKm     String
+  condition      String    @default("BAIK") // BAIK, PERHATIAN, KRITIS
+  lastInspection DateTime  @default(now())
+  stationId      Int
+  station        Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model MaintenanceLog {
+  id          Int      @id @default(autoincrement())
+  timestamp   DateTime @default(now())
+  targetType  String   // "SWITCH", "STATION", "SECTION", "ASSET"
+  targetCode  String   // e.g. "DS 4", "ST. JATINEGARA"
+  actionType  String   // "TOGGLE", "INSPECTION", "REPAIR", "CALIBRATION"
+  technician  String
+  description String
+  status      String   @default("COMPLETED") // COMPLETED, IN_PROGRESS, SCHEDULED
+  createdAt   DateTime @default(now())
+}
+
+model ScadaAlert {
+  id             Int      @id @default(autoincrement())
+  timestamp      DateTime @default(now())
+  severity       String   // "CRITICAL", "WARNING", "INFO"
+  code           String   // e.g. "ALT-001"
+  message        String
+  location       String
+  isAcknowledged Boolean  @default(false)
+  resolvedAt     DateTime?
+  createdAt      DateTime @default(now())
+}
+
+model TelemetryRecord {
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now())
+  substation    String   // e.g. "Gardu Traksi Jatinegara (GTR-JNG)"
+  voltageDc     Float    // e.g. 1520.4 V
+  currentAmps   Float    // e.g. 1250.8 A
+  powerKw       Float    // e.g. 1900.5 kW
+  frequencyHz   Float    @default(50.0)
+  tempSubstation Float   @default(28.4)
+  feederStatus  String   @default("NORMAL")
+  createdAt     DateTime @default(now())
+}

@@ -1,0 +1,29 @@
+{
+  "name": "laa-jatinegara-suite",
+  "version": "1.0.0",
+  "description": "Fullstack SCADA & Asset Dashboard - UPT Resor LAA 1.9 Jatinegara (KAI & Danantara Indonesia)",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "test": "npm test --prefix backend",
+    "prisma:generate": "npm run prisma:generate --prefix backend",
+    "seed": "npm run seed --prefix backend",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend"
+  },
+  "keywords": [
+    "kai",
+    "laa",
+    "scada",
+    "railway",
+    "catenary",
+    "dashboard",
+    "danantara",
+    "prisma",
+    "sqlite",
+    "jest"
+  ],
+  "author": "Google Antigravity & KAI LAA 1.9",
+  "license": "ISC"
+}
