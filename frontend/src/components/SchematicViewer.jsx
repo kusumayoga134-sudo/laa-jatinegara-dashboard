@@ -37,8 +37,8 @@ export default function SchematicViewer({
   const touchStartPos = useRef({ x: 0, y: 0 });
   const hasMovedRef = useRef(false);
 
-  // Zoom handlers (Min 100% - Max 600%)
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 6.0));
+  // Zoom handlers (Min 100% - Max 1000%)
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 10.0));
   const handleZoomOut = () =>
     setZoom((prev) => {
       const next = Math.max(prev - 0.25, 1.0);
@@ -117,7 +117,7 @@ export default function SchematicViewer({
         e.touches[0].clientY - e.touches[1].clientY
       );
       const factor = dist / pinchRef.current.distance;
-      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 6.0);
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 10.0);
       setZoom(nextZoom);
       if (nextZoom <= 1.0) {
         setPosition({ x: 0, y: 0 });
@@ -139,12 +139,12 @@ export default function SchematicViewer({
     }
   };
 
-  // Wheel zoom (Min 100% - Max 600%)
+  // Wheel zoom (Min 100% - Max 1000%)
   const handleWheel = (e) => {
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
     setZoom((prev) => {
-      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 6.0);
+      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 10.0);
       if (next === 1.0) setPosition({ x: 0, y: 0 });
       return next;
     });
@@ -2244,19 +2244,19 @@ export default function SchematicViewer({
               <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
-            <span className="text-[11px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-10 sm:min-w-14 text-center">
+            <span className="text-[11px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-12 sm:min-w-16 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
             <button
               onClick={handleZoomIn}
-              disabled={zoom >= 6.0}
+              disabled={zoom >= 10.0}
               className={`p-1 sm:p-1.5 rounded-lg transition ${
-                zoom >= 6.0
+                zoom >= 10.0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
-              title="Perbesar (+) [Maks 600%]"
+              title="Perbesar (+) [Maks 1000%]"
             >
               <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
