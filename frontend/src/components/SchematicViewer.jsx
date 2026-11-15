@@ -11,6 +11,10 @@ import {
   ChevronRight,
   Sparkles,
   PlusCircle,
+  Zap,
+  ShieldAlert,
+  Sliders,
+  Layers,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -91,8 +95,11 @@ export default function SchematicViewer({
 
   const imageSrc = viewMode === 'hd' ? '/peta-laa-cropped-hd.png' : '/peta-laa-cropped.png';
 
-  // 46 Authentic Track Segments bounded strictly by Cross Marks (Tanda Garis Tersilang / AJ / AS)
-  // Colors match 100% with original AutoCAD DWG vector drawing
+  // 46 Authentic Track Segments separated strictly by:
+  // 1. Air Joint (AJ)
+  // 2. Air Section (AS)
+  // 3. FRP (Section Insulator)
+  // 4. Disconnecting Switch (DS)
   const allTrackLines = [
     // ----------------------------------------------------
     // 1. LINTAS PERCABANGAN KRAMAT & ST. PONDOK JATI
@@ -107,7 +114,9 @@ export default function SchematicViewer({
       xStart: 172,
       xEnd: 588,
       y: 371,
-      color: '#ff7fdf', // AutoCAD Pink
+      color: '#ff7fdf', // Pink AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 10+000)', km: 'KM 10+000' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 10+400)', km: 'KM 10+400' },
     },
     {
       id: 'pondok_jati_hilir',
@@ -119,7 +128,9 @@ export default function SchematicViewer({
       xStart: 172,
       xEnd: 588,
       y: 418,
-      color: '#ff0000', // AutoCAD Red
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 10+000)', km: 'KM 10+000' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 10+400)', km: 'KM 10+400' },
     },
 
     // ----------------------------------------------------
@@ -135,7 +146,9 @@ export default function SchematicViewer({
       xStart: 310,
       xEnd: 475,
       y: 657,
-      color: '#8a6ddd', // AutoCAD Lavender
+      color: '#8a6ddd', // Lavender AutoCAD
+      startDivider: { type: 'AS', label: 'Gardu Traksi Manggarai', km: 'KM 10+800' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 1 (NO)', km: 'KM 11+000' },
     },
     {
       id: 'jng_mri_naspan_2_hi',
@@ -147,7 +160,9 @@ export default function SchematicViewer({
       xStart: 487,
       xEnd: 729,
       y: 657,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 1 (NO)', km: 'KM 11+000' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 3 (NC)', km: 'KM 11+750' },
     },
     {
       id: 'jng_mri_hu',
@@ -159,7 +174,9 @@ export default function SchematicViewer({
       xStart: 310,
       xEnd: 475,
       y: 704,
-      color: '#00ffff', // AutoCAD Cyan
+      color: '#00ffff', // Cyan AutoCAD
+      startDivider: { type: 'AS', label: 'Gardu Traksi Manggarai', km: 'KM 10+800' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 2 (NO)', km: 'KM 11+000' },
     },
     {
       id: 'jng_mri_hu_inbound',
@@ -171,11 +188,13 @@ export default function SchematicViewer({
       xStart: 487,
       xEnd: 729,
       y: 704,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 2 (NO)', km: 'KM 11+000' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 4 (NC)', km: 'KM 11+750' },
     },
 
     // ----------------------------------------------------
-    // 3. STASIUN JATINEGARA (JALUR 1 S/D 8 & WESEL)
+    // 3. STASIUN JATINEGARA (EMPLASEMEN & PERON)
     // ----------------------------------------------------
     {
       id: 'jng_jalur_1',
@@ -187,7 +206,9 @@ export default function SchematicViewer({
       xStart: 741,
       xEnd: 1476,
       y: 656,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 3 (NC)', km: 'KM 11+750' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 5 (NC)', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_2',
@@ -199,7 +220,9 @@ export default function SchematicViewer({
       xStart: 741,
       xEnd: 1476,
       y: 704,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 4 (NC)', km: 'KM 11+750' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 6 (NC)', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_3',
@@ -211,7 +234,9 @@ export default function SchematicViewer({
       xStart: 797,
       xEnd: 1476,
       y: 606,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-03-21A2', km: 'KM 11+750' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 5 (NC)', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_4',
@@ -223,7 +248,9 @@ export default function SchematicViewer({
       xStart: 829,
       xEnd: 1462,
       y: 513,
-      color: '#cc6827', // AutoCAD Orange
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-06-41B', km: 'KM 11+750' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-10-JALUR 4', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_5',
@@ -235,7 +262,9 @@ export default function SchematicViewer({
       xStart: 992,
       xEnd: 1484,
       y: 465,
-      color: '#cc6827', // AutoCAD Orange
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-07-21C1', km: 'KM 11+750' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-11-23B2', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_6',
@@ -247,7 +276,9 @@ export default function SchematicViewer({
       xStart: 600,
       xEnd: 1453,
       y: 418,
-      color: '#cc6827', // AutoCAD Orange
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP Wesel Barat', km: 'KM 11+500' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP Wesel Timur', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_7',
@@ -259,7 +290,9 @@ export default function SchematicViewer({
       xStart: 601,
       xEnd: 1477,
       y: 370,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP Wesel Barat', km: 'KM 11+500' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP Stabling Timur', km: 'KM 12+000' },
     },
     {
       id: 'jng_jalur_8',
@@ -271,7 +304,9 @@ export default function SchematicViewer({
       xStart: 992,
       xEnd: 1422,
       y: 323,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP Wesel Depo', km: 'KM 11+750' },
+      endDivider: { type: 'AS', label: 'Badug Ujung St. Jatinegara', km: 'KM 12+000' },
     },
     {
       id: 'jng_wesel_barat',
@@ -284,6 +319,8 @@ export default function SchematicViewer({
       xEnd: 791,
       y: 606,
       color: '#cc6827',
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-01-31A1', km: 'KM 11+500' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-05-31C2', km: 'KM 11+600' },
     },
     {
       id: 'jng_wesel_timur',
@@ -296,6 +333,8 @@ export default function SchematicViewer({
       xEnd: 1823,
       y: 608,
       color: '#f8d731',
+      startDivider: { type: 'DS', label: 'DS 5 & DS 6 Jatinegara', km: 'KM 12+000' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-13 & FRP-15', km: 'KM 12+200' },
     },
 
     // ----------------------------------------------------
@@ -311,7 +350,9 @@ export default function SchematicViewer({
       xStart: 1487,
       xEnd: 1943,
       y: 656,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 5 (NC)', km: 'KM 11+750' },
+      endDivider: { type: 'DS', label: 'Air Section (AS KM 12+844) & DS 7 (NO)', km: 'KM 12+844' },
     },
     {
       id: 'naspan_1_hu',
@@ -323,7 +364,9 @@ export default function SchematicViewer({
       xStart: 1488,
       xEnd: 1943,
       y: 704,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 6 (NC)', km: 'KM 11+750' },
+      endDivider: { type: 'DS', label: 'Air Section (AS KM 12+844) & DS 8 (NO)', km: 'KM 12+844' },
     },
     {
       id: 'naspan_2',
@@ -335,7 +378,9 @@ export default function SchematicViewer({
       xStart: 1954,
       xEnd: 2079,
       y: 656,
-      color: '#0000ff', // AutoCAD Blue
+      color: '#0000ff', // Blue AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS KM 12+844) & DS 7 (NO)', km: 'KM 12+844' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 13+800)', km: 'KM 13+800' },
     },
     {
       id: 'naspan_3',
@@ -347,7 +392,9 @@ export default function SchematicViewer({
       xStart: 2091,
       xEnd: 2245,
       y: 656,
-      color: '#0000ff', // AutoCAD Blue
+      color: '#0000ff', // Blue AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 13+800)', km: 'KM 13+800' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 14+700)', km: 'KM 14+700' },
     },
     {
       id: 'naspan_4',
@@ -359,7 +406,9 @@ export default function SchematicViewer({
       xStart: 1954,
       xEnd: 2244,
       y: 704,
-      color: '#ff9f7f', // AutoCAD Peach
+      color: '#ff9f7f', // Peach AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS KM 12+844) & DS 8 (NO)', km: 'KM 12+844' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 14+700)', km: 'KM 14+700' },
     },
 
     // ----------------------------------------------------
@@ -375,7 +424,9 @@ export default function SchematicViewer({
       xStart: 2258,
       xEnd: 2513,
       y: 656,
-      color: '#0000ff', // AutoCAD Blue
+      color: '#0000ff', // Blue AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 14+700)', km: 'KM 14+700' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 16+914)', km: 'KM 16+914' },
     },
     {
       id: 'naspan_5',
@@ -387,7 +438,9 @@ export default function SchematicViewer({
       xStart: 2256,
       xEnd: 2512,
       y: 704,
-      color: '#ff9f7f', // AutoCAD Peach
+      color: '#ff9f7f', // Peach AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 14+700)', km: 'KM 14+700' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 16+914)', km: 'KM 16+914' },
     },
     {
       id: 'naspan_6',
@@ -399,7 +452,9 @@ export default function SchematicViewer({
       xStart: 2524,
       xEnd: 2737,
       y: 656,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 16+914)', km: 'KM 16+914' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 18+200)', km: 'KM 18+200' },
     },
 
     // ----------------------------------------------------
@@ -415,7 +470,9 @@ export default function SchematicViewer({
       xStart: 2523,
       xEnd: 2737,
       y: 704,
-      color: '#00ff00', // AutoCAD Green
+      color: '#00ff00', // Green AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 16+914)', km: 'KM 16+914' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 18+200)', km: 'KM 18+200' },
     },
     {
       id: 'naspan_7b_hulu',
@@ -427,7 +484,9 @@ export default function SchematicViewer({
       xStart: 2749,
       xEnd: 3091,
       y: 656,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 18+200)', km: 'KM 18+200' },
+      endDivider: { type: 'DS', label: 'Air Joint (AJ KM 20+474) & DS 9 (NC)', km: 'KM 20+474' },
     },
     {
       id: 'naspan_7b_hilir',
@@ -439,7 +498,9 @@ export default function SchematicViewer({
       xStart: 2749,
       xEnd: 3091,
       y: 704,
-      color: '#ff0000', // AutoCAD Red
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 18+200)', km: 'KM 18+200' },
+      endDivider: { type: 'DS', label: 'Air Joint (AJ KM 20+474) & DS 10 (NC)', km: 'KM 20+474' },
     },
 
     // ----------------------------------------------------
@@ -455,7 +516,9 @@ export default function SchematicViewer({
       xStart: 2819,
       xEnd: 3103,
       y: 1065,
-      color: '#ff0000', // AutoCAD Red
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'Air Joint (AJ) & DS 12 (NO)', km: 'KM 20+474' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 14 (NC)', km: 'KM 21+400' },
     },
     {
       id: 'naspan_8b',
@@ -467,7 +530,9 @@ export default function SchematicViewer({
       xStart: 2825,
       xEnd: 3124,
       y: 1113,
-      color: '#f8d731', // AutoCAD Yellow
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'DS', label: 'Air Joint (AJ) & DS 11 (NO)', km: 'KM 20+474' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 13 (NC)', km: 'KM 21+400' },
     },
     {
       id: 'naspan_9_cuk_hulu',
@@ -479,7 +544,9 @@ export default function SchematicViewer({
       xStart: 2343,
       xEnd: 2808,
       y: 1065,
-      color: '#8a6ddd', // AutoCAD Lavender
+      color: '#8a6ddd', // Lavender AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 14 (NC)', km: 'KM 21+400' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 22+500)', km: 'KM 22+500' },
     },
     {
       id: 'naspan_9_cuk_hilir',
@@ -491,7 +558,9 @@ export default function SchematicViewer({
       xStart: 2344,
       xEnd: 2812,
       y: 1113,
-      color: '#cc6827', // AutoCAD Orange
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 13 (NC)', km: 'KM 21+400' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 22+500)', km: 'KM 22+500' },
     },
 
     // ----------------------------------------------------
@@ -507,7 +576,9 @@ export default function SchematicViewer({
       xStart: 2072,
       xEnd: 2331,
       y: 1063,
-      color: '#8a6ddd', // AutoCAD Lavender
+      color: '#8a6ddd', // Lavender AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 22+500)', km: 'KM 22+500' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 23+200)', km: 'KM 23+200' },
     },
     {
       id: 'naspan_10_hilir',
@@ -519,7 +590,9 @@ export default function SchematicViewer({
       xStart: 2066,
       xEnd: 2332,
       y: 1113,
-      color: '#cc6827', // AutoCAD Orange
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 22+500)', km: 'KM 22+500' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 23+200)', km: 'KM 23+200' },
     },
     {
       id: 'naspan_11_hulu',
@@ -531,7 +604,9 @@ export default function SchematicViewer({
       xStart: 1825,
       xEnd: 2061,
       y: 1064,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 23+200)', km: 'KM 23+200' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 23+987)', km: 'KM 23+987' },
     },
     {
       id: 'naspan_11_hilir',
@@ -543,7 +618,9 @@ export default function SchematicViewer({
       xStart: 1639,
       xEnd: 2051,
       y: 1114,
-      color: '#00bfff', // AutoCAD Deep Sky Blue
+      color: '#00bfff', // Deep Sky Blue AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 23+200)', km: 'KM 23+200' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 23+987)', km: 'KM 23+987' },
     },
 
     // ----------------------------------------------------
@@ -559,7 +636,9 @@ export default function SchematicViewer({
       xStart: 1642,
       xEnd: 1810,
       y: 1064,
-      color: '#ff00ff', // AutoCAD Magenta
+      color: '#ff00ff', // Magenta AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 23+987)', km: 'KM 23+987' },
+      endDivider: { type: 'AJ', label: 'Air Joint (AJ KM 25+000)', km: 'KM 25+000' },
     },
     {
       id: 'naspan_12_hilir',
@@ -571,7 +650,9 @@ export default function SchematicViewer({
       xStart: 1390,
       xEnd: 1626,
       y: 1114,
-      color: '#ff0000', // AutoCAD Red
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 25+000)', km: 'KM 25+000' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 15 (NC)', km: 'KM 26+000' },
     },
     {
       id: 'naspan_12b_hulu',
@@ -583,7 +664,9 @@ export default function SchematicViewer({
       xStart: 1393,
       xEnd: 1627,
       y: 1064,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 25+000)', km: 'KM 25+000' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 16 (NC)', km: 'KM 26+000' },
     },
     {
       id: 'naspan_13',
@@ -595,7 +678,9 @@ export default function SchematicViewer({
       xStart: 776,
       xEnd: 1388,
       y: 1064,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 16 (NC)', km: 'KM 26+000' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-23 Wesel St. Bekasi', km: 'KM 26+403' },
     },
 
     // ----------------------------------------------------
@@ -611,7 +696,9 @@ export default function SchematicViewer({
       xStart: 604,
       xEnd: 1384,
       y: 1113,
-      color: '#ff0000', // AutoCAD Red
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 15 (NC)', km: 'KM 26+000' },
+      endDivider: { type: 'DS', label: 'Air Section (AS) & DS 19 / DS 20', km: 'KM 26+403' },
     },
     {
       id: 'bks_stabling_utara',
@@ -623,7 +710,9 @@ export default function SchematicViewer({
       xStart: 839,
       xEnd: 1300,
       y: 1012,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-22-JALUR 6', km: 'KM 26+403' },
+      endDivider: { type: 'AS', label: 'Ujung Badug Stabling', km: 'KM 26+500' },
     },
     {
       id: 'bks_stabling_5_8',
@@ -635,7 +724,9 @@ export default function SchematicViewer({
       xStart: 738,
       xEnd: 1372,
       y: 1175,
-      color: '#ec1f24', // AutoCAD Red
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-21-JALUR 5', km: 'KM 26+403' },
+      endDivider: { type: 'FRP', label: 'Isolator FRP-JNG-24-51C', km: 'KM 26+500' },
     },
     {
       id: 'bks_langsir_barat',
@@ -647,7 +738,9 @@ export default function SchematicViewer({
       xStart: 461,
       xEnd: 776,
       y: 1064,
-      color: '#139a47', // AutoCAD Green
+      color: '#139a47', // Green AutoCAD
+      startDivider: { type: 'FRP', label: 'Isolator FRP-JNG-26-73', km: 'KM 26+200' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 26+403)', km: 'KM 26+403' },
     },
     {
       id: 'bks_wesel_barat',
@@ -659,7 +752,9 @@ export default function SchematicViewer({
       xStart: 505,
       xEnd: 592,
       y: 1114,
-      color: '#ec1f24', // AutoCAD Red
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 19 / 20', km: 'KM 26+300' },
+      endDivider: { type: 'AS', label: 'Wesel Emplasemen Barat', km: 'KM 26+403' },
     },
 
     // ----------------------------------------------------
@@ -675,7 +770,9 @@ export default function SchematicViewer({
       xStart: 260,
       xEnd: 486,
       y: 1229,
-      color: '#ec1f24', // AutoCAD Red
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 17 (NC)', km: 'KM 26+800' },
+      endDivider: { type: 'AS', label: 'Batas UPT Resor LAA 1.9', km: 'KM 27+000' },
     },
     {
       id: 'bks_timur_hilir',
@@ -687,11 +784,12 @@ export default function SchematicViewer({
       xStart: 260,
       xEnd: 486,
       y: 1278,
-      color: '#ec1f24', // AutoCAD Red
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'Air Section (AS) & DS 18 (NC)', km: 'KM 26+800' },
+      endDivider: { type: 'AS', label: 'Batas UPT Resor LAA 1.9', km: 'KM 27+000' },
     },
   ];
 
-  // Helper to get matching logs for a line
   const getLineLogs = (code) => {
     if (!code) return [];
     return logs.filter(
@@ -707,6 +805,22 @@ export default function SchematicViewer({
   const formatAction = (str) => {
     if (!str) return 'Pekerjaan Pemeliharaan';
     return str.replace(/_/g, ' ');
+  };
+
+  // Helper badge color for divider types
+  const getDividerBadge = (type) => {
+    switch (type) {
+      case 'AJ':
+        return { label: 'Air Joint (AJ)', bg: 'bg-blue-50 text-blue-700 border-blue-200' };
+      case 'AS':
+        return { label: 'Air Section (AS)', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      case 'FRP':
+        return { label: 'Section Insulator (FRP)', bg: 'bg-purple-50 text-purple-700 border-purple-200' };
+      case 'DS':
+        return { label: 'Disconnecting Switch (DS)', bg: 'bg-orange-50 text-orange-700 border-orange-200' };
+      default:
+        return { label: type, bg: 'bg-slate-50 text-slate-700 border-slate-200' };
+    }
   };
 
   return (
@@ -725,7 +839,7 @@ export default function SchematicViewer({
             <Sparkles className="w-4 h-4" />
           </div>
           <p className="text-xs sm:text-sm text-slate-700 font-medium">
-            Arahkan kursor ke garis jalur / naspan untuk <strong className="text-blue-600 font-bold">efek menyala & daftar riwayat pekerjaan</strong>
+            Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">Air Joint (AJ)</strong>, <strong className="text-emerald-700 font-bold">Air Section (AS)</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
           </p>
         </div>
 
@@ -818,15 +932,15 @@ export default function SchematicViewer({
         </div>
 
         {/* ========================================================
-            FLOATING POPUP CARD: DAFTAR SINGKAT PEKERJAAN (WHITE MODE)
+            FLOATING POPUP CARD: INFORMASI SEKSI & PEKERJAAN
             ======================================================== */}
         {hoveredLine && (
           <div
             style={{
-              left: `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 340)}px`,
-              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 280)}px`,
+              left: `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 360)}px`,
+              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 340)}px`,
             }}
-            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-84 animate-in zoom-in-95 duration-150 text-slate-800"
+            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-88 animate-in zoom-in-95 duration-150 text-slate-800"
           >
             {/* Header: Naspan info & color dot */}
             <div className="flex items-start justify-between pb-2.5 border-b border-slate-100">
@@ -850,6 +964,30 @@ export default function SchematicViewer({
               </span>
             </div>
 
+            {/* BATAS-BATAS PEMISAH TEKNIS (AJ / AS / FRP / DS) */}
+            {hoveredLine.startDivider && hoveredLine.endDivider && (
+              <div className="mt-2.5 bg-slate-50 border border-slate-200/90 rounded-xl p-2.5 text-xs space-y-1.5">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Layers className="w-3 h-3 text-blue-600" />
+                  <span>Batas Pemisahan Seksi LAA:</span>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 font-medium">Batas Barat / Awal:</span>
+                  <span className={`px-2 py-0.5 rounded-md font-bold text-[10.5px] border ${getDividerBadge(hoveredLine.startDivider.type).bg}`}>
+                    {hoveredLine.startDivider.label}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 font-medium">Batas Timur / Akhir:</span>
+                  <span className={`px-2 py-0.5 rounded-md font-bold text-[10.5px] border ${getDividerBadge(hoveredLine.endDivider.type).bg}`}>
+                    {hoveredLine.endDivider.label}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Content: Daftar Singkat Pekerjaan */}
             <div className="mt-2.5 space-y-2">
               <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -859,10 +997,10 @@ export default function SchematicViewer({
 
               {hoveredLogs.length === 0 ? (
                 <div className="text-xs text-slate-500 italic py-2 bg-slate-50 rounded-xl px-3 border border-slate-200 text-center">
-                  Belum ada catatan pekerjaan pada seksi naspan ini.
+                  Belum ada catatan pekerjaan pada seksi ini.
                 </div>
               ) : (
-                hoveredLogs.slice(0, 3).map((log, idx) => {
+                hoveredLogs.slice(0, 2).map((log, idx) => {
                   const dateStr = new Date(log.timestamp).toLocaleDateString('id-ID', {
                     day: 'numeric',
                     month: 'short',
@@ -913,7 +1051,7 @@ export default function SchematicViewer({
             >
               <span className="flex items-center space-x-1.5">
                 <PlusCircle className="w-3.5 h-3.5" />
-                <span>Input / Rincian Riwayat</span>
+                <span>Input / Rincian Riwayat Seksi</span>
               </span>
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -941,10 +1079,8 @@ export default function SchematicViewer({
             />
 
             {/* ========================================================
-                AUTHENTIC SVG TRACK LINES (STRICTLY HORIZONTAL, NO CURVES)
-                - In default state: TRANSPARENT so original colors are 100% preserved
-                - On hover: GLOWS WITH EXACT AUTOCAD COLOR & 3D EMBOSSED EFFECT
-                - Cross marks (tanda garis tersilang) highlighted at ends of hovered naspan
+                AUTHENTIC SVG TRACK LINES (STRICTLY HORIZONTAL)
+                Separated by Air Joint (AJ), Air Section (AS), FRP, and DS
                 ======================================================== */}
             <svg
               viewBox="0 0 3275 1419"
@@ -963,7 +1099,7 @@ export default function SchematicViewer({
                     onMouseLeave={() => setHoveredLine(null)}
                     onClick={() => onSelectLocation && onSelectLocation(line)}
                   >
-                    {/* 1. Super generous 36px hit-area for effortless cursor detection */}
+                    {/* 1. Generous 36px hit-area for effortless cursor detection */}
                     <path
                       d={line.d}
                       stroke="transparent"
@@ -1017,42 +1153,79 @@ export default function SchematicViewer({
                           }}
                         />
 
-                        {/* Tanda Garis Tersilang (X) at both ends of this NASPAN */}
-                        {line.xStart && line.y && (
-                          <g stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
-                            {/* Cross at start */}
+                        {/* Tanda Pemisah Awal (Start Divider: AJ / AS / FRP / DS) */}
+                        {line.xStart && line.y && line.startDivider && (
+                          <g>
+                            {/* Visual Boundary Mark (Cross / Symbol) */}
                             <line
-                              x1={line.xStart - 7}
-                              y1={line.y - 7}
-                              x2={line.xStart + 7}
-                              y2={line.y + 7}
-                              stroke={line.color}
-                              strokeWidth="3.5"
+                              x1={line.xStart - 8}
+                              y1={line.y - 8}
+                              x2={line.xStart + 8}
+                              y2={line.y + 8}
+                              stroke="#000000"
+                              strokeWidth="4"
                             />
                             <line
-                              x1={line.xStart - 7}
-                              y1={line.y + 7}
-                              x2={line.xStart + 7}
-                              y2={line.y - 7}
-                              stroke={line.color}
-                              strokeWidth="3.5"
-                            />
-                            {/* Cross at end */}
-                            <line
-                              x1={line.xEnd - 7}
-                              y1={line.y - 7}
-                              x2={line.xEnd + 7}
-                              y2={line.y + 7}
-                              stroke={line.color}
-                              strokeWidth="3.5"
+                              x1={line.xStart - 8}
+                              y1={line.y + 8}
+                              x2={line.xStart + 8}
+                              y2={line.y - 8}
+                              stroke="#000000"
+                              strokeWidth="4"
                             />
                             <line
-                              x1={line.xEnd - 7}
-                              y1={line.y + 7}
-                              x2={line.xEnd + 7}
-                              y2={line.y - 7}
+                              x1={line.xStart - 8}
+                              y1={line.y - 8}
+                              x2={line.xStart + 8}
+                              y2={line.y + 8}
                               stroke={line.color}
-                              strokeWidth="3.5"
+                              strokeWidth="2.5"
+                            />
+                            <line
+                              x1={line.xStart - 8}
+                              y1={line.y + 8}
+                              x2={line.xStart + 8}
+                              y2={line.y - 8}
+                              stroke={line.color}
+                              strokeWidth="2.5"
+                            />
+                          </g>
+                        )}
+
+                        {/* Tanda Pemisah Akhir (End Divider: AJ / AS / FRP / DS) */}
+                        {line.xEnd && line.y && line.endDivider && (
+                          <g>
+                            <line
+                              x1={line.xEnd - 8}
+                              y1={line.y - 8}
+                              x2={line.xEnd + 8}
+                              y2={line.y + 8}
+                              stroke="#000000"
+                              strokeWidth="4"
+                            />
+                            <line
+                              x1={line.xEnd - 8}
+                              y1={line.y + 8}
+                              x2={line.xEnd + 8}
+                              y2={line.y - 8}
+                              stroke="#000000"
+                              strokeWidth="4"
+                            />
+                            <line
+                              x1={line.xEnd - 8}
+                              y1={line.y - 8}
+                              x2={line.xEnd + 8}
+                              y2={line.y + 8}
+                              stroke={line.color}
+                              strokeWidth="2.5"
+                            />
+                            <line
+                              x1={line.xEnd - 8}
+                              y1={line.y + 8}
+                              x2={line.xEnd + 8}
+                              y2={line.y - 8}
+                              stroke={line.color}
+                              strokeWidth="2.5"
                             />
                           </g>
                         )}
