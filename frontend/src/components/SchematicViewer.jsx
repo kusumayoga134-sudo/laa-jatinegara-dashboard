@@ -14,6 +14,7 @@ import {
   Layers,
   GitCommit,
   X,
+  ClipboardList,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -2195,11 +2196,8 @@ export default function SchematicViewer({
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
           <p className="text-xs sm:text-sm text-slate-700 font-medium leading-tight">
-            <span className="hidden sm:inline">
-              Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong> • Termasuk wesel & crossing miring
-            </span>
-            <span className="sm:hidden text-xs">
-              Peta LAA 1500V • <span className="text-blue-700 font-bold">Sentuh garis</span> untuk riwayat seksi
+            <span>
+              Setiap line / garis terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
             </span>
           </p>
         </div>
@@ -2433,14 +2431,14 @@ export default function SchematicViewer({
               )}
             </div>
 
-            {/* Direct Action Button to Input / View Work History */}
+            {/* Direct Action Button to View Work History */}
             <button
               onClick={() => onSelectLocation && onSelectLocation(hoveredLine)}
               className="w-full mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between shadow-sm cursor-pointer transition-all active:scale-98"
             >
               <span className="flex items-center space-x-1.5">
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Input / Rincian Riwayat Seksi</span>
+                <ClipboardList className="w-3.5 h-3.5" />
+                <span>Lihat Riwayat Pekerjaan Seksi</span>
               </span>
               <ChevronRight className="w-4 h-4" />
             </button>

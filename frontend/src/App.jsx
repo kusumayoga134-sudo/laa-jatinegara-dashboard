@@ -69,24 +69,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Minimalist White Header with Direct "+ Input Pekerjaan" Button */}
+      {/* Minimalist White Header */}
       <Header
         totalLogsCount={logs.length}
-        onOpenAddWork={() =>
-          setSelectedLocation({
-            code: '',
-            title: 'Menu Input Pekerjaan Baru',
-            km: 'Seluruh Lintas LAA 1.9',
-            category: 'INPUT PEKERJAAN',
-            isAddWork: true,
-          })
-        }
         onOpenAllLogs={() =>
           setSelectedLocation({
             code: '',
-            title: 'Rekapitulasi Seluruh Riwayat Pekerjaan LAA',
-            km: 'Lintas Kramat / Manggarai — Jatinegara — Buaran — Cakung — Bekasi',
-            category: 'REKAPITULASI TOTAL PEKERJAAN',
+            title: 'Daftar Seluruh Riwayat Pekerjaan LAA',
+            km: 'Seluruh Lintas LAA 1.9',
+            category: 'TOTAL PEKERJAAN',
             isAllLogs: true,
           })
         }

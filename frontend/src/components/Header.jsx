@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Clock,
   Wrench,
-  Plus,
   Train,
   Sparkles,
   ClipboardList,
@@ -11,7 +10,6 @@ import {
 
 export default function Header({
   totalLogsCount = 85,
-  onOpenAddWork,
   onOpenAllLogs,
 }) {
   const [time, setTime] = useState(new Date());
@@ -79,34 +77,23 @@ export default function Header({
             </p>
           </div>
 
-          {/* Action Buttons Grid on Mobile (2 equal columns) */}
-          <div className="grid grid-cols-2 gap-2 pt-0.5">
-            {/* Input Button */}
-            <button
-              onClick={onOpenAddWork}
-              className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 active:scale-95 text-white font-bold text-xs py-2 px-2.5 rounded-xl shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer border border-blue-500/30"
-              title="Input data pekerjaan baru"
-            >
-              <Plus className="w-3.5 h-3.5 shrink-0" />
-              <span>Input Pekerjaan</span>
-            </button>
-
-            {/* Total Work Button */}
+          {/* Total Work Button on Mobile */}
+          <div className="pt-0.5">
             <button
               onClick={onOpenAllLogs}
-              className="bg-slate-50 active:scale-95 border border-slate-200 hover:border-orange-300 rounded-xl py-1 px-2.5 flex items-center justify-center space-x-1.5 shadow-xs cursor-pointer text-left"
+              className="w-full bg-slate-50 active:scale-95 border border-slate-200 hover:border-orange-300 rounded-xl py-2 px-3 flex items-center justify-center space-x-2 shadow-xs cursor-pointer text-left"
               title="Buka rekapitulasi pekerjaan"
             >
-              <div className="p-1 rounded-md bg-orange-100 text-orange-600 shrink-0">
-                <ClipboardList className="w-3.5 h-3.5" />
+              <div className="p-1.5 rounded-lg bg-orange-100 text-orange-600 shrink-0">
+                <ClipboardList className="w-4 h-4" />
               </div>
-              <div className="leading-tight">
-                <div className="text-[8.5px] text-slate-500 font-bold uppercase leading-none">
-                  TOTAL PEKERJAAN
-                </div>
-                <div className="font-mono font-black text-slate-900 text-xs leading-tight mt-0.5">
+              <div className="leading-tight flex items-center space-x-2">
+                <span className="text-[10px] text-slate-500 font-bold uppercase">
+                  TOTAL PEKERJAAN:
+                </span>
+                <span className="font-mono font-black text-slate-900 text-sm">
                   <span className="text-orange-600">{totalLogsCount}</span> Dicatat
-                </div>
+                </span>
               </div>
             </button>
           </div>
@@ -145,25 +132,13 @@ export default function Header({
             </div>
           </div>
 
-          {/* Right: Action Buttons, Total Work Badge & Clock & KAI */}
+          {/* Right: Total Work Badge & Clock & KAI */}
           <div className="flex items-center justify-end gap-3 flex-wrap shrink-0">
             
-            {/* Input Pekerjaan Button */}
-            <button
-              onClick={onOpenAddWork}
-              className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-md hover:shadow-lg shadow-blue-500/25 active:scale-95 transition-all flex items-center space-x-2 cursor-pointer shrink-0 border border-blue-500/30 group"
-              title="Input data pekerjaan / pemeliharaan teknis baru"
-            >
-              <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition">
-                <Plus className="w-3.5 h-3.5" />
-              </div>
-              <span className="tracking-wide">Input Pekerjaan</span>
-            </button>
-
             {/* Total Work Clickable Badge */}
             <button
               onClick={onOpenAllLogs}
-              className="bg-slate-50/90 hover:bg-orange-50/50 border border-slate-200/90 hover:border-orange-300 rounded-xl px-3.5 py-1.5 flex items-center space-x-2.5 shadow-xs hover:shadow-md transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+              className="bg-slate-50/90 hover:bg-orange-50/50 border border-slate-200/90 hover:border-orange-300 rounded-xl px-4 py-2 flex items-center space-x-2.5 shadow-xs hover:shadow-md transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
               title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
             >
               <div className="p-1.5 rounded-lg bg-orange-100/80 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all shadow-2xs">
