@@ -2190,7 +2190,7 @@ export default function SchematicViewer({
 
       </div>
 
-      {/* Main Canvas Viewport (White Mode) */}
+      {/* Main Canvas Viewport (White Mode) - Centered */}
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
@@ -2200,7 +2200,7 @@ export default function SchematicViewer({
           handleMouseUp();
           setHoveredLine(null);
         }}
-        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none ${
+        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center ${
           isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[720px]'
         }`}
       >
@@ -2337,17 +2337,17 @@ export default function SchematicViewer({
           </div>
         )}
 
-        {/* Viewport Content */}
+        {/* Viewport Content (Centered) */}
         <div
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
+            transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
           }}
-          className="w-full h-full min-w-[1300px] min-h-[580px] relative p-2"
+          className="relative flex items-center justify-center shrink-0 p-4"
         >
-          {/* Container tightly wrapping cropped schematic */}
-          <div className="relative inline-block w-[1400px] rounded-2xl overflow-hidden shadow-md border-2 border-slate-300 bg-white">
+          {/* Container tightly wrapping cropped schematic (Centered) */}
+          <div className="relative w-[1420px] rounded-2xl overflow-hidden shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
             
             {/* Cropped AutoCAD Master Image */}
             <img

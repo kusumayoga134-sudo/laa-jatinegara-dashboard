@@ -80,6 +80,15 @@ export default function App() {
             category: 'INPUT PEKERJAAN',
           })
         }
+        onOpenAllLogs={() =>
+          setSelectedLocation({
+            code: '',
+            title: 'Rekapitulasi Seluruh Riwayat Pekerjaan LAA',
+            km: 'Lintas Kramat / Manggarai — Jatinegara — Buaran — Cakung — Bekasi',
+            category: 'REKAPITULASI TOTAL PEKERJAAN',
+            isAllLogs: true,
+          })
+        }
       />
 
       {/* Main AutoCAD Map Workspace (White Mode) */}

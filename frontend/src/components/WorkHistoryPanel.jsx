@@ -14,6 +14,8 @@ import {
   ChevronRight,
   CalendarDays,
   HardHat,
+  Search,
+  ClipboardList,
 } from 'lucide-react';
 
 export default function WorkHistoryPanel({
@@ -24,6 +26,7 @@ export default function WorkHistoryPanel({
 }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState('ALL'); // 'ALL', '7D', '30D'
+  const [searchQuery, setSearchQuery] = useState('');
   
   // New Log Form State
   const [itemPekerjaan, setItemPekerjaan] = useState('PENGUKURAN_KETEBALAN_KAWAT');
@@ -55,6 +58,17 @@ export default function WorkHistoryPanel({
     if (filterPeriod === '7D') return codeMatch && daysDiff <= 7;
     if (filterPeriod === '30D') return codeMatch && daysDiff <= 30;
     return codeMatch;
+  });
+
+  const filteredLogs = matchingLogs.filter((log) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (log.targetCode && log.targetCode.toLowerCase().includes(q)) ||
+      (log.actionType && log.actionType.toLowerCase().includes(q)) ||
+      (log.technician && log.technician.toLowerCase().includes(q)) ||
+      (log.description && log.description.toLowerCase().includes(q))
+    );
   });
 
   const categories = [
@@ -128,8 +142,16 @@ export default function WorkHistoryPanel({
       {/* Drawer Header (White Mode) */}
       <div className="bg-gradient-to-r from-slate-50 to-white p-5 border-b border-slate-200 flex items-start justify-between relative">
         <div className="flex items-start space-x-3.5 relative z-10">
-          <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-md mt-0.5">
-            <Train className="w-5 h-5" />
+          <div className={`p-3 rounded-2xl text-white shadow-md mt-0.5 ${
+            locationData.isAllLogs
+              ? 'bg-gradient-to-br from-orange-500 to-amber-600'
+              : 'bg-blue-600'
+          }`}>
+            {locationData.isAllLogs ? (
+              <ClipboardList className="w-5 h-5" />
+            ) : (
+              <Train className="w-5 h-5" />
+            )}
           </div>
           <div>
             <div className="flex items-center space-x-2">
@@ -189,6 +211,36 @@ export default function WorkHistoryPanel({
           {showAddForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           <span>{showAddForm ? 'Tutup Form' : '+ Catat Pekerjaan'}</span>
         </button>
+      </div>
+
+      {/* Quick Search Bar */}
+      <div className="px-5 py-2.5 bg-white border-b border-slate-200">
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari lokasi/naspan, teknisi, atau uraian pekerjaan..."
+            className="w-full bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs pl-10 pr-8 py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <div className="text-[10.5px] text-slate-500 mt-1.5 px-1 flex items-center justify-between">
+            <span>Ditemukan <strong>{filteredLogs.length}</strong> catatan cocok</span>
+            <button onClick={() => setSearchQuery('')} className="text-blue-600 font-bold hover:underline">
+              Reset Pencarian
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Drawer Scroll Body */}
@@ -360,7 +412,7 @@ export default function WorkHistoryPanel({
             </span>
           </div>
 
-          {matchingLogs.length === 0 ? (
+          {filteredLogs.length === 0 ? (
             <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center text-xs text-slate-500 space-y-2 shadow-xs">
               <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
               <p className="font-bold text-slate-800 text-sm">Belum ada riwayat pekerjaan tercatat di lokasi ini.</p>
@@ -369,7 +421,7 @@ export default function WorkHistoryPanel({
               </p>
             </div>
           ) : (
-            matchingLogs.map((log) => {
+            filteredLogs.map((log) => {
               const dateObj = new Date(log.timestamp);
               const formattedDate = dateObj.toLocaleDateString('id-ID', {
                 weekday: 'short',
@@ -390,8 +442,8 @@ export default function WorkHistoryPanel({
                   {/* Left accent strip */}
                   <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-gradient-to-b from-blue-500 to-emerald-500 group-hover:w-2 transition-all" />
 
-                  {/* Header: Waktu & Status */}
-                  <div className="flex items-center justify-between text-xs pl-1.5">
+                  {/* Header: Lokasi, Waktu & Status */}
+                  <div className="flex items-center justify-between text-xs pl-1.5 flex-wrap gap-1">
                     <div className="flex items-center space-x-1.5 text-blue-700 font-mono font-bold text-xs">
                       <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                       <span>{formattedDate}</span>
@@ -399,10 +451,17 @@ export default function WorkHistoryPanel({
                       <span>{formattedTime} WIB</span>
                     </div>
 
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
-                      <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
-                      {log.status || 'SELESAI'}
-                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      {log.targetCode && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                          {log.targetCode}
+                        </span>
+                      )}
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
+                        <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
+                        {log.status || 'SELESAI'}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Item Pekerjaan */}
