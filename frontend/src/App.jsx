@@ -17,10 +17,12 @@ import {
   Wrench,
   ShieldAlert,
   HelpCircle,
-  RefreshCw,
   Train,
   CheckCircle2,
   AlertCircle,
+  Gauge,
+  Radio,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export default function App() {
@@ -37,7 +39,6 @@ export default function App() {
   const [alerts, setAlerts] = useState([]);
 
   // UI state
-  const [selectedStation, setSelectedStation] = useState(null);
   const [selectedStationModal, setSelectedStationModal] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -83,7 +84,7 @@ export default function App() {
     }
   };
 
-  // Background polling every 5 seconds for live telemetry
+  // Background polling every 5 seconds for live telemetry & switch state
   useEffect(() => {
     loadInitialData();
 
@@ -113,12 +114,10 @@ export default function App() {
       const res = await api.toggleSwitch(code, 'Dispatcher Pusdalopka LAA');
       showToast(res.message || `Sakelar ${code} berhasil diubah`, 'success');
       
-      // Update local state
       setSwitches((prev) =>
         prev.map((sw) => (sw.code === code ? res.data : sw))
       );
 
-      // Refresh stats & logs
       const [newStats, newLogs] = await Promise.all([
         api.getStats(),
         api.getLogs(),
@@ -147,7 +146,7 @@ export default function App() {
 
   // Add Log Handler
   const handleAddLog = async (logData) => {
-    const res = await api.createLog(logData);
+    await api.createLog(logData);
     showToast('Catatan pemeliharaan berhasil disimpan', 'success');
     const logsRes = await api.getLogs();
     if (logsRes.data) setLogs(logsRes.data);
@@ -155,36 +154,28 @@ export default function App() {
 
   // Acknowledge Alert Handler
   const handleAcknowledgeAlert = async (id) => {
-    const res = await api.acknowledgeAlert(id);
-    showToast('Alarm telah dikonfirmasi', 'info');
+    await api.acknowledgeAlert(id);
+    showToast('Alarm telah dikonfirmasi (Acknowledged)', 'info');
     const alertsRes = await api.getAlerts();
     if (alertsRes.data) setAlerts(alertsRes.data);
     const statsRes = await api.getStats();
     if (statsRes.data) setStats(statsRes.data);
   };
 
-  // Station Click on map
-  const handleSelectStation = (stationCode) => {
-    const found = stations.find((s) => s.code === stationCode);
-    if (found) {
-      setSelectedStationModal(found);
-    }
-  };
-
   const activeAlertsCount = alerts.filter((a) => !a.isAcknowledged).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
       
       {/* Toast Notification Banner */}
       {toastMessage && (
         <div
-          className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 text-xs font-semibold backdrop-blur-md animate-in slide-in-from-bottom duration-200 border ${
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 text-xs font-bold backdrop-blur-md animate-in slide-in-from-bottom duration-200 border ${
             toastMessage.type === 'error'
-              ? 'bg-red-950/90 text-red-200 border-red-700'
+              ? 'bg-red-950/90 text-red-200 border-red-700 shadow-red-950/50'
               : toastMessage.type === 'info'
-              ? 'bg-blue-950/90 text-blue-200 border-blue-700'
-              : 'bg-emerald-950/90 text-emerald-200 border-emerald-700'
+              ? 'bg-blue-950/90 text-blue-200 border-blue-700 shadow-blue-950/50'
+              : 'bg-emerald-950/90 text-emerald-200 border-emerald-700 shadow-emerald-950/50'
           }`}
         >
           {toastMessage.type === 'error' ? (
@@ -201,37 +192,61 @@ export default function App() {
         stats={stats}
         activeAlertsCount={activeAlertsCount}
         onOpenAlerts={() => setActiveTab('alerts')}
+        onRefresh={loadInitialData}
       />
 
-      {/* Station Quick Navigation Strip */}
-      <div className="bg-slate-900/50 border-b border-slate-800/80 px-4 py-2">
-        <div className="max-w-7xl mx-auto flex items-center space-x-2 overflow-x-auto text-xs py-1">
-          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] shrink-0 flex items-center mr-1">
-            <Train className="w-3.5 h-3.5 mr-1 text-blue-400" /> Lintasan Stasiun:
-          </span>
-          {stations.map((st) => (
-            <button
-              key={st.id}
-              onClick={() => setSelectedStationModal(st)}
-              className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 whitespace-nowrap transition cursor-pointer flex items-center space-x-1.5"
-            >
-              <span className="font-bold">{st.name}</span>
-              <span className="text-[10px] font-mono text-cyan-400">({st.km})</span>
-            </button>
-          ))}
+      {/* Quick Overview KPI Ticker Bar */}
+      <section className="bg-slate-900/60 border-b border-slate-800/80 px-4 py-2">
+        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-xs">
+          
+          {/* Station Quick Links */}
+          <div className="flex items-center space-x-1.5 overflow-x-auto w-full md:w-auto py-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center mr-1 shrink-0">
+              <Train className="w-3.5 h-3.5 mr-1 text-blue-400" /> Stasiun:
+            </span>
+            {stations.map((st) => (
+              <button
+                key={st.id}
+                onClick={() => setSelectedStationModal(st)}
+                className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/60 text-[11px] font-semibold whitespace-nowrap transition cursor-pointer flex items-center space-x-1"
+              >
+                <span>{st.name}</span>
+                <span className="font-mono text-cyan-300 text-[10px]">({st.km})</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Electrical System Quick Stats */}
+          <div className="hidden lg:flex items-center space-x-4 text-slate-400 text-xs shrink-0">
+            <div className="flex items-center space-x-1">
+              <span className="text-[10px] text-slate-400">PANJANG LINTAS:</span>
+              <span className="font-mono font-bold text-slate-200">16.4 KM</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center space-x-1">
+              <span className="text-[10px] text-slate-400">TOTAL DS:</span>
+              <span className="font-mono font-bold text-cyan-300">{switches.length} UNIT</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center space-x-1">
+              <span className="text-[10px] text-slate-400">GARDU TRAKSI:</span>
+              <span className="font-mono font-bold text-emerald-300">4 GTR</span>
+            </div>
+          </div>
+
         </div>
-      </div>
+      </section>
 
       {/* Navigation Tabs Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 sticky top-[73px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto py-2">
+      <nav className="bg-slate-900 border-b border-slate-800 sticky top-[67px] z-30 shadow-md">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+          <div className="flex space-x-1.5 overflow-x-auto py-2">
             
             <button
               onClick={() => setActiveTab('map')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'map'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -241,51 +256,51 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab('switches')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'switches'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Zap className="w-4 h-4" />
               <span>Matriks Sakelar (DS 1 - 20)</span>
-              <span className="px-1.5 py-0.2 rounded bg-slate-950/80 text-[10px] text-cyan-300">
+              <span className="px-1.5 py-0.2 rounded bg-slate-950/80 text-[10px] text-cyan-300 font-mono">
                 {switches.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('telemetry')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'telemetry'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Activity className="w-4 h-4" />
-              <span>Gardu Traksi</span>
+              <span>Gardu Traksi (Substations)</span>
             </button>
 
             <button
               onClick={() => setActiveTab('assets')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'assets'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span>Aset (AJ/AS/FRP)</span>
-              <span className="px-1.5 py-0.2 rounded bg-slate-950/80 text-[10px] text-slate-300">
+              <span>Inventaris Aset (AJ/AS/FRP)</span>
+              <span className="px-1.5 py-0.2 rounded bg-slate-950/80 text-[10px] text-slate-300 font-mono">
                 {assets.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('logs')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'logs'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -295,9 +310,9 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab('alerts')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'alerts'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -312,22 +327,22 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab('legend')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer ${
                 activeTab === 'legend'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               <HelpCircle className="w-4 h-4" />
-              <span>Keterangan & Simbol</span>
+              <span>Keterangan & Simbol LAA</span>
             </button>
 
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
         
         {activeTab === 'map' && (
           <div className="space-y-6">
@@ -336,7 +351,11 @@ export default function App() {
               stations={stations}
               assets={assets}
               onToggleSwitch={handleToggleSwitch}
-              onSelectStation={handleSelectStation}
+              onToggleInterlock={handleToggleInterlock}
+              onSelectStation={(code) => {
+                const found = stations.find((s) => s.code === code);
+                if (found) setSelectedStationModal(found);
+              }}
             />
             <LegendGuide />
           </div>
@@ -385,22 +404,20 @@ export default function App() {
         <StationDetailModal
           station={selectedStationModal}
           onClose={() => setSelectedStationModal(null)}
-          onSelectSwitch={(sw) => {
-            setActiveTab('switches');
-          }}
+          onSelectSwitch={() => setActiveTab('switches')}
         />
       )}
 
       {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-4 px-6 text-xs text-slate-500 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="bg-slate-900 border-t border-slate-800 py-4 px-6 text-xs text-slate-400 mt-auto">
+        <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-slate-400">UPT RESOR LAA 1.9 JATINEGARA</span>
+            <span className="font-extrabold text-white">UPT RESOR LAA 1.9 JATINEGARA</span>
             <span>•</span>
-            <span>Sistem Monitoring Listrik Aliran Atas 1500 V DC</span>
+            <span>Monitoring & Kontrol Listrik Aliran Atas 1500 V DC</span>
           </div>
           <div className="text-[11px] text-slate-500">
-            KAI (Kereta Api Indonesia) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}
+            PT Kereta Api Indonesia (Persero) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}
           </div>
         </div>
       </footer>

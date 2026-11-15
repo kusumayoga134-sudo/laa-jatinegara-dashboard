@@ -24,8 +24,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun persimpangan lintasan lingkar Jakarta menuju Kramat dan Jatinegara.',
       status: 'NORMAL',
-      xPos: 120,
-      yPos: 380,
+      xPos: 11.0,
+      yPos: 41.5,
     },
     {
       code: 'JNG',
@@ -36,8 +36,8 @@ async function main() {
       platforms: 4,
       description: 'Stasiun sentral UPT Resor LAA 1.9 dengan 8 jalur, kompleks wesel dan sistem suplai listrik traksi utama.',
       status: 'NORMAL',
-      xPos: 360,
-      yPos: 350,
+      xPos: 35.0,
+      yPos: 32.0,
     },
     {
       code: 'KLD',
@@ -48,8 +48,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun lintas hilir-hulu petak Jatinegara - Klender dengan sectioning gardu traksi.',
       status: 'NORMAL',
-      xPos: 680,
-      yPos: 460,
+      xPos: 71.5,
+      yPos: 45.0,
     },
     {
       code: 'BUA',
@@ -60,8 +60,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun perantara petak Klender - Klender Baru dilengkapi Air Joint dan Air Section.',
       status: 'NORMAL',
-      xPos: 860,
-      yPos: 460,
+      xPos: 86.5,
+      yPos: 45.0,
     },
     {
       code: 'KLDB',
@@ -72,8 +72,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun komuter petak Buaran - Cakung dengan DS 9 & DS 10 pembatas seksi.',
       status: 'NORMAL',
-      xPos: 900,
-      yPos: 650,
+      xPos: 89.0,
+      yPos: 62.5,
     },
     {
       code: 'CUK',
@@ -84,8 +84,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun transit utama dengan jalur dwiganda (DDT) dan DS 11-14 proteksi petak Cakung - Kranji.',
       status: 'NORMAL',
-      xPos: 760,
-      yPos: 650,
+      xPos: 76.5,
+      yPos: 60.0,
     },
     {
       code: 'KRI',
@@ -96,8 +96,8 @@ async function main() {
       platforms: 2,
       description: 'Stasiun gerbang perbatasan DKI Jakarta - Jawa Barat lintasan KRL Commuter Line.',
       status: 'NORMAL',
-      xPos: 560,
-      yPos: 650,
+      xPos: 58.5,
+      yPos: 60.5,
     },
     {
       code: 'BKS',
@@ -108,8 +108,8 @@ async function main() {
       platforms: 4,
       description: 'Stasiun terminus dan emplasemen besar LAA 1.9 dengan pemutus beban DS 15-20.',
       status: 'NORMAL',
-      xPos: 320,
-      yPos: 650,
+      xPos: 33.5,
+      yPos: 58.5,
     },
   ];
 
@@ -119,7 +119,7 @@ async function main() {
     createdStations[st.code] = created;
   }
 
-  // 2. Seed Disconnecting Switches (DS 1 - DS 20)
+  // 2. Seed Disconnecting Switches (DS 1 - DS 20) with precise percentage coordinates on original schematic
   const switchesData = [
     {
       code: 'DS 1',
@@ -134,8 +134,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 29.2,
       status: 'NORMAL',
-      mapCoordX: 180,
-      mapCoordY: 460,
+      mapCoordX: 18.0,
+      mapCoordY: 46.8,
     },
     {
       code: 'DS 2',
@@ -150,8 +150,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 29.5,
       status: 'NORMAL',
-      mapCoordX: 180,
-      mapCoordY: 510,
+      mapCoordX: 18.0,
+      mapCoordY: 51.8,
     },
     {
       code: 'DS 3',
@@ -166,8 +166,8 @@ async function main() {
       currentLoad: 480.0,
       temperature: 37.8,
       status: 'NORMAL',
-      mapCoordX: 250,
-      mapCoordY: 460,
+      mapCoordX: 24.2,
+      mapCoordY: 46.8,
     },
     {
       code: 'DS 4',
@@ -182,8 +182,8 @@ async function main() {
       currentLoad: 510.5,
       temperature: 38.4,
       status: 'NORMAL',
-      mapCoordX: 250,
-      mapCoordY: 510,
+      mapCoordX: 24.2,
+      mapCoordY: 51.8,
     },
     {
       code: 'DS 5',
@@ -198,8 +198,8 @@ async function main() {
       currentLoad: 620.0,
       temperature: 39.1,
       status: 'NORMAL',
-      mapCoordX: 470,
-      mapCoordY: 460,
+      mapCoordX: 45.8,
+      mapCoordY: 46.5,
     },
     {
       code: 'DS 6',
@@ -214,8 +214,8 @@ async function main() {
       currentLoad: 540.2,
       temperature: 38.0,
       status: 'NORMAL',
-      mapCoordX: 470,
-      mapCoordY: 510,
+      mapCoordX: 45.8,
+      mapCoordY: 51.8,
     },
     {
       code: 'DS 7',
@@ -230,8 +230,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 30.1,
       status: 'NORMAL',
-      mapCoordX: 610,
-      mapCoordY: 460,
+      mapCoordX: 59.5,
+      mapCoordY: 46.8,
     },
     {
       code: 'DS 8',
@@ -246,8 +246,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 30.4,
       status: 'NORMAL',
-      mapCoordX: 610,
-      mapCoordY: 510,
+      mapCoordX: 59.5,
+      mapCoordY: 51.8,
     },
     {
       code: 'DS 9',
@@ -262,8 +262,8 @@ async function main() {
       currentLoad: 410.2,
       temperature: 36.9,
       status: 'NORMAL',
-      mapCoordX: 920,
-      mapCoordY: 460,
+      mapCoordX: 90.5,
+      mapCoordY: 46.8,
     },
     {
       code: 'DS 10',
@@ -278,8 +278,8 @@ async function main() {
       currentLoad: 435.0,
       temperature: 37.2,
       status: 'NORMAL',
-      mapCoordX: 920,
-      mapCoordY: 510,
+      mapCoordX: 90.5,
+      mapCoordY: 51.8,
     },
     {
       code: 'DS 11',
@@ -294,8 +294,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 28.7,
       status: 'NORMAL',
-      mapCoordX: 860,
-      mapCoordY: 670,
+      mapCoordX: 84.5,
+      mapCoordY: 68.5,
     },
     {
       code: 'DS 12',
@@ -310,8 +310,8 @@ async function main() {
       currentLoad: 0.0,
       temperature: 29.0,
       status: 'NORMAL',
-      mapCoordX: 860,
-      mapCoordY: 625,
+      mapCoordX: 84.5,
+      mapCoordY: 63.5,
     },
     {
       code: 'DS 13',
@@ -326,8 +326,8 @@ async function main() {
       currentLoad: 530.0,
       temperature: 38.6,
       status: 'NORMAL',
-      mapCoordX: 720,
-      mapCoordY: 670,
+      mapCoordX: 71.0,
+      mapCoordY: 68.5,
     },
     {
       code: 'DS 14',
@@ -342,8 +342,8 @@ async function main() {
       currentLoad: 490.5,
       temperature: 38.1,
       status: 'NORMAL',
-      mapCoordX: 720,
-      mapCoordY: 625,
+      mapCoordX: 71.0,
+      mapCoordY: 63.5,
     },
     {
       code: 'DS 15',
@@ -358,8 +358,8 @@ async function main() {
       currentLoad: 610.0,
       temperature: 39.5,
       status: 'NORMAL',
-      mapCoordX: 430,
-      mapCoordY: 670,
+      mapCoordX: 43.5,
+      mapCoordY: 68.5,
     },
     {
       code: 'DS 16',
@@ -374,8 +374,8 @@ async function main() {
       currentLoad: 580.4,
       temperature: 39.0,
       status: 'NORMAL',
-      mapCoordX: 430,
-      mapCoordY: 625,
+      mapCoordX: 43.5,
+      mapCoordY: 63.5,
     },
     {
       code: 'DS 17',
@@ -390,8 +390,8 @@ async function main() {
       currentLoad: 310.0,
       temperature: 35.4,
       status: 'NORMAL',
-      mapCoordX: 380,
-      mapCoordY: 720,
+      mapCoordX: 39.0,
+      mapCoordY: 74.0,
     },
     {
       code: 'DS 18',
@@ -406,8 +406,8 @@ async function main() {
       currentLoad: 280.0,
       temperature: 34.8,
       status: 'NORMAL',
-      mapCoordX: 350,
-      mapCoordY: 720,
+      mapCoordX: 36.0,
+      mapCoordY: 74.0,
     },
     {
       code: 'DS 19',
@@ -422,8 +422,8 @@ async function main() {
       currentLoad: 470.0,
       temperature: 37.9,
       status: 'NORMAL',
-      mapCoordX: 200,
-      mapCoordY: 670,
+      mapCoordX: 21.0,
+      mapCoordY: 68.5,
     },
     {
       code: 'DS 20',
@@ -438,8 +438,8 @@ async function main() {
       currentLoad: 520.0,
       temperature: 38.2,
       status: 'NORMAL',
-      mapCoordX: 200,
-      mapCoordY: 625,
+      mapCoordX: 21.0,
+      mapCoordY: 63.5,
     },
   ];
 
@@ -485,6 +485,8 @@ async function main() {
     { type: 'AIR_JOINT', code: 'AJ KM 25+000', name: 'Air Joint KM 25+000', locationKm: 'KM 25+000', stationId: createdStations['BKS'].id, condition: 'BAIK', notes: 'Menjelang emplasemen St. Bekasi.' },
 
     // Air Sections (AS)
+    { type: 'AIR_SECTION', code: 'AS KM 1+880', name: 'Air Section KM 1+880', locationKm: 'KM 1+880', stationId: createdStations['PND'].id, condition: 'BAIK', notes: 'Arah percabangan Kramat.' },
+    { type: 'AIR_SECTION', code: 'AS KM 2+000', name: 'Air Section KM 2+000', locationKm: 'KM 2+000', stationId: createdStations['PND'].id, condition: 'BAIK', notes: 'Arah percabangan Kramat.' },
     { type: 'AIR_SECTION', code: 'AS KM 11+200', name: 'Air Section KM 11+200', locationKm: 'KM 11+200', stationId: createdStations['JNG'].id, condition: 'BAIK', notes: 'Pemisah isolasi udara fasa traksi Manggarai-Jatinegara.' },
     { type: 'AIR_SECTION', code: 'AS KM 11+900', name: 'Air Section KM 11+900', locationKm: 'KM 11+900', stationId: createdStations['JNG'].id, condition: 'BAIK', notes: 'Isolator busur listrik aman.' },
     { type: 'AIR_SECTION', code: 'AS KM 12+500', name: 'Air Section KM 12+500', locationKm: 'KM 12+500', stationId: createdStations['JNG'].id, condition: 'BAIK', notes: 'Pemisah seksi stasiun timur.' },

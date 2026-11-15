@@ -1,36 +1,55 @@
-import React, { useState, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Eye, Layers, Zap, Info, ShieldCheck, Lock, Unlock } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Zap,
+  Lock,
+  Unlock,
+  Layers,
+  Info,
+  Maximize2,
+  CheckCircle2,
+  AlertTriangle,
+  MapPin,
+  Crosshair,
+} from 'lucide-react';
 
 export default function SchematicViewer({
   switches = [],
   stations = [],
   assets = [],
-  onSelectSwitch,
   onToggleSwitch,
+  onToggleInterlock,
   onSelectStation,
 }) {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [viewMode, setViewMode] = useState('svg'); // 'svg' (vector dynamic) or 'original' (high-res official print)
+  const [viewMode, setViewMode] = useState('blueprint'); // 'blueprint' (official PDF map) or 'vector' (cyber SCADA vector)
   
-  // Visibility filters
+  // Layer Filters
   const [showSwitches, setShowSwitches] = useState(true);
   const [showStations, setShowStations] = useState(true);
   const [showAssets, setShowAssets] = useState(true);
+  
+  // Selected switch popover
   const [selectedPin, setSelectedPin] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const containerRef = useRef(null);
+  const viewerWrapperRef = useRef(null);
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.6));
+  // Zoom handlers
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3.5));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => {
     setZoom(1);
     setPosition({ x: 0, y: 0 });
-    setSelectedPin(null);
   };
 
+  // Drag handlers
   const handleMouseDown = (e) => {
     if (e.target.closest('button') || e.target.closest('.interactive-pin')) return;
     setIsDragging(true);
@@ -47,188 +66,295 @@ export default function SchematicViewer({
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Positions mapped onto the 1200x650 SVG canvas
-  const stationCoords = {
-    PND: { x: 120, y: 180, name: 'ST. PONDOK JATI', km: 'KM 10+400' },
-    JNG: { x: 340, y: 150, name: 'ST. JATINEGARA', km: 'KM 11+750' },
-    KLD: { x: 670, y: 220, name: 'ST. KLENDER', km: 'KM 15+027' },
-    BUA: { x: 880, y: 220, name: 'ST. BUARAN', km: 'KM 17+500' },
-    KLDB: { x: 920, y: 460, name: 'ST. KLENDER BARU', km: 'KM 19+546' },
-    CUK: { x: 740, y: 460, name: 'ST. CAKUNG', km: 'KM 20+943' },
-    KRI: { x: 530, y: 460, name: 'ST. KRANJI', km: 'KM 23+987' },
-    BKS: { x: 260, y: 460, name: 'ST. BEKASI', km: 'KM 26+403' },
+  // Wheel zoom
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 0.15 : -0.15;
+    setZoom((prev) => Math.min(Math.max(prev + zoomFactor, 0.5), 3.5));
+  };
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
+
+  // Fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!viewerWrapperRef.current) return;
+    if (!document.fullscreenElement) {
+      viewerWrapperRef.current.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl relative flex flex-col">
-      
-      {/* Control Bar */}
-      <div className="bg-slate-950/90 border-b border-slate-800 p-3 flex flex-wrap items-center justify-between gap-3 z-10">
+    <div
+      ref={viewerWrapperRef}
+      className={`bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative flex flex-col transition-all ${
+        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full'
+      }`}
+    >
+      {/* Top Toolbar */}
+      <div className="bg-slate-950/95 border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
         
-        {/* View Mode Toggle */}
+        {/* Mode Selector */}
         <div className="flex items-center space-x-2">
-          <div className="bg-slate-800 p-1 rounded-lg flex space-x-1 border border-slate-700">
+          <div className="bg-slate-900 p-1 rounded-xl flex space-x-1 border border-slate-800">
             <button
-              onClick={() => setViewMode('svg')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                viewMode === 'svg'
-                  ? 'bg-blue-600 text-white shadow'
+              onClick={() => setViewMode('blueprint')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ${
+                viewMode === 'blueprint'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              ⚡ Skematik Vektor Dinamis
+              <Layers className="w-3.5 h-3.5" />
+              <span>Peta Cetak Resmi (Resolusi Tinggi)</span>
             </button>
+
             <button
-              onClick={() => setViewMode('original')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                viewMode === 'original'
-                  ? 'bg-blue-600 text-white shadow'
+              onClick={() => setViewMode('vector')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ${
+                viewMode === 'vector'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              📄 Dokumen Cetak Asli (High-Res)
+              <Zap className="w-3.5 h-3.5" />
+              <span>SCADA Vektor Interaktif</span>
             </button>
           </div>
 
-          <span className="text-xs text-slate-400 hidden sm:inline">
-            | Geser & Zoom untuk melihat rincian jalur LAA
+          <span className="text-[11px] text-slate-400 hidden xl:inline">
+            • Klik sakelar pada peta untuk membuka/menutup beban listrik
           </span>
         </div>
 
-        {/* Layer Toggles & Zoom Controls */}
+        {/* View Controls & Filters */}
         <div className="flex items-center space-x-2">
-          {viewMode === 'svg' && (
-            <div className="hidden md:flex items-center space-x-2 mr-2">
-              <label className="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">
-                <input
-                  type="checkbox"
-                  checked={showSwitches}
-                  onChange={(e) => setShowSwitches(e.target.checked)}
-                  className="rounded text-blue-500 focus:ring-0"
-                />
-                <span>Sakelar (DS)</span>
-              </label>
+          
+          {/* Layer toggles */}
+          <div className="hidden md:flex items-center space-x-1.5 mr-2">
+            <button
+              onClick={() => setShowSwitches(!showSwitches)}
+              className={`px-2.5 py-1 text-xs rounded-lg border transition flex items-center space-x-1 cursor-pointer ${
+                showSwitches
+                  ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60 font-semibold'
+                  : 'bg-slate-900 text-slate-500 border-slate-800'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${showSwitches ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+              <span>Pin DS ({switches.length})</span>
+            </button>
 
-              <label className="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">
-                <input
-                  type="checkbox"
-                  checked={showStations}
-                  onChange={(e) => setShowStations(e.target.checked)}
-                  className="rounded text-blue-500 focus:ring-0"
-                />
-                <span>Stasiun</span>
-              </label>
+            <button
+              onClick={() => setShowStations(!showStations)}
+              className={`px-2.5 py-1 text-xs rounded-lg border transition flex items-center space-x-1 cursor-pointer ${
+                showStations
+                  ? 'bg-blue-950/80 text-blue-300 border-blue-700/60 font-semibold'
+                  : 'bg-slate-900 text-slate-500 border-slate-800'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${showStations ? 'bg-blue-400' : 'bg-slate-600'}`} />
+              <span>Stasiun ({stations.length})</span>
+            </button>
+          </div>
 
-              <label className="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">
-                <input
-                  type="checkbox"
-                  checked={showAssets}
-                  onChange={(e) => setShowAssets(e.target.checked)}
-                  className="rounded text-blue-500 focus:ring-0"
-                />
-                <span>AJ / AS / FRP</span>
-              </label>
-            </div>
-          )}
-
-          {/* Zoom Buttons */}
-          <div className="flex items-center space-x-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
+          {/* Zoom controls */}
+          <div className="flex items-center space-x-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
             <button
               onClick={handleZoomOut}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition"
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"
               title="Perkecil (-)"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono font-semibold px-2 text-slate-300">
+
+            <span className="text-xs font-mono font-bold px-2 text-cyan-300 min-w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
+
             <button
               onClick={handleZoomIn}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition"
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"
               title="Perbesar (+)"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
+
             <button
               onClick={handleResetZoom}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition"
-              title="Reset Tampilan"
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"
+              title="Reset Zoom (100%)"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
+
+            <button
+              onClick={toggleFullscreen}
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"
+              title="Layar Penuh"
+            >
+              <Maximize2 className="w-4 h-4" />
+            </button>
           </div>
+
         </div>
 
       </div>
 
-      {/* Canvas Viewport */}
+      {/* Main Canvas Area */}
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="w-full h-[580px] overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing relative select-none"
+        className={`w-full overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing relative select-none ${
+          isFullscreen ? 'h-[calc(100vh-60px)]' : 'h-[640px]'
+        }`}
       >
+        {/* Help Overlay Hint */}
+        <div className="absolute bottom-3 left-3 z-20 pointer-events-none bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg text-[10px] text-slate-400 backdrop-blur-sm flex items-center space-x-2">
+          <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Tahan & Geser mouse untuk menggeser peta • Scroll roda mouse untuk Zoom</span>
+        </div>
+
+        {/* Legend Box Preview on Bottom Right */}
+        <div className="absolute bottom-3 right-3 z-20 bg-slate-950/90 border border-slate-800 p-2.5 rounded-xl text-[10px] text-slate-300 backdrop-blur-md hidden sm:flex items-center space-x-3">
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500 animate-pulse" />
+            <span className="font-semibold text-emerald-300">NC (Tertutup / Alir)</span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500" />
+            <span className="font-semibold text-amber-300">NO (Terbuka / Putus)</span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <Lock className="w-3 h-3 text-purple-400" />
+            <span className="text-purple-300 font-semibold">Locked</span>
+          </div>
+        </div>
+
+        {/* Viewport Content */}
         <div
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-            transformOrigin: 'top left',
-            transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+            transformOrigin: '0 0',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
           }}
-          className="w-full h-full min-w-[1200px] min-h-[650px] relative"
+          className="w-full h-full min-w-[1300px] min-h-[750px] relative"
         >
-          {viewMode === 'original' ? (
-            /* High-Res Original Document with live overlay pins */
-            <div className="relative w-[1300px] h-auto p-4">
+          {viewMode === 'blueprint' ? (
+            /* ========================================================
+               MODE 1: OFFICIAL HIGH-RES BLUEPRINT WITH INTERACTIVE PINS
+               ======================================================== */
+            <div className="relative inline-block w-[1400px] p-4">
               <img
                 src="/schematic-map-web.png"
-                alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara Asli"
-                className="w-full h-auto rounded border border-slate-700 shadow-2xl"
+                alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara"
+                className="w-full h-auto rounded-xl shadow-2xl border border-slate-700 bg-white"
+                draggable={false}
               />
-              
-              {/* Overlay Interactive Switch Hotspots on Original PDF */}
-              <div className="absolute inset-0 pointer-events-auto">
-                {switches.map((sw) => {
-                  const isClosed = sw.currentState === 'NC';
-                  return (
-                    <button
-                      key={sw.id}
-                      onClick={() => setSelectedPin(sw)}
-                      title={`${sw.code} - ${sw.feedSection} [${sw.currentState}]`}
-                      style={{
-                        left: `${(sw.mapCoordX / 1150) * 100}%`,
-                        top: `${(sw.mapCoordY / 850) * 100}%`,
-                      }}
-                      className={`interactive-pin absolute -translate-x-1/2 -translate-y-1/2 p-1 rounded-full shadow-lg border-2 transition-all cursor-pointer ${
+
+              {/* Station Clickable Hotspots */}
+              {showStations && stations.map((st) => (
+                <button
+                  key={st.id}
+                  onClick={() => onSelectStation && onSelectStation(st.code)}
+                  title={`Klik untuk melihat detail ${st.name} (${st.km})`}
+                  style={{
+                    left: `${st.xPos}%`,
+                    top: `${st.yPos}%`,
+                  }}
+                  className="interactive-pin absolute -translate-x-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-blue-900/90 hover:bg-blue-700 text-white text-[10px] font-bold border border-blue-400/80 shadow-lg shadow-blue-950/60 transition cursor-pointer backdrop-blur-sm"
+                >
+                  <div className="flex items-center space-x-1">
+                    <MapPin className="w-3 h-3 text-cyan-300" />
+                    <span>{st.name}</span>
+                  </div>
+                </button>
+              ))}
+
+              {/* Disconnecting Switch Pins (DS 1 - DS 20) */}
+              {showSwitches && switches.map((sw) => {
+                const isClosed = sw.currentState === 'NC';
+                const isLocked = sw.isInterlocked;
+                const isSelected = selectedPin?.code === sw.code;
+
+                return (
+                  <button
+                    key={sw.id}
+                    onClick={() => setSelectedPin(sw)}
+                    title={`${sw.code} [${sw.currentState}] - ${sw.feedSection}`}
+                    style={{
+                      left: `${sw.mapCoordX}%`,
+                      top: `${sw.mapCoordY}%`,
+                    }}
+                    className={`interactive-pin absolute -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-full shadow-2xl transition-all cursor-pointer border-2 z-10 ${
+                      isSelected
+                        ? 'ring-4 ring-cyan-400 scale-125'
+                        : 'hover:scale-115'
+                    } ${
+                      isClosed
+                        ? 'bg-emerald-500 border-white text-white shadow-emerald-500/80'
+                        : 'bg-amber-500 border-slate-900 text-slate-950 shadow-amber-500/80'
+                    }`}
+                  >
+                    <div className="relative flex items-center justify-center">
+                      {isClosed ? (
+                        <Zap className="w-3.5 h-3.5 fill-current" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-full border border-current" />
+                      )}
+                      {isLocked && (
+                        <div className="absolute -top-2 -right-2 bg-purple-600 rounded-full p-0.5 border border-white">
+                          <Lock className="w-2 h-2 text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Code Tag badge */}
+                    <span
+                      className={`absolute -bottom-5 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold whitespace-nowrap shadow-md border ${
                         isClosed
-                          ? 'bg-emerald-500 border-white text-white shadow-emerald-500/50 animate-pulse'
-                          : 'bg-amber-500 border-slate-900 text-slate-950 shadow-amber-500/40'
+                          ? 'bg-emerald-950 text-emerald-200 border-emerald-600'
+                          : 'bg-amber-950 text-amber-200 border-amber-600'
                       }`}
                     >
-                      <Zap className="w-3.5 h-3.5" />
-                    </button>
-                  );
-                })}
-              </div>
+                      {sw.code}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           ) : (
-            /* Interactive Vector Dynamic SCADA SVG */
+            /* ========================================================
+               MODE 2: SCADA MODERN VECTOR SVG
+               ======================================================== */
             <svg
-              viewBox="0 0 1200 650"
+              viewBox="0 0 1400 750"
               className="w-full h-full"
-              style={{ backgroundColor: '#090d16' }}
+              style={{ backgroundColor: '#060911' }}
             >
               <defs>
-                {/* Grid Pattern */}
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" strokeWidth="0.5" strokeOpacity="0.4" />
+                <pattern id="scadaGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" strokeWidth="0.5" strokeOpacity="0.5" />
                 </pattern>
-
-                {/* Glow Filter for Energized Tracks */}
-                <filter id="energizedGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
+                <filter id="neonGreen" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="neonCyan" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
@@ -236,160 +362,153 @@ export default function SchematicViewer({
                 </filter>
               </defs>
 
-              {/* Background Grid */}
-              <rect width="1200" height="650" fill="url(#grid)" />
+              <rect width="1400" height="750" fill="url(#scadaGrid)" />
 
-              {/* Corridor Direction Arrows */}
-              <g fill="#64748b" fontSize="11" fontFamily="sans-serif" fontWeight="bold">
-                <text x="30" y="165">◀ DARI KRAMAT</text>
-                <text x="30" y="245">◀ DARI MANGGARAI</text>
-                <text x="30" y="560">◀ MENUJU BEKASI TIMUR</text>
-                <text x="1100" y="340">KE BEKASI ▶</text>
+              {/* Title Header Banner inside Vector */}
+              <g transform="translate(40, 30)">
+                <rect width="1320" height="65" rx="8" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+                <text x="30" y="32" fill="#f8fafc" fontSize="16" fontWeight="bold" fontFamily="sans-serif">
+                  PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA
+                </text>
+                <text x="30" y="50" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">
+                  Sistem Listrik Aliran Atas (Catenary 1500 V DC) • DAOP 1 JAKARTA
+                </text>
+                <text x="1290" y="40" fill="#38bdf8" fontSize="12" fontWeight="bold" textAnchor="end">
+                  PT KERETA API INDONESIA & DANANTARA
+                </text>
               </g>
 
-              {/* Corridor Background Tracks & Catenary Wire Lines */}
-              {/* TOP CORRIDOR: Kramat / Manggarai -> Jatinegara -> Klender -> Buaran */}
-              
+              {/* Corridor Guide Arrows */}
+              <g fill="#64748b" fontSize="11" fontFamily="sans-serif" fontWeight="bold">
+                <text x="50" y="195">◀ MENUJU KRAMAT</text>
+                <text x="50" y="275">◀ MENUJU MANGGARAI</text>
+                <text x="50" y="660">◀ MENUJU BEKASI TIMUR</text>
+                <text x="1300" y="380" textAnchor="end">MENUJU BEKASI ▶</text>
+              </g>
+
+              {/* TOP TRACKS: Kramat/Manggarai -> Jatinegara -> Klender -> Buaran */}
               {/* Kramat Branch line */}
-              <path d="M 60 160 L 220 160 L 300 170" fill="none" stroke="#334155" strokeWidth="4" />
-              <path d="M 60 160 L 220 160 L 300 170" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="6,2" />
+              <path d="M 80 190 L 260 190 L 340 200" fill="none" stroke="#334155" strokeWidth="4" />
+              <path d="M 80 190 L 260 190 L 340 200" fill="none" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6,3" />
 
               {/* Manggarai Inbound Tracks */}
-              <path d="M 60 240 L 220 240 L 320 230" fill="none" stroke="#334155" strokeWidth="4" />
-              <path d="M 60 240 L 220 240 L 320 230" fill="none" stroke="#06b6d4" strokeWidth="2" />
+              <path d="M 80 270 L 260 270 L 360 250" fill="none" stroke="#334155" strokeWidth="4" />
+              <path d="M 80 270 L 260 270 L 360 250" fill="none" stroke="#06b6d4" strokeWidth="2.5" />
 
-              {/* Stasiun Jatinegara Multi-Track Complex (Jalur 1 - 8) */}
+              {/* Jatinegara Emplasemen Tracks (Jalur 1 - 8) */}
               <g stroke="#334155" strokeWidth="3" fill="none">
-                <path d="M 280 170 L 480 170" /> {/* Jalur 8 */}
-                <path d="M 280 190 L 480 190" /> {/* Jalur 7 */}
-                <path d="M 280 210 L 480 210" /> {/* Jalur 6 */}
-                <path d="M 280 230 L 480 230" /> {/* Jalur 5 */}
-                <path d="M 280 250 L 480 250" /> {/* Jalur 4 */}
-                <path d="M 280 270 L 480 270" /> {/* Jalur 3 */}
-                <path d="M 280 290 L 480 290" /> {/* Jalur 2 */}
-                <path d="M 280 310 L 480 310" /> {/* Jalur 1 */}
+                <path d="M 320 180 L 580 180" />
+                <path d="M 320 200 L 580 200" />
+                <path d="M 320 220 L 580 220" />
+                <path d="M 320 240 L 580 240" />
+                <path d="M 320 260 L 580 260" />
+                <path d="M 320 280 L 580 280" />
+                <path d="M 320 300 L 580 300" />
+                <path d="M 320 320 L 580 320" />
               </g>
 
-              {/* Jatinegara Platform Indicator Bars */}
-              <rect x="330" y="175" width="100" height="8" rx="2" fill="#475569" opacity="0.8" />
-              <text x="380" y="182" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 4</text>
+              {/* Jatinegara Platforms */}
+              <rect x="380" y="185" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
+              <text x="445" y="192" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 4</text>
 
-              <rect x="330" y="215" width="100" height="8" rx="2" fill="#475569" opacity="0.8" />
-              <text x="380" y="222" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 3</text>
+              <rect x="380" y="225" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
+              <text x="445" y="232" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 3</text>
 
-              <rect x="330" y="255" width="100" height="8" rx="2" fill="#475569" opacity="0.8" />
-              <text x="380" y="262" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 2</text>
+              <rect x="380" y="265" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
+              <text x="445" y="272" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 2</text>
 
-              <rect x="330" y="295" width="100" height="8" rx="2" fill="#475569" opacity="0.8" />
-              <text x="380" y="302" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 1</text>
+              <rect x="380" y="305" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
+              <text x="445" y="312" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 1</text>
 
-              {/* Main Line: Jatinegara to Klender & Buaran */}
-              {/* Hilir (HU) Line */}
-              <path
-                d="M 480 290 L 620 270 L 1050 270"
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="3.5"
-                filter="url(#energizedGlow)"
-              />
-              <text x="780" y="262" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) — 1500V DC</text>
-
+              {/* Top Main Catenary Lines: Hulu & Hilir */}
               {/* Hulu (HI) Line */}
               <path
-                d="M 480 270 L 620 250 L 1050 250"
+                d="M 580 280 L 720 260 L 1220 260"
                 fill="none"
                 stroke="#06b6d4"
-                strokeWidth="3.5"
-                filter="url(#energizedGlow)"
+                strokeWidth="4"
+                filter="url(#neonCyan)"
               />
-              <text x="780" y="244" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) — 1500V DC</text>
+              <text x="890" y="252" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) — 1500 V DC</text>
 
-              {/* Loop track around Klender Baru to Cakung (Looping Downwards) */}
+              {/* Hilir (HU) Line */}
               <path
-                d="M 1050 250 C 1120 250, 1120 330, 1050 350 L 1000 380 L 1050 490"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="3"
-              />
-              <path
-                d="M 1050 270 C 1140 270, 1140 330, 1080 370 L 1020 410 L 1050 510"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="3"
-              />
-
-              {/* BOTTOM CORRIDOR: Klender Baru -> Cakung -> Kranji -> Bekasi */}
-              {/* Hilir Line Bottom */}
-              <path
-                d="M 1050 490 L 150 490"
+                d="M 580 300 L 720 280 L 1220 280"
                 fill="none"
                 stroke="#10b981"
-                strokeWidth="3.5"
-                filter="url(#energizedGlow)"
+                strokeWidth="4"
+                filter="url(#neonGreen)"
               />
-              <text x="560" y="482" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) ARAH BEKASI</text>
+              <text x="890" y="296" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) — 1500 V DC</text>
+
+              {/* Curve connecting upper corridor to lower corridor */}
+              <path
+                d="M 1220 260 C 1300 260, 1300 360, 1220 400 L 1150 440 L 1220 540"
+                fill="none"
+                stroke="#334155"
+                strokeWidth="4"
+              />
+              <path
+                d="M 1220 280 C 1320 280, 1320 360, 1240 420 L 1170 460 L 1220 560"
+                fill="none"
+                stroke="#334155"
+                strokeWidth="4"
+              />
+
+              {/* BOTTOM TRACKS: Klender Baru -> Cakung -> Kranji -> Bekasi */}
+              {/* Hilir Line Bottom */}
+              <path
+                d="M 1220 540 L 150 540"
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="4"
+                filter="url(#neonGreen)"
+              />
+              <text x="680" y="532" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) ARAH BEKASI</text>
 
               {/* Hulu Line Bottom */}
               <path
-                d="M 1050 510 L 150 510"
+                d="M 1220 560 L 150 560"
                 fill="none"
                 stroke="#06b6d4"
-                strokeWidth="3.5"
-                filter="url(#energizedGlow)"
+                strokeWidth="4"
+                filter="url(#neonCyan)"
               />
-              <text x="560" y="528" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) ARAH BEKASI</text>
+              <text x="680" y="578" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) ARAH BEKASI</text>
 
-              {/* Stasiun Bekasi Multi-Track Complex (Jalur 1 - 8) */}
-              <g stroke="#334155" strokeWidth="2.5" fill="none">
-                <path d="M 360 440 L 180 440" /> {/* Jalur 8 */}
-                <path d="M 360 460 L 180 460" /> {/* Jalur 7 */}
-                <path d="M 360 530 L 180 530" /> {/* Emplasemen 4-5 */}
-                <path d="M 360 550 L 180 550" /> {/* Emplasemen 6-7,8 */}
+              {/* Stasiun Bekasi Tracks & Emplasemen */}
+              <g stroke="#334155" strokeWidth="3" fill="none">
+                <path d="M 450 490 L 220 490" />
+                <path d="M 450 510 L 220 510" />
+                <path d="M 450 590 L 220 590" />
+                <path d="M 450 610 L 220 610" />
               </g>
 
-              {/* Bekasi Platforms */}
-              <rect x="220" y="445" width="80" height="7" rx="2" fill="#475569" opacity="0.8" />
-              <rect x="220" y="495" width="80" height="7" rx="2" fill="#475569" opacity="0.8" />
+              {/* Stations Vector Labels */}
+              {showStations && stations.map((st) => {
+                const px = (st.xPos / 100) * 1400;
+                const py = (st.yPos / 100) * 750;
 
-              {/* Wesel Points (Switches W) */}
-              <g fill="#f97316" stroke="#f97316">
-                <circle cx="270" cy="270" r="3" />
-                <text x="270" y="263" fontSize="8" fill="#fdba74" textAnchor="middle">W11A</text>
-
-                <circle cx="295" cy="250" r="3" />
-                <text x="295" y="243" fontSize="8" fill="#fdba74" textAnchor="middle">W21B</text>
-
-                <circle cx="490" cy="270" r="3" />
-                <text x="490" y="263" fontSize="8" fill="#fdba74" textAnchor="middle">W31A</text>
-
-                <circle cx="510" cy="290" r="3" />
-                <text x="510" y="283" fontSize="8" fill="#fdba74" textAnchor="middle">W51B</text>
-              </g>
-
-              {/* STATIONS MARKERS */}
-              {showStations && Object.entries(stationCoords).map(([code, st]) => {
-                const isSelected = selectedPin?.stationId === st.id || selectedPin?.code === code;
                 return (
                   <g
-                    key={code}
+                    key={st.id}
                     className="interactive-pin cursor-pointer group"
-                    onClick={() => onSelectStation && onSelectStation(code)}
+                    onClick={() => onSelectStation && onSelectStation(st.code)}
                   >
-                    {/* Station Box */}
                     <rect
-                      x={st.x - 65}
-                      y={st.y - 32}
+                      x={px - 65}
+                      y={py - 16}
                       width="130"
-                      height="26"
-                      rx="4"
+                      height="30"
+                      rx="6"
                       fill="#0f172a"
-                      stroke={isSelected ? '#f97316' : '#3b82f6'}
+                      stroke="#3b82f6"
                       strokeWidth="1.5"
-                      className="group-hover:stroke-orange-400 transition-colors"
+                      className="group-hover:stroke-orange-400 group-hover:fill-slate-800 transition-colors shadow-lg"
                     />
                     <text
-                      x={st.x}
-                      y={st.y - 20}
+                      x={px}
+                      y={py - 2}
                       fill="#ffffff"
                       fontSize="9.5"
                       fontWeight="bold"
@@ -398,143 +517,55 @@ export default function SchematicViewer({
                       {st.name}
                     </text>
                     <text
-                      x={st.x}
-                      y={st.y - 10}
-                      fill="#94a3b8"
+                      x={px}
+                      y={py + 10}
+                      fill="#38bdf8"
                       fontSize="7.5"
                       fontFamily="monospace"
                       textAnchor="middle"
                     >
                       {st.km}
                     </text>
-                    {/* Anchor line to track */}
-                    <line
-                      x1={st.x}
-                      y1={st.y - 6}
-                      x2={st.x}
-                      y2={st.y + 12}
-                      stroke="#3b82f6"
-                      strokeWidth="1"
-                      strokeDasharray="2,2"
-                    />
                   </g>
                 );
               })}
 
-              {/* ASSETS: Air Joints (AJ) & Air Sections (AS) */}
-              {showAssets && assets.map((asset) => {
-                const isAirJoint = asset.type === 'AIR_JOINT';
-                const isAirSection = asset.type === 'AIR_SECTION';
-                const isFRP = asset.type === 'FRP';
-
-                // Approximation of KM to X position on top or bottom corridor
-                let posX = 400;
-                let posY = 260;
-                const kmNum = parseFloat(asset.locationKm?.replace('KM ', '').replace('+', '.')) || 15;
-
-                if (kmNum < 18.5) {
-                  posX = 150 + ((kmNum - 10) / 8.5) * 850;
-                  posY = isAirJoint ? 235 : 285;
-                } else {
-                  posX = 1000 - ((kmNum - 18.5) / 8.5) * 850;
-                  posY = isAirJoint ? 475 : 525;
-                }
-
-                return (
-                  <g key={asset.id} className="cursor-pointer group">
-                    {isAirJoint && (
-                      <g transform={`translate(${posX - 10}, ${posY - 6})`}>
-                        <title>{`${asset.code} (${asset.name})`}</title>
-                        <rect x="0" y="0" width="20" height="12" rx="2" fill="#0284c7" fillOpacity="0.3" stroke="#38bdf8" strokeWidth="0.8" />
-                        <text x="10" y="9" fontSize="6.5" fill="#bae6fd" textAnchor="middle" fontWeight="bold">AJ</text>
-                      </g>
-                    )}
-
-                    {isAirSection && (
-                      <g transform={`translate(${posX - 10}, ${posY - 6})`}>
-                        <title>{`${asset.code} (${asset.name})`}</title>
-                        <rect x="0" y="0" width="20" height="12" rx="2" fill="#d97706" fillOpacity="0.3" stroke="#fbbf24" strokeWidth="0.8" />
-                        <text x="10" y="9" fontSize="6.5" fill="#fef3c7" textAnchor="middle" fontWeight="bold">AS</text>
-                      </g>
-                    )}
-
-                    {isFRP && (
-                      <g transform={`translate(${posX - 12}, ${posY - 6})`}>
-                        <title>{`${asset.code} (${asset.name})`}</title>
-                        <rect x="0" y="0" width="24" height="12" rx="2" fill="#059669" fillOpacity="0.3" stroke="#34d399" strokeWidth="0.8" />
-                        <text x="12" y="9" fontSize="6" fill="#a7f3d0" textAnchor="middle" fontWeight="bold">FRP</text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-
-              {/* DISCONNECTING SWITCHES (DS 1 - DS 20) */}
+              {/* Disconnecting Switches on Vector */}
               {showSwitches && switches.map((sw) => {
+                const px = (sw.mapCoordX / 100) * 1400;
+                const py = (sw.mapCoordY / 100) * 750;
                 const isClosed = sw.currentState === 'NC';
                 const isLocked = sw.isInterlocked;
-                const isSelected = selectedPin?.id === sw.id;
-
-                // Adjust mapCoordX & Y to fit 1200x650
-                const px = (sw.mapCoordX / 1000) * 1100 + 40;
-                const py = (sw.mapCoordY / 850) * 560 + 50;
 
                 return (
                   <g
                     key={sw.id}
                     className="interactive-pin cursor-pointer group"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPin(sw);
-                      onSelectSwitch && onSelectSwitch(sw);
-                    }}
+                    onClick={() => setSelectedPin(sw)}
                   >
-                    {/* Outer Glow when closed */}
                     {isClosed && (
                       <circle
                         cx={px}
                         cy={py}
-                        r="14"
+                        r="16"
                         fill="#10b981"
                         fillOpacity="0.25"
                         className="animate-ping"
                       />
                     )}
-
-                    {/* Switch Node Circle */}
                     <circle
                       cx={px}
                       cy={py}
-                      r="10"
-                      fill={isClosed ? '#10b981' : '#475569'}
-                      stroke={isSelected ? '#f97316' : '#ffffff'}
-                      strokeWidth={isSelected ? '2.5' : '1.5'}
-                      className="group-hover:scale-125 transition-transform origin-center"
-                    />
-
-                    {/* Inner Icon: Zap or Lock */}
-                    {isLocked ? (
-                      <circle cx={px} cy={py} r="3" fill="#f59e0b" />
-                    ) : (
-                      <circle cx={px} cy={py} r="3" fill="#ffffff" />
-                    )}
-
-                    {/* Switch Label Badge */}
-                    <rect
-                      x={px - 26}
-                      y={py + 13}
-                      width="52"
-                      height="16"
-                      rx="3"
-                      fill="#0f172a"
-                      stroke={isClosed ? '#10b981' : '#64748b'}
-                      strokeWidth="1"
+                      r="12"
+                      fill={isClosed ? '#10b981' : '#f59e0b'}
+                      stroke="#ffffff"
+                      strokeWidth="2"
                     />
                     <text
                       x={px}
-                      y={py + 24}
-                      fill={isClosed ? '#a7f3d0' : '#cbd5e1'}
-                      fontSize="8"
+                      y={py + 26}
+                      fill={isClosed ? '#a7f3d0' : '#fde68a'}
+                      fontSize="8.5"
                       fontWeight="bold"
                       fontFamily="monospace"
                       textAnchor="middle"
@@ -549,24 +580,24 @@ export default function SchematicViewer({
           )}
         </div>
 
-        {/* Selected Switch Popup Dialog Overlay inside the Map */}
+        {/* Selected Switch Control Popover */}
         {selectedPin && (
-          <div className="absolute top-4 right-4 z-30 w-80 bg-slate-900/95 border border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-md p-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute top-4 right-4 z-40 w-84 bg-slate-900/95 border border-slate-700 rounded-2xl shadow-2xl backdrop-blur-md p-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`w-3 h-3 rounded-full ${
-                    selectedPin.currentState === 'NC' ? 'bg-emerald-400' : 'bg-amber-400'
+                  className={`w-3.5 h-3.5 rounded-full ${
+                    selectedPin.currentState === 'NC' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
                   }`}
                 />
-                <h3 className="font-bold text-white text-base font-mono">{selectedPin.code}</h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                <h3 className="font-extrabold text-white text-base font-mono">{selectedPin.code}</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
                   {selectedPin.lineType}
                 </span>
               </div>
               <button
                 onClick={() => setSelectedPin(null)}
-                className="text-slate-400 hover:text-white text-sm p-1 rounded hover:bg-slate-800"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
               >
                 ✕
               </button>
@@ -574,70 +605,96 @@ export default function SchematicViewer({
 
             <div className="py-3 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Nama Seksi:</span>
-                <span className="font-semibold text-slate-200 text-right">{selectedPin.feedSection}</span>
+                <span className="text-slate-400">Seksi Suplai:</span>
+                <span className="font-bold text-white text-right truncate max-w-[170px]" title={selectedPin.feedSection}>
+                  {selectedPin.feedSection}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Lokasi:</span>
-                <span className="font-mono text-cyan-300">{selectedPin.locationKm}</span>
+                <span className="text-slate-400">Lokasi KM:</span>
+                <span className="font-mono font-bold text-cyan-300">{selectedPin.locationKm}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Tegangan Terukur:</span>
-                <span className="font-mono font-bold text-emerald-400">
+                <span className="font-mono font-bold text-emerald-400 text-sm">
                   {selectedPin.voltageValue} V DC
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Arus Beban:</span>
-                <span className="font-mono font-bold text-yellow-400">
-                  {selectedPin.currentLoad} Ampere
+                <span className="font-mono font-bold text-yellow-400 text-sm">
+                  {selectedPin.currentLoad} A
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Suhu Kontak Pisau:</span>
+                <span className="text-slate-400">Suhu Kontak:</span>
                 <span className="font-mono text-slate-300">{selectedPin.temperature} °C</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Safety Interlock:</span>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Proteksi Interlock:</span>
                 <span className="font-semibold">
                   {selectedPin.isInterlocked ? (
-                    <span className="text-amber-400 flex items-center">
-                      <Lock className="w-3 h-3 mr-1" /> TERKUNCI
+                    <span className="text-amber-400 flex items-center text-[11px]">
+                      <Lock className="w-3 h-3 mr-1" /> TERKUNCI (LOCKED)
                     </span>
                   ) : (
-                    <span className="text-emerald-400 flex items-center">
-                      <Unlock className="w-3 h-3 mr-1" /> AKTIF SIAGA
+                    <span className="text-emerald-400 flex items-center text-[11px]">
+                      <Unlock className="w-3 h-3 mr-1" /> SIAGA OPERASI
                     </span>
                   )}
                 </span>
               </div>
             </div>
 
-            {/* Actions: Toggle Switch & Lock */}
-            <div className="pt-2 border-t border-slate-800 flex items-center space-x-2">
+            {/* Action buttons */}
+            <div className="pt-3 border-t border-slate-800 flex items-center space-x-2">
+              <button
+                onClick={async () => {
+                  if (onToggleInterlock) {
+                    await onToggleInterlock(selectedPin.code);
+                    setSelectedPin((prev) => ({
+                      ...prev,
+                      isInterlocked: !prev.isInterlocked,
+                    }));
+                  }
+                }}
+                className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                  selectedPin.isInterlocked
+                    ? 'bg-purple-950/80 border-purple-600 text-purple-300 hover:bg-purple-900'
+                    : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
+                title={selectedPin.isInterlocked ? 'Buka Interlock' : 'Kunci Sakelar (Safety Lock)'}
+              >
+                {selectedPin.isInterlocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+              </button>
+
               <button
                 disabled={selectedPin.isInterlocked}
                 onClick={async () => {
                   if (onToggleSwitch) {
                     await onToggleSwitch(selectedPin.code);
+                    const nextState = selectedPin.currentState === 'NC' ? 'NO' : 'NC';
                     setSelectedPin((prev) => ({
                       ...prev,
-                      currentState: prev.currentState === 'NC' ? 'NO' : 'NC',
-                      voltageValue: prev.currentState === 'NC' ? 0.0 : 1515.0,
+                      currentState: nextState,
+                      voltageValue: nextState === 'NC' ? 1514.2 : 0.0,
+                      currentLoad: nextState === 'NC' ? 480.0 : 0.0,
                     }));
                   }
                 }}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 cursor-pointer shadow-lg ${
                   selectedPin.isInterlocked
                     ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                     : selectedPin.currentState === 'NC'
-                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/30'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30'
+                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/30'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
                 }`}
               >
-                <Zap className="w-3.5 h-3.5" />
+                <Zap className="w-4 h-4" />
                 <span>
-                  {selectedPin.currentState === 'NC' ? 'PUTUS BEBAN (BUKA NO)' : 'ALIRKAN LISTRIK (TUTUP NC)'}
+                  {selectedPin.currentState === 'NC'
+                    ? 'BUKA BEBAN (NO / ISOLASI)'
+                    : 'TUTUP SAKELAR (NC / ALIRAN)'}
                 </span>
               </button>
             </div>
