@@ -33,11 +33,16 @@ export default function SchematicViewer({
   const containerRef = useRef(null);
   const viewerWrapperRef = useRef(null);
 
-  // Zoom handlers
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 4.0));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.6));
+  // Zoom handlers (Min 100% - Max 600%)
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 6.0));
+  const handleZoomOut = () =>
+    setZoom((prev) => {
+      const next = Math.max(prev - 0.25, 1.0);
+      if (next === 1.0) setPosition({ x: 0, y: 0 });
+      return next;
+    });
   const handleResetZoom = () => {
-    setZoom(1);
+    setZoom(1.0);
     setPosition({ x: 0, y: 0 });
   };
 
@@ -66,11 +71,15 @@ export default function SchematicViewer({
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Wheel zoom
+  // Wheel zoom (Min 100% - Max 600%)
   const handleWheel = (e) => {
     e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 0.15 : -0.15;
-    setZoom((prev) => Math.min(Math.max(prev + zoomFactor, 0.6), 4.0));
+    const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
+    setZoom((prev) => {
+      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 6.0);
+      if (next === 1.0) setPosition({ x: 0, y: 0 });
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -2151,8 +2160,13 @@ export default function SchematicViewer({
           <div className="flex items-center space-x-1 bg-slate-100 rounded-xl p-1 border border-slate-200">
             <button
               onClick={handleZoomOut}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
-              title="Perkecil (-)"
+              disabled={zoom <= 1.0}
+              className={`p-1.5 rounded-lg transition ${
+                zoom <= 1.0
+                  ? 'text-slate-300 cursor-not-allowed'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
+              }`}
+              title="Perkecil (-) [Min 100%]"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
@@ -2163,8 +2177,13 @@ export default function SchematicViewer({
 
             <button
               onClick={handleZoomIn}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
-              title="Perbesar (+)"
+              disabled={zoom >= 6.0}
+              className={`p-1.5 rounded-lg transition ${
+                zoom >= 6.0
+                  ? 'text-slate-300 cursor-not-allowed'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
+              }`}
+              title="Perbesar (+) [Maks 600%]"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
