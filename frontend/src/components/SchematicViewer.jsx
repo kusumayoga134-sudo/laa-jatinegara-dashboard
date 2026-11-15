@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   MapPin,
   Crosshair,
+  Sparkles,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -27,12 +28,13 @@ export default function SchematicViewer({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [viewMode, setViewMode] = useState('blueprint'); // 'blueprint' (official PDF map) or 'vector' (cyber SCADA vector)
+  
+  // Modes: 'autocad_web' (3500px), 'autocad_hd' (7000px Master), 'vector' (SCADA Dark)
+  const [viewMode, setViewMode] = useState('autocad_web');
   
   // Layer Filters
   const [showSwitches, setShowSwitches] = useState(true);
   const [showStations, setShowStations] = useState(true);
-  const [showAssets, setShowAssets] = useState(true);
   
   // Selected switch popover
   const [selectedPin, setSelectedPin] = useState(null);
@@ -42,7 +44,7 @@ export default function SchematicViewer({
   const viewerWrapperRef = useRef(null);
 
   // Zoom handlers
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3.5));
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 4.0));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => {
     setZoom(1);
@@ -70,7 +72,7 @@ export default function SchematicViewer({
   const handleWheel = (e) => {
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 0.15 : -0.15;
-    setZoom((prev) => Math.min(Math.max(prev + zoomFactor, 0.5), 3.5));
+    setZoom((prev) => Math.min(Math.max(prev + zoomFactor, 0.5), 4.0));
   };
 
   useEffect(() => {
@@ -92,6 +94,9 @@ export default function SchematicViewer({
     }
   };
 
+  const isAutoCADMode = viewMode === 'autocad_web' || viewMode === 'autocad_hd';
+  const autoCadSrc = viewMode === 'autocad_hd' ? '/autocad-peta-hd.png' : '/autocad-peta-web.png';
+
   return (
     <div
       ref={viewerWrapperRef}
@@ -103,18 +108,30 @@ export default function SchematicViewer({
       <div className="bg-slate-950/95 border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
         
         {/* Mode Selector */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-wrap">
           <div className="bg-slate-900 p-1 rounded-xl flex space-x-1 border border-slate-800">
             <button
-              onClick={() => setViewMode('blueprint')}
+              onClick={() => setViewMode('autocad_web')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ${
-                viewMode === 'blueprint'
+                viewMode === 'autocad_web'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Peta Cetak Resmi (Resolusi Tinggi)</span>
+              <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+              <span>AutoCAD Asli DWG (3500px)</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('autocad_hd')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ${
+                viewMode === 'autocad_hd'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-yellow-300" />
+              <span>AutoCAD Ultra HD (7000px)</span>
             </button>
 
             <button
@@ -130,8 +147,8 @@ export default function SchematicViewer({
             </button>
           </div>
 
-          <span className="text-[11px] text-slate-400 hidden xl:inline">
-            • Klik sakelar pada peta untuk membuka/menutup beban listrik
+          <span className="text-[11px] text-emerald-400 font-medium hidden xl:inline">
+            ✓ Sumber Asli: PETA DAERAH LAA 1.9 JNG.dwg (AutoCAD 2025)
           </span>
         </div>
 
@@ -216,28 +233,28 @@ export default function SchematicViewer({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         className={`w-full overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing relative select-none ${
-          isFullscreen ? 'h-[calc(100vh-60px)]' : 'h-[640px]'
+          isFullscreen ? 'h-[calc(100vh-60px)]' : 'h-[650px]'
         }`}
       >
         {/* Help Overlay Hint */}
         <div className="absolute bottom-3 left-3 z-20 pointer-events-none bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg text-[10px] text-slate-400 backdrop-blur-sm flex items-center space-x-2">
           <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Tahan & Geser mouse untuk menggeser peta • Scroll roda mouse untuk Zoom</span>
+          <span>Tahan & Geser mouse untuk menggeser • Scroll roda mouse untuk Zoom • Klik sakelar untuk mengontrol</span>
         </div>
 
         {/* Legend Box Preview on Bottom Right */}
         <div className="absolute bottom-3 right-3 z-20 bg-slate-950/90 border border-slate-800 p-2.5 rounded-xl text-[10px] text-slate-300 backdrop-blur-md hidden sm:flex items-center space-x-3">
           <div className="flex items-center space-x-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500 animate-pulse" />
-            <span className="font-semibold text-emerald-300">NC (Tertutup / Alir)</span>
+            <span className="font-semibold text-emerald-300">NC (Tertutup / Mengalir)</span>
           </div>
           <div className="flex items-center space-x-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500" />
-            <span className="font-semibold text-amber-300">NO (Terbuka / Putus)</span>
+            <span className="font-semibold text-amber-300">NO (Terbuka / Terputus)</span>
           </div>
           <div className="flex items-center space-x-1.5">
             <Lock className="w-3 h-3 text-purple-400" />
-            <span className="text-purple-300 font-semibold">Locked</span>
+            <span className="text-purple-300 font-semibold">Interlocked</span>
           </div>
         </div>
 
@@ -250,14 +267,14 @@ export default function SchematicViewer({
           }}
           className="w-full h-full min-w-[1300px] min-h-[750px] relative"
         >
-          {viewMode === 'blueprint' ? (
+          {isAutoCADMode ? (
             /* ========================================================
-               MODE 1: OFFICIAL HIGH-RES BLUEPRINT WITH INTERACTIVE PINS
+               AUTOCAD ASLI DARI FILE DWG (HIGH-DEFINITION VECTOR/RASTER)
                ======================================================== */
             <div className="relative inline-block w-[1400px] p-4">
               <img
-                src="/schematic-map-web.png"
-                alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara"
+                src={autoCadSrc}
+                alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara - Hasil Asli AutoCAD DWG"
                 className="w-full h-auto rounded-xl shadow-2xl border border-slate-700 bg-white"
                 draggable={false}
               />
@@ -272,16 +289,16 @@ export default function SchematicViewer({
                     left: `${st.xPos}%`,
                     top: `${st.yPos}%`,
                   }}
-                  className="interactive-pin absolute -translate-x-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-blue-900/90 hover:bg-blue-700 text-white text-[10px] font-bold border border-blue-400/80 shadow-lg shadow-blue-950/60 transition cursor-pointer backdrop-blur-sm"
+                  className="interactive-pin absolute -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded bg-blue-900/90 hover:bg-blue-700 text-white text-[9px] font-bold border border-blue-400/80 shadow-lg shadow-blue-950/60 transition cursor-pointer backdrop-blur-sm"
                 >
                   <div className="flex items-center space-x-1">
-                    <MapPin className="w-3 h-3 text-cyan-300" />
+                    <MapPin className="w-2.5 h-2.5 text-cyan-300" />
                     <span>{st.name}</span>
                   </div>
                 </button>
               ))}
 
-              {/* Disconnecting Switch Pins (DS 1 - DS 20) */}
+              {/* Disconnecting Switch Pins (DS 1 - DS 20) with Exact AutoCAD Coordinates */}
               {showSwitches && switches.map((sw) => {
                 const isClosed = sw.currentState === 'NC';
                 const isLocked = sw.isInterlocked;
@@ -291,7 +308,7 @@ export default function SchematicViewer({
                   <button
                     key={sw.id}
                     onClick={() => setSelectedPin(sw)}
-                    title={`${sw.code} [${sw.currentState}] - ${sw.feedSection}`}
+                    title={`${sw.code} [${sw.currentState}] - ${sw.feedSection} (${sw.locationKm})`}
                     style={{
                       left: `${sw.mapCoordX}%`,
                       top: `${sw.mapCoordY}%`,
@@ -335,7 +352,7 @@ export default function SchematicViewer({
             </div>
           ) : (
             /* ========================================================
-               MODE 2: SCADA MODERN VECTOR SVG
+               SCADA VECTOR MODE (DARK INDUSTRIAL CYBER-RAIL)
                ======================================================== */
             <svg
               viewBox="0 0 1400 750"
@@ -378,7 +395,7 @@ export default function SchematicViewer({
                 </text>
               </g>
 
-              {/* Corridor Guide Arrows */}
+              {/* Direction Arrows */}
               <g fill="#64748b" fontSize="11" fontFamily="sans-serif" fontWeight="bold">
                 <text x="50" y="195">◀ MENUJU KRAMAT</text>
                 <text x="50" y="275">◀ MENUJU MANGGARAI</text>
@@ -386,16 +403,14 @@ export default function SchematicViewer({
                 <text x="1300" y="380" textAnchor="end">MENUJU BEKASI ▶</text>
               </g>
 
-              {/* TOP TRACKS: Kramat/Manggarai -> Jatinegara -> Klender -> Buaran */}
-              {/* Kramat Branch line */}
+              {/* Tracks Kramat/Manggarai -> Jatinegara */}
               <path d="M 80 190 L 260 190 L 340 200" fill="none" stroke="#334155" strokeWidth="4" />
               <path d="M 80 190 L 260 190 L 340 200" fill="none" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6,3" />
 
-              {/* Manggarai Inbound Tracks */}
               <path d="M 80 270 L 260 270 L 360 250" fill="none" stroke="#334155" strokeWidth="4" />
               <path d="M 80 270 L 260 270 L 360 250" fill="none" stroke="#06b6d4" strokeWidth="2.5" />
 
-              {/* Jatinegara Emplasemen Tracks (Jalur 1 - 8) */}
+              {/* Jatinegara Jalur 1 - 8 */}
               <g stroke="#334155" strokeWidth="3" fill="none">
                 <path d="M 320 180 L 580 180" />
                 <path d="M 320 200 L 580 200" />
@@ -410,73 +425,30 @@ export default function SchematicViewer({
               {/* Jatinegara Platforms */}
               <rect x="380" y="185" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
               <text x="445" y="192" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 4</text>
-
               <rect x="380" y="225" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
               <text x="445" y="232" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 3</text>
-
               <rect x="380" y="265" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
               <text x="445" y="272" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 2</text>
-
               <rect x="380" y="305" width="130" height="9" rx="2" fill="#475569" opacity="0.9" />
               <text x="445" y="312" fill="#f8fafc" fontSize="7" textAnchor="middle" fontWeight="bold">PERON 1</text>
 
-              {/* Top Main Catenary Lines: Hulu & Hilir */}
-              {/* Hulu (HI) Line */}
-              <path
-                d="M 580 280 L 720 260 L 1220 260"
-                fill="none"
-                stroke="#06b6d4"
-                strokeWidth="4"
-                filter="url(#neonCyan)"
-              />
+              {/* Main Catenary Tracks */}
+              <path d="M 580 280 L 720 260 L 1220 260" fill="none" stroke="#06b6d4" strokeWidth="4" filter="url(#neonCyan)" />
               <text x="890" y="252" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) — 1500 V DC</text>
 
-              {/* Hilir (HU) Line */}
-              <path
-                d="M 580 300 L 720 280 L 1220 280"
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="4"
-                filter="url(#neonGreen)"
-              />
+              <path d="M 580 300 L 720 280 L 1220 280" fill="none" stroke="#10b981" strokeWidth="4" filter="url(#neonGreen)" />
               <text x="890" y="296" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) — 1500 V DC</text>
 
-              {/* Curve connecting upper corridor to lower corridor */}
-              <path
-                d="M 1220 260 C 1300 260, 1300 360, 1220 400 L 1150 440 L 1220 540"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="4"
-              />
-              <path
-                d="M 1220 280 C 1320 280, 1320 360, 1240 420 L 1170 460 L 1220 560"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="4"
-              />
+              <path d="M 1220 260 C 1300 260, 1300 360, 1220 400 L 1150 440 L 1220 540" fill="none" stroke="#334155" strokeWidth="4" />
+              <path d="M 1220 280 C 1320 280, 1320 360, 1240 420 L 1170 460 L 1220 560" fill="none" stroke="#334155" strokeWidth="4" />
 
-              {/* BOTTOM TRACKS: Klender Baru -> Cakung -> Kranji -> Bekasi */}
-              {/* Hilir Line Bottom */}
-              <path
-                d="M 1220 540 L 150 540"
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="4"
-                filter="url(#neonGreen)"
-              />
+              <path d="M 1220 540 L 150 540" fill="none" stroke="#10b981" strokeWidth="4" filter="url(#neonGreen)" />
               <text x="680" y="532" fill="#34d399" fontSize="9" fontWeight="bold">JALUR HILIR (HU) ARAH BEKASI</text>
 
-              {/* Hulu Line Bottom */}
-              <path
-                d="M 1220 560 L 150 560"
-                fill="none"
-                stroke="#06b6d4"
-                strokeWidth="4"
-                filter="url(#neonCyan)"
-              />
+              <path d="M 1220 560 L 150 560" fill="none" stroke="#06b6d4" strokeWidth="4" filter="url(#neonCyan)" />
               <text x="680" y="578" fill="#67e8f9" fontSize="9" fontWeight="bold">JALUR HULU (HI) ARAH BEKASI</text>
 
-              {/* Stasiun Bekasi Tracks & Emplasemen */}
+              {/* Bekasi Emplasemen */}
               <g stroke="#334155" strokeWidth="3" fill="none">
                 <path d="M 450 490 L 220 490" />
                 <path d="M 450 510 L 220 510" />
@@ -484,7 +456,7 @@ export default function SchematicViewer({
                 <path d="M 450 610 L 220 610" />
               </g>
 
-              {/* Stations Vector Labels */}
+              {/* Stations Labels */}
               {showStations && stations.map((st) => {
                 const px = (st.xPos / 100) * 1400;
                 const py = (st.yPos / 100) * 750;
@@ -530,12 +502,11 @@ export default function SchematicViewer({
                 );
               })}
 
-              {/* Disconnecting Switches on Vector */}
+              {/* Disconnecting Switches */}
               {showSwitches && switches.map((sw) => {
                 const px = (sw.mapCoordX / 100) * 1400;
                 const py = (sw.mapCoordY / 100) * 750;
                 const isClosed = sw.currentState === 'NC';
-                const isLocked = sw.isInterlocked;
 
                 return (
                   <g
