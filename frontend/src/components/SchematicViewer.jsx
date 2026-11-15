@@ -11,10 +11,8 @@ import {
   ChevronRight,
   Sparkles,
   PlusCircle,
-  Zap,
-  ShieldAlert,
-  Sliders,
   Layers,
+  GitCommit,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -95,11 +93,10 @@ export default function SchematicViewer({
 
   const imageSrc = viewMode === 'hd' ? '/peta-laa-cropped-hd.png' : '/peta-laa-cropped.png';
 
-  // 46 Authentic Track Segments separated strictly by:
-  // 1. Air Joint (AJ)
-  // 2. Air Section (AS)
-  // 3. FRP (Section Insulator)
-  // 4. Disconnecting Switch (DS)
+  // Complete List of Catenary Lines:
+  // - Horizontal Naspan Tracks (46 Segments)
+  // - Diagonal / Sloping Crossing Turnouts (17 Segments)
+  // Every single segment has a strictly unique ID so only 1 line glows when clicked!
   const allTrackLines = [
     // ----------------------------------------------------
     // 1. LINTAS PERCABANGAN KRAMAT & ST. PONDOK JATI
@@ -152,8 +149,8 @@ export default function SchematicViewer({
     },
     {
       id: 'jng_mri_naspan_2_hi',
-      code: 'MRI-JNG NASPAN 1 HI',
-      title: 'JNG-MRI NASPAN 2 HI (Inbound Manggarai)',
+      code: 'MRI-JNG NASPAN 1 HI (JNG)',
+      title: 'JNG-MRI NASPAN 2 HI (Jatinegara Barat)',
       km: 'KM 11+448 - KM 11+750',
       category: 'SEKSI LAA HULU (HI)',
       d: 'M 487 657 L 729 657',
@@ -180,7 +177,7 @@ export default function SchematicViewer({
     },
     {
       id: 'jng_mri_hu_inbound',
-      code: 'JNG-MRI NASPAN 1 HU',
+      code: 'JNG-MRI NASPAN 1 HU (JNG)',
       title: 'JNG-MRI NASPAN 1 HU (Jatinegara Barat)',
       km: 'KM 11+448 - KM 11+750',
       category: 'SEKSI LAA HILIR (HU)',
@@ -476,7 +473,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_7b_hulu',
-      code: 'NASPAN 7 BUA-KLDB',
+      code: 'NASPAN 7B BUA-KLDB (Hulu)',
       title: 'NASPAN 7B BUA-KLDB (Hulu)',
       km: 'KM 19+546 - KM 20+474',
       category: 'SEKSI LAA PETAK KLENDER BARU',
@@ -490,7 +487,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_7b_hilir',
-      code: 'NASPAN 7 BUA-KLDB',
+      code: 'NASPAN 7B BUA-KLDB (Hilir)',
       title: 'NASPAN 7B BUA-KLDB (Hilir)',
       km: 'KM 19+546 - KM 20+474',
       category: 'SEKSI LAA PETAK KLENDER BARU',
@@ -522,7 +519,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_8b',
-      code: 'NASPAN 8 BUA-KLDB',
+      code: 'NASPAN 8B KLDB-CUK',
       title: 'NASPAN 8B KLDB-CUK (Menuju Cakung)',
       km: 'KM 20+943 - KM 21+400',
       category: 'SEKSI LAA MENUJU CAKUNG',
@@ -536,7 +533,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_9_cuk_hulu',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 EMPL CUK (Hulu)',
       title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung Hulu)',
       km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
@@ -550,7 +547,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_9_cuk_hilir',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 EMPL CUK (Hilir)',
       title: 'NASPAN 9 EMPL CUK (Emplasemen Cakung Hilir)',
       km: 'KM 21+400 - KM 22+500',
       category: 'EMPLASEMEN CAKUNG',
@@ -568,7 +565,7 @@ export default function SchematicViewer({
     // ----------------------------------------------------
     {
       id: 'naspan_10_hulu',
-      code: 'NASPAN 10 CUK-KRI',
+      code: 'NASPAN 10 CUK-KRI (Hulu)',
       title: 'NASPAN 10 CUK-KRI (Jalur Hulu)',
       km: 'KM 22+500 - KM 23+200',
       category: 'SEKSI LAA CAKUNG - KRANJI',
@@ -582,7 +579,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_10_hilir',
-      code: 'NASPAN 10 CUK-KRI',
+      code: 'NASPAN 10 CUK-KRI (Hilir)',
       title: 'NASPAN 10 CUK-KRI (Jalur Hilir)',
       km: 'KM 22+500 - KM 23+200',
       category: 'SEKSI LAA CAKUNG - KRANJI',
@@ -596,7 +593,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_11_hulu',
-      code: 'NASPAN 11 CUK-KRI',
+      code: 'NASPAN 11 CUK-KRI (Hulu)',
       title: 'NASPAN 11 CUK-KRI (Jalur Hulu)',
       km: 'KM 23+200 - KM 23+987',
       category: 'SEKSI LAA CAKUNG - KRANJI',
@@ -610,7 +607,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_11_hilir',
-      code: 'NASPAN 11 CUK-KRI',
+      code: 'NASPAN 11 CUK-KRI (Hilir)',
       title: 'NASPAN 11 CUK-KRI (Jalur Hilir)',
       km: 'KM 23+200 - KM 23+987',
       category: 'SEKSI LAA CAKUNG - KRANJI',
@@ -628,7 +625,7 @@ export default function SchematicViewer({
     // ----------------------------------------------------
     {
       id: 'naspan_12_hulu',
-      code: 'NASPAN 12 BKS-KRI',
+      code: 'NASPAN 12 BKS-KRI (Hulu)',
       title: 'NASPAN 12 BKS-KRI (Jalur Hulu Petak Kranji)',
       km: 'KM 23+987 - KM 25+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
@@ -642,7 +639,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_12_hilir',
-      code: 'NASPAN 12 BKS-KRI',
+      code: 'NASPAN 12 BKS-KRI (Hilir)',
       title: 'NASPAN 12A/B KRI-BKS (Jalur Hilir)',
       km: 'KM 25+000 - KM 26+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
@@ -656,7 +653,7 @@ export default function SchematicViewer({
     },
     {
       id: 'naspan_12b_hulu',
-      code: 'NASPAN 12 BKS-KRI',
+      code: 'NASPAN 12 BKS-KRI (12B)',
       title: 'NASPAN 12B KRI-BKS (Jalur Hulu Petak Bekasi)',
       km: 'KM 25+000 - KM 26+000',
       category: 'SEKSI LAA KRANJI - BEKASI',
@@ -702,7 +699,7 @@ export default function SchematicViewer({
     },
     {
       id: 'bks_stabling_utara',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI (STABLING UTARA)',
       title: 'ST. BEKASI (Jalur Stabling Utara)',
       km: 'KM 26+403',
       category: 'STABLING BEKASI',
@@ -730,7 +727,7 @@ export default function SchematicViewer({
     },
     {
       id: 'bks_langsir_barat',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI (LANGSIR)',
       title: 'ST. BEKASI (Jalur Langsir Barat)',
       km: 'KM 26+200',
       category: 'EMPLASEMEN BEKASI',
@@ -744,7 +741,7 @@ export default function SchematicViewer({
     },
     {
       id: 'bks_wesel_barat',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI (WESEL BARAT)',
       title: 'ST. BEKASI (Wesel Barat)',
       km: 'KM 26+300',
       category: 'WESEL BEKASI',
@@ -762,7 +759,7 @@ export default function SchematicViewer({
     // ----------------------------------------------------
     {
       id: 'bks_timur_hulu',
-      code: 'PETAK BEKASI TIMUR',
+      code: 'PETAK BEKASI TIMUR (HULU)',
       title: 'Lintas Menuju Bekasi Timur (Jalur Hulu)',
       km: 'KM 26+800',
       category: 'SEKSI KELUAR BEKASI TIMUR',
@@ -776,7 +773,7 @@ export default function SchematicViewer({
     },
     {
       id: 'bks_timur_hilir',
-      code: 'PETAK BEKASI TIMUR',
+      code: 'PETAK BEKASI TIMUR (HILIR)',
       title: 'Lintas Menuju Bekasi Timur (Jalur Hilir)',
       km: 'KM 26+800',
       category: 'SEKSI KELUAR BEKASI TIMUR',
@@ -787,6 +784,209 @@ export default function SchematicViewer({
       color: '#ec1f24', // Red AutoCAD
       startDivider: { type: 'DS', label: 'Air Section (AS) & DS 18 (NC)', km: 'KM 26+800' },
       endDivider: { type: 'AS', label: 'Batas UPT Resor LAA 1.9', km: 'KM 27+000' },
+    },
+
+    // ====================================================
+    // 12. DIAGONAL & SLOPING CROSSING TURNOUTS (WESEL / CROSSING)
+    // Garis menurun dan miring yang menunjukkan crossing
+    // ====================================================
+    {
+      id: 'jng_crossing_w21',
+      code: 'ST. JATINEGARA (WESEL W21)',
+      title: 'Crossing Wesel Barat Jatinegara W21A/B',
+      km: 'KM 11+500',
+      category: 'CROSSING WESEL',
+      d: 'M 656 631 L 635 657 M 594 657 L 576 677 M 571 682 L 553 704',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-01-31A1', km: 'KM 11+500' },
+      endDivider: { type: 'FRP', label: 'FRP-JNG-02-11A', km: 'KM 11+600' },
+    },
+    {
+      id: 'jng_scissor_w31',
+      code: 'ST. JATINEGARA (SCISSOR W31)',
+      title: 'Scissor Crossover Tengah Jatinegara W31A/B',
+      km: 'KM 11+750',
+      category: 'SCISSOR CROSSOVER',
+      d: 'M 933 657 L 975 690 M 992 657 L 950 690',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-04-31C1', km: 'KM 11+750' },
+      endDivider: { type: 'FRP', label: 'FRP-JNG-05-31C2', km: 'KM 11+750' },
+    },
+    {
+      id: 'jng_crossing_w51',
+      code: 'ST. JATINEGARA (WESEL W51)',
+      title: 'Crossing Wesel Timur Jatinegara W51A/B',
+      km: 'KM 12+000',
+      category: 'CROSSING WESEL',
+      d: 'M 1751 657 L 1768 676 M 1772 681 L 1792 704',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-14-33B2', km: 'KM 12+000' },
+      endDivider: { type: 'FRP', label: 'FRP-JNG-16-33C2', km: 'KM 12+000' },
+    },
+    {
+      id: 'jng_crossing_w53',
+      code: 'ST. JATINEGARA (WESEL W53)',
+      title: 'Crossing Wesel Timur Jatinegara W53A/B',
+      km: 'KM 12+100',
+      category: 'CROSSING WESEL',
+      d: 'M 1835 656 L 1852 676 M 1857 681 L 1877 704',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-13-13D1', km: 'KM 12+100' },
+      endDivider: { type: 'FRP', label: 'FRP-JNG-15-33C1', km: 'KM 12+100' },
+    },
+    {
+      id: 'jng_wesel_jalur_4_3',
+      code: 'ST. JATINEGARA (HUBUNG 4-3)',
+      title: 'Wesel Hubung Miring Jalur 3 & 4 Jatinegara',
+      km: 'KM 11+900',
+      category: 'WESEL HUBUNG',
+      d: 'M 1601 608 L 1561 656 M 1667 608 L 1709 656',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-10-JALUR 4', km: 'KM 11+900' },
+      endDivider: { type: 'DS', label: 'DS 5 (NC)', km: 'KM 12+000' },
+    },
+    {
+      id: 'jng_turnout_kramat',
+      code: 'ST. PONDOK JATI (TURNOUT)',
+      title: 'Wesel Menurun Percabangan Kramat ke Jalur 1 JNG',
+      km: 'KM 10+857',
+      category: 'WESEL PERCABANGAN',
+      d: 'M 588 371 L 656 631',
+      color: '#ff7fdf', // Pink AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 10+400)', km: 'KM 10+400' },
+      endDivider: { type: 'FRP', label: 'FRP-JNG-01-31A1', km: 'KM 11+500' },
+    },
+    {
+      id: 'cuk_crossing_w13',
+      code: 'NASPAN 9 EMPL CUK (W13)',
+      title: 'Crossing Wesel St. Cakung W13 (KM 21+200)',
+      km: 'KM 21+200',
+      category: 'CROSSING WESEL CAKUNG',
+      d: 'M 2416 1065 L 2454 1023',
+      color: '#8a6ddd', // Lavender AutoCAD
+      startDivider: { type: 'AS', label: 'Air Section (AS KM 21+400)', km: 'KM 21+400' },
+      endDivider: { type: 'FRP', label: 'Wesel Masuk Jalur 1 Cakung', km: 'KM 21+200' },
+    },
+    {
+      id: 'cuk_crossing_w11',
+      code: 'NASPAN 9 EMPL CUK (W11)',
+      title: 'Crossing Wesel St. Cakung W11 (KM 21+350)',
+      km: 'KM 21+350',
+      category: 'CROSSING WESEL CAKUNG',
+      d: 'M 2584 1023 L 2618 1065',
+      color: '#8a6ddd', // Lavender AutoCAD
+      startDivider: { type: 'FRP', label: 'Wesel Jalur 1 Cakung', km: 'KM 21+350' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 21+400)', km: 'KM 21+400' },
+    },
+    {
+      id: 'cuk_crossover_w21',
+      code: 'NASPAN 9 EMPL CUK (W21)',
+      title: 'Crossover Miring Jalur 2 ke 3 Cakung W21',
+      km: 'KM 21+200',
+      category: 'CROSSOVER CAKUNG',
+      d: 'M 2367 1113 L 2386 1090 M 2390 1085 L 2407 1065',
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'DS', label: 'DS 13 (NC)', km: 'KM 21+400' },
+      endDivider: { type: 'DS', label: 'DS 14 (NC)', km: 'KM 21+400' },
+    },
+    {
+      id: 'cuk_crossover_w23',
+      code: 'NASPAN 9 EMPL CUK (W23)',
+      title: 'Crossover Miring Jalur 3 ke 2 Cakung W23',
+      km: 'KM 21+350',
+      category: 'CROSSOVER CAKUNG',
+      d: 'M 2667 1113 L 2649 1090 M 2645 1085 L 2629 1065',
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'DS', label: 'DS 13 (NC)', km: 'KM 21+400' },
+      endDivider: { type: 'DS', label: 'DS 14 (NC)', km: 'KM 21+400' },
+    },
+    {
+      id: 'cuk_crossing_jalur_4',
+      code: 'NASPAN 9 EMPL CUK (JALUR 4)',
+      title: 'Wesel Miring Masuk Jalur 4 St. Cakung',
+      km: 'KM 21+300',
+      category: 'CROSSING WESEL CAKUNG',
+      d: 'M 2453 1155 L 2416 1113 M 2618 1113 L 2584 1155',
+      color: '#cc6827', // Orange AutoCAD
+      startDivider: { type: 'FRP', label: 'Wesel Percabangan Jalur 4', km: 'KM 21+300' },
+      endDivider: { type: 'AS', label: 'Peron Jalur 4 Cakung', km: 'KM 21+350' },
+    },
+    {
+      id: 'kri_bks_crossover_w11',
+      code: 'NASPAN 12 BKS-KRI (W11)',
+      title: 'Crossover Miring Kranji - Bekasi W11',
+      km: 'KM 25+400',
+      category: 'CROSSOVER KRANJI-BEKASI',
+      d: 'M 1432 1114 L 1450 1092 M 1455 1088 L 1475 1064',
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 25+000)', km: 'KM 25+000' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 26+000)', km: 'KM 26+000' },
+    },
+    {
+      id: 'kri_bks_crossover_w13',
+      code: 'NASPAN 12 BKS-KRI (W13)',
+      title: 'Crossover Miring Kranji - Bekasi W13',
+      km: 'KM 25+600',
+      category: 'CROSSOVER KRANJI-BEKASI',
+      d: 'M 1525 1087 L 1506 1064 M 1548 1114 L 1529 1092',
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'AJ', label: 'Air Joint (AJ KM 25+000)', km: 'KM 25+000' },
+      endDivider: { type: 'AS', label: 'Air Section (AS KM 26+000)', km: 'KM 26+000' },
+    },
+    {
+      id: 'bks_wesel_stabling_in',
+      code: 'ST. BEKASI (WESEL STABLING)',
+      title: 'Wesel Miring Masuk Stabling St. Bekasi',
+      km: 'KM 26+200',
+      category: 'WESEL STABLING BEKASI',
+      d: 'M 798 1140 L 776 1113 M 827 1175 L 801 1144',
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-21-JALUR 5', km: 'KM 26+200' },
+      endDivider: { type: 'AS', label: 'Jalur 5 Stabling Bekasi', km: 'KM 26+300' },
+    },
+    {
+      id: 'bks_wesel_stabling_out',
+      code: 'ST. BEKASI (WESEL STABLING)',
+      title: 'Wesel Miring Keluar Stabling St. Bekasi',
+      km: 'KM 26+500',
+      category: 'WESEL STABLING BEKASI',
+      d: 'M 1323 1139 L 1342 1113 M 1297 1175 L 1320 1144',
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'FRP', label: 'FRP-JNG-24-51C', km: 'KM 26+500' },
+      endDivider: { type: 'AS', label: 'Jalur 8 Stabling Bekasi', km: 'KM 26+500' },
+    },
+    {
+      id: 'bks_crossing_timur',
+      code: 'PETAK BEKASI TIMUR (CROSSING)',
+      title: 'Crossing Miring Jalur Keluar Bekasi Timur',
+      km: 'KM 26+850',
+      category: 'CROSSING BEKASI TIMUR',
+      d: 'M 433 1229 L 392 1278',
+      color: '#ec1f24', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'DS 17 (NC)', km: 'KM 26+800' },
+      endDivider: { type: 'DS', label: 'DS 18 (NC)', km: 'KM 26+800' },
+    },
+    {
+      id: 'kldb_cuk_slope_hulu',
+      code: 'NASPAN 8 BUA-KLDB (SLOPE HULU)',
+      title: 'Jalur Menurun / Miring Ujung Timur Hulu',
+      km: 'KM 20+500',
+      category: 'JALUR MENURUN UJUNG TIMUR',
+      d: 'M 3124 656 L 3182 716 M 3124 1113 L 3182 1049',
+      color: '#f8d731', // Yellow AutoCAD
+      startDivider: { type: 'DS', label: 'DS 9 (NC)', km: 'KM 20+474' },
+      endDivider: { type: 'DS', label: 'DS 11 (NO)', km: 'KM 20+943' },
+    },
+    {
+      id: 'kldb_cuk_slope_hilir',
+      code: 'NASPAN 8 BUA-KLDB (SLOPE HILIR)',
+      title: 'Jalur Menurun / Miring Ujung Timur Hilir',
+      km: 'KM 20+500',
+      category: 'JALUR MENURUN UJUNG TIMUR',
+      d: 'M 3113 703 L 3145 736 M 3145 1022 L 3103 1065',
+      color: '#ff0000', // Red AutoCAD
+      startDivider: { type: 'DS', label: 'DS 10 (NC)', km: 'KM 20+474' },
+      endDivider: { type: 'DS', label: 'DS 12 (NO)', km: 'KM 20+943' },
     },
   ];
 
@@ -807,7 +1007,6 @@ export default function SchematicViewer({
     return str.replace(/_/g, ' ');
   };
 
-  // Helper badge color for divider types
   const getDividerBadge = (type) => {
     switch (type) {
       case 'AJ':
@@ -839,7 +1038,7 @@ export default function SchematicViewer({
             <Sparkles className="w-4 h-4" />
           </div>
           <p className="text-xs sm:text-sm text-slate-700 font-medium">
-            Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">Air Joint (AJ)</strong>, <strong className="text-emerald-700 font-bold">Air Section (AS)</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
+            Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong> • Termasuk wesel & crossing miring
           </p>
         </div>
 
@@ -973,14 +1172,14 @@ export default function SchematicViewer({
                 </div>
 
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 font-medium">Batas Barat / Awal:</span>
+                  <span className="text-slate-500 font-medium">Batas Awal:</span>
                   <span className={`px-2 py-0.5 rounded-md font-bold text-[10.5px] border ${getDividerBadge(hoveredLine.startDivider.type).bg}`}>
                     {hoveredLine.startDivider.label}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 font-medium">Batas Timur / Akhir:</span>
+                  <span className="text-slate-500 font-medium">Batas Akhir:</span>
                   <span className={`px-2 py-0.5 rounded-md font-bold text-[10.5px] border ${getDividerBadge(hoveredLine.endDivider.type).bg}`}>
                     {hoveredLine.endDivider.label}
                   </span>
@@ -1079,8 +1278,10 @@ export default function SchematicViewer({
             />
 
             {/* ========================================================
-                AUTHENTIC SVG TRACK LINES (STRICTLY HORIZONTAL)
-                Separated by Air Joint (AJ), Air Section (AS), FRP, and DS
+                AUTHENTIC SVG TRACK LINES (HORIZONTAL & DIAGONAL CROSSINGS)
+                - Only 1 line glows when clicked (matched by line.id)
+                - In default state: TRANSPARENT so original colors are 100% preserved
+                - On hover/active: GLOWS WITH EXACT AUTOCAD COLOR & 3D EMBOSSED EFFECT
                 ======================================================== */}
             <svg
               viewBox="0 0 3275 1419"
@@ -1089,7 +1290,8 @@ export default function SchematicViewer({
             >
               {allTrackLines.map((line) => {
                 const isHovered = hoveredLine?.id === line.id;
-                const isActive = selectedLocation?.code === line.code;
+                // CRITICAL FIX: Only match strictly by unique line.id so clicking 1 line NEVER highlights 3 lines!
+                const isActive = selectedLocation?.id === line.id;
 
                 return (
                   <g
@@ -1099,17 +1301,17 @@ export default function SchematicViewer({
                     onMouseLeave={() => setHoveredLine(null)}
                     onClick={() => onSelectLocation && onSelectLocation(line)}
                   >
-                    {/* 1. Generous 36px hit-area for effortless cursor detection */}
+                    {/* 1. Generous 34px hit-area for effortless cursor detection */}
                     <path
                       d={line.d}
                       stroke="transparent"
-                      strokeWidth="36"
+                      strokeWidth="34"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       fill="none"
                     />
 
-                    {/* 2. On Hover/Active: Glowing Line in EXACT authentic AutoCAD color */}
+                    {/* 2. On Hover or Active (1 line only): Glowing Line in EXACT authentic AutoCAD color */}
                     {(isHovered || isActive) && (
                       <>
                         {/* Outer Glow Halo matching exact AutoCAD color */}
@@ -1117,8 +1319,8 @@ export default function SchematicViewer({
                           d={line.d}
                           stroke={line.color}
                           strokeWidth="11"
-                          strokeLinecap="square"
-                          strokeLinejoin="miter"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           fill="none"
                           style={{
                             opacity: 0.85,
@@ -1131,8 +1333,8 @@ export default function SchematicViewer({
                           d={line.d}
                           stroke={line.color}
                           strokeWidth="6"
-                          strokeLinecap="square"
-                          strokeLinejoin="miter"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           fill="none"
                           style={{
                             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
@@ -1144,8 +1346,8 @@ export default function SchematicViewer({
                           d={line.d}
                           stroke="#ffffff"
                           strokeWidth="2.2"
-                          strokeLinecap="square"
-                          strokeLinejoin="miter"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           fill="none"
                           style={{
                             opacity: 0.95,
@@ -1156,7 +1358,6 @@ export default function SchematicViewer({
                         {/* Tanda Pemisah Awal (Start Divider: AJ / AS / FRP / DS) */}
                         {line.xStart && line.y && line.startDivider && (
                           <g>
-                            {/* Visual Boundary Mark (Cross / Symbol) */}
                             <line
                               x1={line.xStart - 8}
                               y1={line.y - 8}
