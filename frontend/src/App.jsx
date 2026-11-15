@@ -92,7 +92,7 @@ export default function App() {
       />
 
       {/* Main AutoCAD Map Workspace (White Mode) */}
-      <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 py-4">
+      <main className="flex-1 max-w-[1700px] w-full mx-auto px-2 py-2 sm:px-6 sm:py-4">
         <SchematicViewer
           logs={logs}
           selectedLocation={selectedLocation}

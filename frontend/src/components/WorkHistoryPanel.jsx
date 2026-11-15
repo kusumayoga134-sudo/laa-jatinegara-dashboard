@@ -137,7 +137,13 @@ export default function WorkHistoryPanel({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[540px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 transition-opacity"
+        onClick={onClose}
+      />
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[540px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
       
       {/* Drawer Header (White Mode) */}
       <div className="bg-gradient-to-r from-slate-50 to-white p-5 border-b border-slate-200 flex items-start justify-between relative">
@@ -515,5 +521,6 @@ export default function WorkHistoryPanel({
       </div>
 
     </div>
+    </>
   );
 }

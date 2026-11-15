@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Layers,
   GitCommit,
+  X,
 } from 'lucide-react';
 
 export default function SchematicViewer({
@@ -32,6 +33,9 @@ export default function SchematicViewer({
 
   const containerRef = useRef(null);
   const viewerWrapperRef = useRef(null);
+  const pinchRef = useRef({ distance: 0, initialZoom: 1 });
+  const touchStartPos = useRef({ x: 0, y: 0 });
+  const hasMovedRef = useRef(false);
 
   // Zoom handlers (Min 100% - Max 600%)
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 6.0));
@@ -70,6 +74,70 @@ export default function SchematicViewer({
   };
 
   const handleMouseUp = () => setIsDragging(false);
+
+  // Mobile Touch Gestures (Single finger Pan & 2-finger Pinch Zoom)
+  const handleTouchStart = (e) => {
+    if (e.target.closest('button')) return;
+
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      hasMovedRef.current = false;
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchRef.current = {
+        distance: dist,
+        initialZoom: zoom,
+      };
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1 && isDragging) {
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
+      if (deltaX > 6 || deltaY > 6) {
+        hasMovedRef.current = true;
+      }
+      setPosition({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y,
+      });
+    } else if (e.touches.length === 2 && pinchRef.current.distance > 0) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / pinchRef.current.distance;
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 6.0);
+      setZoom(nextZoom);
+      if (nextZoom <= 1.0) {
+        setPosition({ x: 0, y: 0 });
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+      pinchRef.current = { distance: 0, initialZoom: 1 };
+    } else if (e.touches.length === 1) {
+      setIsDragging(true);
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    }
+  };
 
   // Wheel zoom (Min 100% - Max 600%)
   const handleWheel = (e) => {
@@ -2119,25 +2187,30 @@ export default function SchematicViewer({
       }`}
     >
       {/* Top Toolbar White Mode */}
-      <div className="bg-white/95 border-b border-slate-200 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 backdrop-blur-md">
+      <div className="bg-white/95 border-b border-slate-200 px-3 sm:px-5 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 sm:gap-3 z-20 backdrop-blur-md">
         
         {/* Left Instruction */}
-        <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600">
-            <Sparkles className="w-4 h-4" />
+        <div className="flex items-center space-x-2">
+          <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <p className="text-xs sm:text-sm text-slate-700 font-medium">
-            Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong> • Termasuk wesel & crossing miring
+          <p className="text-xs sm:text-sm text-slate-700 font-medium leading-tight">
+            <span className="hidden sm:inline">
+              Setiap seksi terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong> • Termasuk wesel & crossing miring
+            </span>
+            <span className="sm:hidden text-xs">
+              Peta LAA 1500V • <span className="text-blue-700 font-bold">Sentuh garis</span> untuk riwayat seksi
+            </span>
           </p>
         </div>
 
         {/* Right Tools: Resolution & Zoom */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
           
-          <div className="bg-slate-100 p-1 rounded-xl flex space-x-1 border border-slate-200 text-xs">
+          <div className="bg-slate-100 p-0.5 sm:p-1 rounded-xl flex space-x-0.5 sm:space-x-1 border border-slate-200 text-[11px] sm:text-xs">
             <button
               onClick={() => setViewMode('web')}
-              className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
+              className={`px-2 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'web'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -2147,7 +2220,7 @@ export default function SchematicViewer({
             </button>
             <button
               onClick={() => setViewMode('hd')}
-              className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
+              className={`px-2 sm:px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
                 viewMode === 'hd'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -2157,51 +2230,51 @@ export default function SchematicViewer({
             </button>
           </div>
 
-          <div className="flex items-center space-x-1 bg-slate-100 rounded-xl p-1 border border-slate-200">
+          <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl p-0.5 sm:p-1 border border-slate-200">
             <button
               onClick={handleZoomOut}
               disabled={zoom <= 1.0}
-              className={`p-1.5 rounded-lg transition ${
+              className={`p-1 sm:p-1.5 rounded-lg transition ${
                 zoom <= 1.0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
               title="Perkecil (-) [Min 100%]"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
-            <span className="text-xs font-mono font-bold px-2 text-slate-800 min-w-14 text-center">
+            <span className="text-[11px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-10 sm:min-w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
             <button
               onClick={handleZoomIn}
               disabled={zoom >= 6.0}
-              className={`p-1.5 rounded-lg transition ${
+              className={`p-1 sm:p-1.5 rounded-lg transition ${
                 zoom >= 6.0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
               title="Perbesar (+) [Maks 600%]"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             <button
               onClick={handleResetZoom}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+              className="p-1 sm:p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Reset Zoom (100%)"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+              className="p-1 sm:p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Layar Penuh"
             >
-              <Maximize2 className="w-4 h-4" />
+              <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
 
@@ -2209,7 +2282,7 @@ export default function SchematicViewer({
 
       </div>
 
-      {/* Main Canvas Viewport (White Mode) - Centered */}
+      {/* Main Canvas Viewport (White Mode) - Centered with Mobile Touch Support */}
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
@@ -2219,14 +2292,19 @@ export default function SchematicViewer({
           handleMouseUp();
           setHoveredLine(null);
         }}
-        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[720px]'
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[440px] sm:h-[580px] lg:h-[720px]'
         }`}
       >
         {/* Floating Quick Hint */}
-        <div className="absolute bottom-4 left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-3.5 py-2 rounded-2xl text-xs text-slate-600 backdrop-blur-md flex items-center space-x-2 shadow-sm">
+        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-[11px] sm:text-xs text-slate-600 backdrop-blur-md flex items-center space-x-1.5 sm:space-x-2 shadow-sm">
           <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-          <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
+          <span className="hidden sm:inline">Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
+          <span className="sm:hidden">Cubit 2 jari untuk zoom • Geser untuk navigasi</span>
         </div>
 
         {/* ========================================================
@@ -2235,10 +2313,14 @@ export default function SchematicViewer({
         {hoveredLine && (
           <div
             style={{
-              left: `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 360)}px`,
-              top: `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 340)}px`,
+              left: typeof window !== 'undefined' && window.innerWidth >= 640
+                ? `${Math.min(Math.max(mousePos.x + 15, 20), (containerRef.current?.clientWidth || 1000) - 360)}px`
+                : undefined,
+              top: typeof window !== 'undefined' && window.innerWidth >= 640
+                ? `${Math.min(Math.max(mousePos.y - 40, 20), (containerRef.current?.clientHeight || 600) - 340)}px`
+                : undefined,
             }}
-            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-4 shadow-2xl backdrop-blur-xl w-88 animate-in zoom-in-95 duration-150 text-slate-800"
+            className="absolute z-50 pointer-events-auto bg-white/98 border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-2xl backdrop-blur-xl w-auto sm:w-88 max-w-sm left-3 right-3 sm:left-auto sm:right-auto bottom-3 sm:bottom-auto animate-in zoom-in-95 duration-150 text-slate-800"
           >
             {/* Header: Naspan info & color dot */}
             <div className="flex items-start justify-between pb-2.5 border-b border-slate-100">
@@ -2251,15 +2333,24 @@ export default function SchematicViewer({
                   <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight">
                     {hoveredLine.title}
                   </h4>
-                  <span className="text-xs text-blue-600 font-mono font-bold mt-0.5 block">
+                  <span className="text-[11px] sm:text-xs text-blue-600 font-mono font-bold mt-0.5 block">
                     {hoveredLine.km}
                   </span>
                 </div>
               </div>
 
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 shrink-0 border border-blue-200">
-                {hoveredLogs.length} Pekerjaan
-              </span>
+              <div className="flex items-center space-x-1.5 shrink-0">
+                <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  {hoveredLogs.length} Pekerjaan
+                </span>
+                <button
+                  onClick={() => setHoveredLine(null)}
+                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                  title="Tutup Info"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {/* BATAS-BATAS PEMISAH TEKNIS (AJ / AS / FRP / DS) */}
@@ -2363,10 +2454,10 @@ export default function SchematicViewer({
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
           }}
-          className="relative flex items-center justify-center shrink-0 p-4"
+          className="relative flex items-center justify-center shrink-0 p-2 sm:p-4"
         >
           {/* Container tightly wrapping cropped schematic (Centered) */}
-          <div className="relative w-[1420px] rounded-2xl overflow-hidden shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
+          <div className="relative w-[min(calc(100vw-24px),1420px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
             
             {/* Cropped AutoCAD Master Image */}
             <img
@@ -2398,7 +2489,10 @@ export default function SchematicViewer({
                     className="pointer-events-auto cursor-pointer"
                     onMouseEnter={() => setHoveredLine(line)}
                     onMouseLeave={() => setHoveredLine(null)}
-                    onClick={() => onSelectLocation && onSelectLocation(line)}
+                    onClick={() => {
+                      setHoveredLine(line);
+                      if (onSelectLocation) onSelectLocation(line);
+                    }}
                   >
                     {/* 1. Generous 34px hit-area for effortless cursor detection */}
                     <path

@@ -38,32 +38,112 @@ export default function Header({
   });
 
   return (
-    <header className="bg-white/95 backdrop-blur-xl border-b border-slate-200/90 sticky top-0 z-40 shadow-xs select-none relative">
+    <header className="bg-white/95 backdrop-blur-xl border-b border-slate-200/90 sticky top-0 z-40 shadow-xs select-none">
       {/* Top Accent Gradient Ribbon (KAI Navy to Danantara Teal to Railway Amber) */}
       <div className="h-1 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-teal-500 to-amber-500" />
 
-      <div className="max-w-[1720px] mx-auto px-4 py-2.5 sm:px-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 py-2.5">
+        
+        {/* ========================================================
+            1. MOBILE VIEW (< md) - CLEAN, BALANCED & TOUCH-FRIENDLY
+            ======================================================== */}
+        <div className="md:hidden flex flex-col space-y-2.5">
+          {/* Top Bar: Danantara Logo (Left), Badges (Center), KAI Logo (Right) */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Danantara Logo */}
+            <div className="bg-white rounded-xl px-2 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-9 w-26 shrink-0 overflow-hidden">
+              <img
+                src="/danantara-logo.png"
+                alt="Danantara Indonesia"
+                className="max-h-6 max-w-full object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+
+            {/* Badges in Center */}
+            <div className="flex items-center space-x-1 shrink-0">
+              <span className="px-1.5 py-0.5 text-[9.5px] font-black uppercase bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+                DAOP 1
+              </span>
+              <span className="px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-800 bg-emerald-50 rounded-md border border-emerald-200 flex items-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping mr-1" />
+                1500V DC
+              </span>
+            </div>
+
+            {/* KAI Logo */}
+            <div className="bg-white rounded-xl px-2 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-9 w-20 shrink-0 overflow-hidden">
+              <img
+                src="/kai-logo.png"
+                alt="KAI"
+                className="max-h-6 max-w-full object-contain"
+                onError={(e) => { e.target.src = '/kai-logo.webp'; }}
+              />
+            </div>
+          </div>
+
+          {/* Title on Mobile */}
+          <div className="text-center px-1">
+            <h1 className="text-xs sm:text-sm font-black text-slate-900 tracking-tight leading-tight">
+              PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA
+            </h1>
+            <p className="text-[10.5px] text-slate-500 truncate mt-0.5 font-medium">
+              Lintas: Kramat / Manggarai — Jatinegara — Cakung — Bekasi
+            </p>
+          </div>
+
+          {/* Action Buttons Grid on Mobile (2 equal columns) */}
+          <div className="grid grid-cols-2 gap-2 pt-0.5">
+            {/* Input Button */}
+            <button
+              onClick={onOpenAddWork}
+              className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 active:scale-95 text-white font-bold text-xs py-2 px-2.5 rounded-xl shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer border border-blue-500/30"
+              title="Input data pekerjaan baru"
+            >
+              <Plus className="w-3.5 h-3.5 shrink-0" />
+              <span>Input Pekerjaan</span>
+            </button>
+
+            {/* Total Work Button */}
+            <button
+              onClick={onOpenAllLogs}
+              className="bg-slate-50 active:scale-95 border border-slate-200 hover:border-orange-300 rounded-xl py-1 px-2.5 flex items-center justify-center space-x-1.5 shadow-xs cursor-pointer text-left"
+              title="Buka rekapitulasi pekerjaan"
+            >
+              <div className="p-1 rounded-md bg-orange-100 text-orange-600 shrink-0">
+                <ClipboardList className="w-3.5 h-3.5" />
+              </div>
+              <div className="leading-tight">
+                <div className="text-[8.5px] text-slate-500 font-bold uppercase leading-none">
+                  TOTAL PEKERJAAN
+                </div>
+                <div className="font-mono font-black text-slate-900 text-xs leading-tight mt-0.5">
+                  <span className="text-orange-600">{totalLogsCount}</span> Dicatat
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================
+            2. DESKTOP VIEW (>= md) - FULL HORIZONTAL EXECUTIVE BAR
+            ======================================================== */}
+        <div className="hidden md:flex md:items-center md:justify-between gap-3">
           
-          {/* ========================================================
-              LEFT: BRANDING & TITLE COVER SECTION
-              ======================================================== */}
+          {/* Left: Branding & Title */}
           <div className="flex items-center space-x-3.5">
-            {/* Danantara Indonesia Sovereign Fund Logo Container */}
+            {/* Danantara Logo */}
             <div className="bg-white rounded-2xl px-3 py-1.5 border border-slate-200/80 shadow-xs hover:shadow-sm transition-all flex items-center justify-center h-11 w-32 shrink-0 overflow-hidden">
               <img
                 src="/danantara-logo.png"
                 alt="Danantara Indonesia Sovereign Fund"
                 className="max-h-7 max-w-full object-contain transition-transform hover:scale-105 duration-200"
                 style={{ maxHeight: '28px', maxWidth: '110px' }}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
 
-            {/* Elegant Divider */}
-            <div className="h-8 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent hidden sm:block shrink-0" />
+            <div className="h-8 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent shrink-0" />
 
             {/* Title & Metadata Badges */}
             <div className="min-w-0">
@@ -74,8 +154,8 @@ export default function Header({
                 
                 <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200/80 flex items-center shadow-2xs">
                   <span className="relative flex h-2 w-2 mr-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                   </span>
                   LAA 1500 V DC
                 </span>
@@ -86,23 +166,21 @@ export default function Header({
                 </span>
               </div>
 
-              <h1 className="text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight leading-snug flex items-center gap-2">
-                <span>PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA</span>
+              <h1 className="text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight leading-snug">
+                PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA
               </h1>
               
-              <p className="text-[11.5px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
+              <p className="text-xs text-slate-500 truncate flex items-center gap-1.5">
                 <span className="font-semibold text-slate-700">Lintas Catenary:</span>
                 <span>Kramat / Manggarai — Jatinegara — Buaran — Cakung — Bekasi</span>
               </p>
             </div>
           </div>
 
-          {/* ========================================================
-              RIGHT: ACTION BUTTONS, TOTAL WORK BADGE & KAI LOGO
-              ======================================================== */}
-          <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 flex-wrap">
+          {/* Right: Action Buttons, Total Work Badge & Clock & KAI */}
+          <div className="flex items-center justify-end gap-3 flex-wrap shrink-0">
             
-            {/* 1. Sleek "+ Input Pekerjaan" Action Button */}
+            {/* Input Pekerjaan Button */}
             <button
               onClick={onOpenAddWork}
               className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-md hover:shadow-lg shadow-blue-500/25 active:scale-95 transition-all flex items-center space-x-2 cursor-pointer shrink-0 border border-blue-500/30 group"
@@ -114,7 +192,7 @@ export default function Header({
               <span className="tracking-wide">Input Pekerjaan</span>
             </button>
 
-            {/* 2. Interactive "TOTAL PEKERJAAN" Clickable Menu Badge */}
+            {/* Total Work Clickable Badge */}
             <button
               onClick={onOpenAllLogs}
               className="bg-slate-50/90 hover:bg-orange-50/50 border border-slate-200/90 hover:border-orange-300 rounded-xl px-3.5 py-1.5 flex items-center space-x-2.5 shadow-xs hover:shadow-md transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
@@ -136,8 +214,8 @@ export default function Header({
               </div>
             </button>
 
-            {/* 3. Live Clock Widget */}
-            <div className="hidden md:flex items-center space-x-2 bg-slate-50/90 border border-slate-200/90 rounded-xl px-3 py-1.5 shadow-2xs text-right">
+            {/* Live Clock Widget */}
+            <div className="flex items-center space-x-2 bg-slate-50/90 border border-slate-200/90 rounded-xl px-3 py-1.5 shadow-2xs text-right">
               <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
                 <Clock className="w-3.5 h-3.5" />
               </div>
@@ -151,22 +229,21 @@ export default function Header({
               </div>
             </div>
 
-            {/* 4. KAI Corporate Logo Container */}
+            {/* KAI Logo */}
             <div className="bg-white rounded-2xl px-3 py-1.5 border border-slate-200/80 shadow-xs hover:shadow-sm transition-all flex items-center justify-center h-11 w-24 shrink-0 overflow-hidden">
               <img
                 src="/kai-logo.png"
                 alt="Kereta Api Indonesia (KAI)"
                 className="max-h-7 max-w-full object-contain transition-transform hover:scale-105 duration-200"
                 style={{ maxHeight: '28px', maxWidth: '85px' }}
-                onError={(e) => {
-                  e.target.src = '/kai-logo.webp';
-                }}
+                onError={(e) => { e.target.src = '/kai-logo.webp'; }}
               />
             </div>
 
           </div>
 
         </div>
+
       </div>
     </header>
   );
