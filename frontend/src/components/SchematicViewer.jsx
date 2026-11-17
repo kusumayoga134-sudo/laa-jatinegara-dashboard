@@ -21,6 +21,8 @@ export default function SchematicViewer({
   logs = [],
   selectedLocation,
   onSelectLocation,
+  isAdmin = false,
+  onOpenAddLog,
 }) {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -37,6 +39,44 @@ export default function SchematicViewer({
   const pinchRef = useRef({ distance: 0, initialZoom: 1 });
   const touchStartPos = useRef({ x: 0, y: 0 });
   const hasMovedRef = useRef(false);
+
+  const [viewportBase, setViewportBase] = useState({ width: 1420, height: 615 });
+
+  // Responsive Fit Calculation: Guarantees that at Zoom 100%, the entire map fits perfectly centered without ANY side cut off!
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const calculateFit = () => {
+      const cw = el.clientWidth;
+      const ch = el.clientHeight;
+      if (!cw || !ch) return;
+
+      const pad = window.innerWidth < 640 ? 8 : 20;
+      const maxW = Math.max(cw - pad * 2, 280);
+      const maxH = Math.max(ch - pad * 2, 160);
+      const mapRatio = 3275 / 1419; // ~2.30796
+
+      let w, h;
+      if (maxW / maxH > mapRatio) {
+        h = maxH;
+        w = maxH * mapRatio;
+      } else {
+        w = maxW;
+        h = maxW / ratio;
+      }
+      setViewportBase({ width: Math.round(w), height: Math.round(h) });
+    };
+
+    calculateFit();
+    const ro = new ResizeObserver(calculateFit);
+    ro.observe(el);
+    window.addEventListener('resize', calculateFit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', calculateFit);
+    };
+  }, []);
 
   // Zoom handlers (Min 100% - Max 1000%)
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 10.0));
@@ -1718,9 +1758,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_44_1596_560',
-    code: 'WESEL W23B',
-    title: 'Wesel W23B1 / W23B2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W23B1',
+    title: 'Wesel W23B1 (Crossover Jalur 4 ke Jalur 3 Barat)',
+    km: 'KM 11+920',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1596.8 560.5 L 1613.8 580.0',
     color: '#cc6827',
@@ -1738,9 +1778,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_46_1617_584',
-    code: 'WESEL W23B',
-    title: 'Wesel W23B1 / W23B2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W23B2',
+    title: 'Wesel W23B2 (Lanjutan Crossover Jalur 4 ke Jalur 3 Barat)',
+    km: 'KM 11+950',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1617.5 584.0 L 1638.4 608.0',
     color: '#f8d731',
@@ -1749,8 +1789,8 @@ export default function SchematicViewer({
   {
     id: 'slope_47_1628_512',
     code: 'WESEL W83A2',
-    title: 'Wesel W83A2 (Crossover Jalur 4)',
-    km: 'KM 11+800 - KM 12+500',
+    title: 'Wesel W83A2 (Crossover Jalur 4 Timur)',
+    km: 'KM 11+900',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1628.1 512.7 L 1667.3 560.5',
     color: '#139a47',
@@ -1768,9 +1808,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_49_1692_560',
-    code: 'WESEL W23C',
-    title: 'Wesel W23C1 / W23C2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W23C1',
+    title: 'Wesel W23C1 (Crossover Jalur 4 ke Jalur 3 Timur)',
+    km: 'KM 12+000',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1692.9 560.5 L 1710.0 580.2',
     color: '#139a47',
@@ -1778,9 +1818,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_50_1713_584',
-    code: 'WESEL W23C',
-    title: 'Wesel W23C1 / W23C2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W23C2',
+    title: 'Wesel W23C2 (Lanjutan Crossover Jalur 4 ke Jalur 3 Timur)',
+    km: 'KM 12+050',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1713.8 584.1 L 1734.8 608.1',
     color: '#f8d731',
@@ -1788,9 +1828,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_51_1750_608',
-    code: 'WESEL W13D',
-    title: 'Wesel W13D1 / W13D2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W13D1',
+    title: 'Wesel W13D1 (Crossover Jalur 3 ke Jalur 2 Timur)',
+    km: 'KM 12+100',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1750.1 608.1 L 1767.3 627.8',
     color: '#f8d731',
@@ -1798,9 +1838,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_52_1750_656',
-    code: 'WESEL W33B',
-    title: 'Wesel W33B1 / W33B2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W33B1',
+    title: 'Wesel W33B1 / W33B2 (Crossover Jalur 2 ke Jalur 1 Barat)',
+    km: 'KM 12+150',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1750.1 656.2 L 1767.3 675.9',
     color: '#f8d731',
@@ -1828,9 +1868,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_55_1771_632',
-    code: 'WESEL W13D',
-    title: 'Wesel W13D1 / W13D2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W13D2',
+    title: 'Wesel W13D2 (Lanjutan Crossover Jalur 2 Timur)',
+    km: 'KM 12+150',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1771.6 632.5 L 1791.9 655.8',
     color: '#f8d731',
@@ -1838,9 +1878,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_56_1771_680',
-    code: 'WESEL W53',
-    title: 'Wesel W53B / W53C',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W53B',
+    title: 'Wesel W53B (Percabangan Jalur 1 Hulu ke FRP-JNG-14-33B2)',
+    km: 'KM 12+180',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1771.6 680.6 L 1791.9 703.9',
     color: '#ff00ff',
@@ -1868,9 +1908,9 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_59_1834_655',
-    code: 'WESEL W33C',
-    title: 'Wesel W33C1 / W33C2',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W33C1',
+    title: 'Wesel W33C1 / W33C2 (Crossover Jalur 2 ke Jalur 1 Timur)',
+    km: 'KM 12+320',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1834.1 655.8 L 1851.6 675.9',
     color: '#f8d731',
@@ -1878,92 +1918,12 @@ export default function SchematicViewer({
   },
   {
     id: 'slope_60_1856_680',
-    code: 'WESEL W53',
-    title: 'Wesel W53B / W53C',
-    km: 'KM 11+800 - KM 12+500',
+    code: 'WESEL W53C',
+    title: 'Wesel W53C (Percabangan Jalur 1 Hulu ke FRP-JNG-16-33C2)',
+    km: 'KM 12+350',
     category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
     d: 'M 1856.1 680.6 L 1876.4 703.9',
     color: '#ff00ff',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_61_2076_693',
-    code: 'AJ KM 13+300',
-    title: 'Air Joint Overlap KM 13+300',
-    km: 'KM 13+300',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2076.2 693.1 L 2088.8 712.9',
-    color: '#ff9f7f',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_62_2078_646',
-    code: 'AJ KM 13+300',
-    title: 'Air Joint Overlap KM 13+300',
-    km: 'KM 13+300',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2078.2 646.2 L 2090.8 666.0',
-    color: '#0000ff',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_63_2156_692',
-    code: 'AJ KM 14+100',
-    title: 'Air Joint Overlap KM 14+100',
-    km: 'KM 14+100',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2156.3 692.7 L 2169.0 712.5',
-    color: '#ff9f7f',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_64_2158_645',
-    code: 'AJ KM 14+100',
-    title: 'Air Joint Overlap KM 14+100',
-    km: 'KM 14+100',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2158.4 645.7 L 2171.1 665.6',
-    color: '#0000ff',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_65_2216_1053',
-    code: 'AJ KM 22+700',
-    title: 'Air Joint Overlap KM 22+700',
-    km: 'KM 22+700',
-    category: 'ST. CAKUNG - KRANJI',
-    d: 'M 2216.9 1053.9 L 2206.1 1070.8',
-    color: '#8a6ddd',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_66_2220_1102',
-    code: 'AJ KM 22+700',
-    title: 'Air Joint Overlap KM 22+700',
-    km: 'KM 22+700',
-    category: 'ST. CAKUNG - KRANJI',
-    d: 'M 2220.2 1102.5 L 2207.4 1122.3',
-    color: '#cc6827',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_67_2242_692',
-    code: 'AJ KM 14+700',
-    title: 'Air Joint Overlap KM 14+700',
-    km: 'KM 14+700',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2242.7 692.5 L 2255.4 712.3',
-    color: '#ff9f7f',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_68_2244_645',
-    code: 'AJ KM 14+700',
-    title: 'Air Joint Overlap KM 14+700',
-    km: 'KM 14+700',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2244.8 645.6 L 2257.5 665.4',
-    color: '#0000ff',
     isCrossing: true,
   },
   {
@@ -2027,26 +1987,6 @@ export default function SchematicViewer({
     isCrossing: true,
   },
   {
-    id: 'slope_75_2628_694',
-    code: 'AJ KM 16+500',
-    title: 'Air Joint Overlap KM 16+500',
-    km: 'KM 16+500',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2628.6 694.2 L 2641.4 714.1',
-    color: '#00ff00',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_76_2630_646',
-    code: 'AJ KM 16+500',
-    title: 'Air Joint Overlap KM 16+500',
-    km: 'KM 16+500',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 2630.1 646.5 L 2642.8 666.3',
-    color: '#ff00ff',
-    isCrossing: true,
-  },
-  {
     id: 'slope_77_2644_1084',
     code: 'WESEL CAKUNG',
     title: 'Wesel W11A / W21A St. Cakung',
@@ -2064,46 +2004,6 @@ export default function SchematicViewer({
     category: 'ST. CAKUNG - KRANJI',
     d: 'M 2666.7 1112.1 L 2648.4 1089.3',
     color: '#cc6827',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_79_3047_1055',
-    code: 'LOOP BUA-KLDB',
-    title: 'Tikungan Loop Menurun Buaran - Klender Baru #79',
-    km: 'KM 18+800 - KM 19+300',
-    category: 'PETAK BUARAN - KLENDER BARU (MENURUN)',
-    d: 'M 3047.8 1055.4 L 3035.1 1075.2',
-    color: '#ff0000',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_80_3047_1103',
-    code: 'LOOP BUA-KLDB',
-    title: 'Tikungan Loop Menurun Buaran - Klender Baru #80',
-    km: 'KM 18+800 - KM 19+300',
-    category: 'PETAK BUARAN - KLENDER BARU (MENURUN)',
-    d: 'M 3047.8 1103.1 L 3035.1 1122.9',
-    color: '#f8d731',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_81_3089_645',
-    code: 'AJ KM 18+800',
-    title: 'Air Joint Overlap KM 18+800 (Buaran Timur)',
-    km: 'KM 18+800',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 3089.4 645.7 L 3102.2 665.5',
-    color: '#f8d731',
-    isCrossing: true,
-  },
-  {
-    id: 'slope_82_3089_693',
-    code: 'AJ KM 18+800',
-    title: 'Air Joint Overlap KM 18+800 (Buaran Timur)',
-    km: 'KM 18+800',
-    category: 'PETAK JATINEGARA - KLENDER - BUARAN',
-    d: 'M 3089.4 693.4 L 3102.2 713.2',
-    color: '#ff0000',
     isCrossing: true,
   },
   {
@@ -2295,7 +2195,7 @@ export default function SchematicViewer({
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[480px] xs:h-[520px] sm:h-[580px] lg:h-[720px]'
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[calc(100vh-215px)] min-h-[480px] max-h-[820px]'
         }`}
       >
         {/* Floating Quick Hint */}
@@ -2431,17 +2331,30 @@ export default function SchematicViewer({
               )}
             </div>
 
-            {/* Direct Action Button to View Work History */}
-            <button
-              onClick={() => onSelectLocation && onSelectLocation(hoveredLine)}
-              className="w-full mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between shadow-sm cursor-pointer transition-all active:scale-98"
-            >
-              <span className="flex items-center space-x-1.5">
-                <ClipboardList className="w-3.5 h-3.5" />
-                <span>Lihat Riwayat Pekerjaan Seksi</span>
-              </span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+                        {/* Direct Action Button to View Work History */}
+            <div className="flex items-center space-x-2 mt-3">
+              <button
+                onClick={() => onSelectLocation && onSelectLocation(hoveredLine)}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-between shadow-sm cursor-pointer transition-all active:scale-98"
+              >
+                <span className="flex items-center space-x-1.5">
+                  <ClipboardList className="w-3.5 h-3.5" />
+                  <span>Lihat Riwayat Pekerjaan</span>
+                </span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              {isAdmin && onOpenAddLog && (
+                <button
+                  onClick={() => onOpenAddLog(hoveredLine)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center space-x-1 shadow-sm cursor-pointer transition-all active:scale-98 shrink-0"
+                  title="Catat Pekerjaan Baru pada Seksi Ini"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Catat</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -2455,13 +2368,19 @@ export default function SchematicViewer({
           className="relative flex items-center justify-center shrink-0 p-1 sm:p-4"
         >
           {/* Container tightly wrapping cropped schematic (Centered) */}
-          <div className="relative w-[1100px] sm:w-[1420px] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0">
+          <div
+            style={{
+              width: `${viewportBase.width}px`,
+              height: `${viewportBase.height}px`,
+            }}
+            className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0"
+          >
             
             {/* Cropped AutoCAD Master Image */}
             <img
               src={imageSrc}
               alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara - Potongan Garis Tepi Terluar"
-              className="w-full h-auto block select-none"
+              className="w-full h-full object-contain block select-none pointer-events-none"
               draggable={false}
             />
 
@@ -2546,81 +2465,7 @@ export default function SchematicViewer({
                           }}
                         />
 
-                        {/* Tanda Pemisah Awal (Start Divider: AJ / AS / FRP / DS) */}
-                        {line.xStart && line.y && line.startDivider && (
-                          <g>
-                            <line
-                              x1={line.xStart - 8}
-                              y1={line.y - 8}
-                              x2={line.xStart + 8}
-                              y2={line.y + 8}
-                              stroke="#000000"
-                              strokeWidth="4"
-                            />
-                            <line
-                              x1={line.xStart - 8}
-                              y1={line.y + 8}
-                              x2={line.xStart + 8}
-                              y2={line.y - 8}
-                              stroke="#000000"
-                              strokeWidth="4"
-                            />
-                            <line
-                              x1={line.xStart - 8}
-                              y1={line.y - 8}
-                              x2={line.xStart + 8}
-                              y2={line.y + 8}
-                              stroke={line.color}
-                              strokeWidth="2.5"
-                            />
-                            <line
-                              x1={line.xStart - 8}
-                              y1={line.y + 8}
-                              x2={line.xStart + 8}
-                              y2={line.y - 8}
-                              stroke={line.color}
-                              strokeWidth="2.5"
-                            />
-                          </g>
-                        )}
-
-                        {/* Tanda Pemisah Akhir (End Divider: AJ / AS / FRP / DS) */}
-                        {line.xEnd && line.y && line.endDivider && (
-                          <g>
-                            <line
-                              x1={line.xEnd - 8}
-                              y1={line.y - 8}
-                              x2={line.xEnd + 8}
-                              y2={line.y + 8}
-                              stroke="#000000"
-                              strokeWidth="4"
-                            />
-                            <line
-                              x1={line.xEnd - 8}
-                              y1={line.y + 8}
-                              x2={line.xEnd + 8}
-                              y2={line.y - 8}
-                              stroke="#000000"
-                              strokeWidth="4"
-                            />
-                            <line
-                              x1={line.xEnd - 8}
-                              y1={line.y - 8}
-                              x2={line.xEnd + 8}
-                              y2={line.y + 8}
-                              stroke={line.color}
-                              strokeWidth="2.5"
-                            />
-                            <line
-                              x1={line.xEnd - 8}
-                              y1={line.y + 8}
-                              x2={line.xEnd + 8}
-                              y2={line.y - 8}
-                              stroke={line.color}
-                              strokeWidth="2.5"
-                            />
-                          </g>
-                        )}
+                        
                       </>
                     )}
                   </g>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import SchematicViewer from './components/SchematicViewer';
 import WorkHistoryPanel from './components/WorkHistoryPanel';
+import LoginModal from './components/LoginModal';
 import { api } from './services/api';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function App() {
   const [stations, setStations] = useState([]);
@@ -12,6 +13,18 @@ export default function App() {
   
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Authentication State (Dual System: Public Monitoring vs. Admin Mode)
+  const [isAdmin, setIsAdmin] = useState(() => {
+    try {
+      const saved = localStorage.getItem('laa_admin_auth');
+      return Boolean(saved && JSON.parse(saved)?.role === 'ADMIN');
+    } catch {
+      return false;
+    }
+  });
+
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ message, type });
@@ -23,7 +36,7 @@ export default function App() {
       const [stationsRes, switchesRes, logsRes] = await Promise.all([
         api.getStations().catch(() => ({ data: [] })),
         api.getSwitches().catch(() => ({ data: [] })),
-        api.getLogs(200).catch(() => ({ data: [] })),
+        api.getLogs(500).catch(() => ({ data: [] })),
       ]);
 
       if (stationsRes.data) setStations(stationsRes.data);
@@ -38,40 +51,105 @@ export default function App() {
     loadInitialData();
     const interval = setInterval(async () => {
       try {
-        const logsRes = await api.getLogs(200);
+        const logsRes = await api.getLogs(500);
         if (logsRes?.data) setLogs(logsRes.data);
       } catch (err) {}
     }, 10000);
     return () => clearInterval(interval);
   }, []);
 
+  // Admin Login & Logout
+  const handleLoginSuccess = (adminData) => {
+    setIsAdmin(true);
+    showToast(`Selamat datang, ${adminData.name || 'Admin UPT 1.9'}. Mode Admin Aktif.`, 'success');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('laa_admin_auth');
+    setIsAdmin(false);
+    showToast('Telah keluar dari Mode Admin. Beralih ke Mode Monitoring Pengguna.', 'success');
+  };
+
+  // CRUD Log Handlers
   const handleAddLog = async (logData) => {
-    await api.createLog(logData);
-    showToast('Catatan pekerjaan berhasil disimpan ke database', 'success');
-    const logsRes = await api.getLogs(200);
-    if (logsRes.data) setLogs(logsRes.data);
+    try {
+      await api.createLog(logData);
+      showToast('Catatan pekerjaan baru berhasil disimpan!', 'success');
+      const logsRes = await api.getLogs(500);
+      if (logsRes.data) setLogs(logsRes.data);
+    } catch (err) {
+      showToast(err.message || 'Gagal menyimpan catatan pekerjaan', 'error');
+      throw err;
+    }
+  };
+
+  const handleUpdateLog = async (id, logData) => {
+    try {
+      await api.updateLog(id, logData);
+      showToast('Catatan pekerjaan berhasil diperbarui!', 'success');
+      const logsRes = await api.getLogs(500);
+      if (logsRes.data) setLogs(logsRes.data);
+    } catch (err) {
+      showToast(err.message || 'Gagal memperbarui catatan pekerjaan', 'error');
+      throw err;
+    }
+  };
+
+  const handleDeleteLog = async (id) => {
+    try {
+      await api.deleteLog(id);
+      showToast('Catatan pekerjaan berhasil dihapus!', 'success');
+      const logsRes = await api.getLogs(500);
+      if (logsRes.data) setLogs(logsRes.data);
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus catatan pekerjaan', 'error');
+      throw err;
+    }
+  };
+
+  // Quick Open Add Log from Header or Line
+  const handleOpenAddLog = (lineTarget) => {
+    if (lineTarget) {
+      setSelectedLocation(lineTarget);
+    } else {
+      setSelectedLocation({
+        code: 'NASPAN 1 JNG-KLD (HU)',
+        title: 'Input Catatan Pekerjaan Baru',
+        km: 'Lintas LAA 1.9',
+        category: 'INPUT PEKERJAAN',
+        isAllLogs: true,
+      });
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
-      {/* Toast Notification (White Mode) */}
+      {/* Toast Notification */}
       {toastMessage && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs sm:text-sm font-bold backdrop-blur-md animate-in slide-in-from-bottom duration-200 border ${
+          className={`fixed bottom-6 right-6 z-60 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs sm:text-sm font-bold backdrop-blur-md animate-in slide-in-from-bottom duration-200 border ${
             toastMessage.type === 'error'
-              ? 'bg-red-50 text-red-800 border-red-300'
+              ? 'bg-rose-50 text-rose-800 border-rose-300'
               : 'bg-emerald-50 text-emerald-800 border-emerald-300'
           }`}
         >
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          {toastMessage.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          )}
           <span>{toastMessage.message}</span>
         </div>
       )}
 
-      {/* Minimalist White Header */}
+      {/* Header with Dual System (Monitoring vs. Admin) */}
       <Header
         totalLogsCount={logs.length}
+        isAdmin={isAdmin}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
+        onLogout={handleLogout}
+        onOpenAddLog={handleOpenAddLog}
         onOpenAllLogs={() =>
           setSelectedLocation({
             code: '',
@@ -83,28 +161,41 @@ export default function App() {
         }
       />
 
-      {/* Main AutoCAD Map Workspace (White Mode) */}
-      <main className="flex-1 max-w-[1700px] w-full mx-auto px-1.5 py-1.5 sm:px-6 sm:py-4">
+      {/* Main AutoCAD Map Workspace (White Mode, Responsive Fit, Zero Side-Clipping) */}
+      <main className="flex-1 max-w-[1720px] w-full mx-auto px-1.5 py-1.5 sm:px-6 sm:py-4">
         <SchematicViewer
           logs={logs}
           selectedLocation={selectedLocation}
           onSelectLocation={(loc) => setSelectedLocation(loc)}
+          isAdmin={isAdmin}
+          onOpenAddLog={handleOpenAddLog}
         />
       </main>
 
-      {/* Work History Drawer & Form */}
+      {/* Work History Drawer & Form (Read-only for public, Full CRUD for Admin) */}
       {selectedLocation && (
         <WorkHistoryPanel
           locationData={selectedLocation}
           logs={logs}
+          isAdmin={isAdmin}
           onClose={() => setSelectedLocation(null)}
           onAddLog={handleAddLog}
+          onUpdateLog={handleUpdateLog}
+          onDeleteLog={handleDeleteLog}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
         />
       )}
 
+      {/* Admin Login Modal (Security: User 1.9, Password 191) */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
       {/* Minimalist White Footer */}
       <footer className="bg-white border-t border-slate-200 py-2.5 px-3 sm:py-3.5 sm:px-6 text-[11px] sm:text-xs text-slate-500 mt-auto">
-        <div className="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
+        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
           <div>
             <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA
           </div>

@@ -8,6 +8,10 @@ const telemetryController = require('../controllers/telemetryController');
 const logController = require('../controllers/logController');
 const alertController = require('../controllers/alertController');
 const statsController = require('../controllers/statsController');
+const authController = require('../controllers/authController');
+
+// Authentication (Admin Security: User 1.9, Password 191)
+router.post('/auth/login', authController.login);
 
 // Dashboard Overview Stats
 router.get('/stats', statsController.getDashboardStats);
@@ -29,9 +33,11 @@ router.get('/sections', assetController.getAllSections);
 // Telemetry & Substations
 router.get('/telemetry', telemetryController.getTelemetry);
 
-// Maintenance Logs
+// Maintenance Logs (Read for all, Create/Update/Delete for Admin)
 router.get('/logs', logController.getAllLogs);
 router.post('/logs', logController.createLog);
+router.put('/logs/:id', logController.updateLog);
+router.delete('/logs/:id', logController.deleteLog);
 
 // SCADA Alerts
 router.get('/alerts', alertController.getAllAlerts);

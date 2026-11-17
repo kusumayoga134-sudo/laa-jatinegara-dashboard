@@ -1,6 +1,18 @@
 const BASE_URL = '/api';
 
 export const api = {
+  // Auth Login (Security: User 1.9, Password 191)
+  async login(username, password) {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login gagal');
+    return data;
+  },
+
   // Stats
   async getStats() {
     const res = await fetch(`${BASE_URL}/stats`);
@@ -72,8 +84,8 @@ export const api = {
     return res.json();
   },
 
-  // Logs
-  async getLogs(limit = 50) {
+  // Logs (CRUD)
+  async getLogs(limit = 500) {
     const res = await fetch(`${BASE_URL}/logs?limit=${limit}`);
     if (!res.ok) throw new Error('Gagal mengambil log');
     return res.json();
@@ -90,6 +102,26 @@ export const api = {
     return data;
   },
 
+  async updateLog(id, payload) {
+    const res = await fetch(`${BASE_URL}/logs/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal memperbarui log');
+    return data;
+  },
+
+  async deleteLog(id) {
+    const res = await fetch(`${BASE_URL}/logs/${id}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal menghapus log');
+    return data;
+  },
+
   // Alerts
   async getAlerts() {
     const res = await fetch(`${BASE_URL}/alerts`);
@@ -101,8 +133,6 @@ export const api = {
     const res = await fetch(`${BASE_URL}/alerts/${id}/ack`, {
       method: 'PATCH',
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Gagal konfirmasi alarm');
-    return data;
+    return res.json();
   },
 };

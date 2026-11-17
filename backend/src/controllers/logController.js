@@ -2,7 +2,7 @@ const prisma = require('../db');
 
 exports.getAllLogs = async (req, res) => {
   try {
-    const { targetType, status, targetCode, search, limit = 200 } = req.query;
+    const { targetType, status, targetCode, search, limit = 500 } = req.query;
     const where = {};
     if (targetType) where.targetType = targetType;
     if (status) where.status = status;
@@ -53,5 +53,61 @@ exports.createLog = async (req, res) => {
   } catch (error) {
     console.error('Error creating log:', error);
     res.status(500).json({ success: false, message: 'Gagal membuat catatan pekerjaan' });
+  }
+};
+
+exports.updateLog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { targetType, targetCode, actionType, technician, description, status, timestamp } = req.body;
+
+    const existing = await prisma.maintenanceLog.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Catatan pekerjaan tidak ditemukan' });
+    }
+
+    const updated = await prisma.maintenanceLog.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(targetType && { targetType }),
+        ...(targetCode && { targetCode }),
+        ...(actionType && { actionType }),
+        ...(technician && { technician }),
+        ...(description && { description }),
+        ...(status && { status }),
+        ...(timestamp && { timestamp: new Date(timestamp) }),
+      },
+    });
+
+    res.json({ success: true, message: 'Catatan pekerjaan berhasil diperbarui', data: updated });
+  } catch (error) {
+    console.error('Error updating log:', error);
+    res.status(500).json({ success: false, message: 'Gagal memperbarui catatan pekerjaan' });
+  }
+};
+
+exports.deleteLog = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existing = await prisma.maintenanceLog.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Catatan pekerjaan tidak ditemukan' });
+    }
+
+    await prisma.maintenanceLog.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.json({ success: true, message: 'Catatan pekerjaan berhasil dihapus' });
+  } catch (error) {
+    console.error('Error deleting log:', error);
+    res.status(500).json({ success: false, message: 'Gagal menghapus catatan pekerjaan' });
   }
 };

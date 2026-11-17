@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import {
+  PlusCircle,
+  Edit3,
+  Trash2,
+  Save,
+  AlertTriangle,
   Clock,
   Wrench,
   CheckCircle2,
@@ -272,6 +277,11 @@ export default function WorkHistoryPanel({
   locationData,
   logs = [],
   onClose,
+  isAdmin = false,
+  onAddLog,
+  onUpdateLog,
+  onDeleteLog,
+  onOpenLogin,
 }) {
   const isAllLogsMode = Boolean(locationData?.isAllLogs);
 
@@ -279,10 +289,27 @@ export default function WorkHistoryPanel({
   const [stationFilter, setStationFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Admin Form State (Add / Edit)
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingLogId, setEditingLogId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    targetCode: '',
+    actionType: 'PENGUKURAN_KETEBALAN_KAWAT',
+    technician: '',
+    description: '',
+    status: 'COMPLETED',
+    timestamp: new Date().toISOString().slice(0, 16),
+  });
+
   if (!locationData) return null;
 
-  // Filter logs relevant to location or station
   const locationCode = locationData.code || locationData.name || '';
+  const locationTitle = locationData.title || locationData.name || locationCode;
+
+  // Filter logs relevant to location or station
   const matchingLogs = logs.filter((log) => {
     // If opened from a specific track line on the map
     if (!isAllLogsMode && locationCode) {
@@ -338,6 +365,66 @@ export default function WorkHistoryPanel({
     return action.replace(/_/g, ' ');
   };
 
+  // Open Form to Add New Work Log
+  const handleOpenAdd = () => {
+    setEditingLogId(null);
+    setFormData({
+      targetCode: locationCode || 'NASPAN 1 JNG-KLD (HU)',
+      actionType: 'PENGUKURAN_KETEBALAN_KAWAT',
+      technician: 'Tim UPT Resor LAA 1.9',
+      description: '',
+      status: 'COMPLETED',
+      timestamp: new Date().toISOString().slice(0, 16),
+    });
+    setIsFormOpen(true);
+  };
+
+  // Open Form to Edit Existing Work Log
+  const handleOpenEdit = (log) => {
+    setEditingLogId(log.id);
+    const dateStr = log.timestamp ? new Date(log.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
+    setFormData({
+      targetCode: log.targetCode || '',
+      actionType: log.actionType || 'INSPEKSI',
+      technician: log.technician || '',
+      description: log.description || '',
+      status: log.status || 'COMPLETED',
+      timestamp: dateStr,
+    });
+    setIsFormOpen(true);
+  };
+
+  // Handle Save
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.targetCode || !formData.technician || !formData.description) return;
+
+    setSubmitting(true);
+    try {
+      if (editingLogId) {
+        if (onUpdateLog) await onUpdateLog(editingLogId, formData);
+      } else {
+        if (onAddLog) await onAddLog(formData);
+      }
+      setIsFormOpen(false);
+      setEditingLogId(null);
+    } catch (err) {
+      console.error('Error saving log:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle Delete
+  const handleConfirmDelete = async (id) => {
+    try {
+      if (onDeleteLog) await onDeleteLog(id);
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error('Error deleting log:', err);
+    }
+  };
+
   return (
     <>
       {/* Mobile Backdrop Overlay */}
@@ -347,13 +434,13 @@ export default function WorkHistoryPanel({
       />
 
       {/* Main Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[580px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
         
         {/* ========================================================
             DRAWER HEADER
             ======================================================== */}
         <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 sm:p-5 border-b border-slate-200 flex items-start justify-between relative">
-          <div className="flex items-start space-x-3.5 relative z-10">
+          <div className="flex items-start space-x-3.5 relative z-10 min-w-0 pr-2">
             
             {/* Header Icon */}
             <div className={`p-3 rounded-2xl text-white shadow-md mt-0.5 shrink-0 ${
@@ -368,8 +455,8 @@ export default function WorkHistoryPanel({
               )}
             </div>
 
-            <div>
-              {/* Badges: ONLY displayed in single line mode (deleted from total pekerjaan) */}
+            <div className="min-w-0">
+              {/* Badges: ONLY displayed in single line mode */}
               {!isAllLogsMode && (
                 <div className="flex items-center space-x-2 flex-wrap gap-y-1 mb-1">
                   <span className="px-2.5 py-0.5 text-xs font-black rounded-full border uppercase bg-blue-50 text-blue-800 border-blue-200">
@@ -383,13 +470,13 @@ export default function WorkHistoryPanel({
                 </div>
               )}
 
-              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-snug truncate">
                 {isAllLogsMode
                   ? 'Daftar Riwayat Pekerjaan LAA'
-                  : locationData.title || locationData.name || locationCode}
+                  : locationTitle}
               </h2>
 
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5 truncate">
                 {isAllLogsMode
                   ? `Total ${logs.length} catatan pekerjaan pemeliharaan pada lintas Resor LAA 1.9 Jatinegara`
                   : 'Riwayat inspeksi, pemeliharaan teknis, dan pencatatan pekerjaan seksi'}
@@ -397,13 +484,26 @@ export default function WorkHistoryPanel({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer relative z-10 shrink-0"
-            title="Tutup Panel (Esc)"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-1.5 shrink-0 relative z-10">
+            {isAdmin && (
+              <button
+                onClick={handleOpenAdd}
+                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center space-x-1 shadow-sm transition cursor-pointer"
+                title="Catat Pekerjaan Baru"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Catat Pekerjaan</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+              title="Tutup Panel (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* ========================================================
@@ -514,7 +614,7 @@ export default function WorkHistoryPanel({
                   key={log.id}
                   className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 space-y-2.5 relative overflow-hidden group"
                 >
-                  {/* 1. Glowing Left Accent Strip matching exact AutoCAD line color on map */}
+                  {/* Glowing Left Accent Strip matching exact AutoCAD line color on map */}
                   <div
                     className="absolute top-0 bottom-0 left-0 w-2 group-hover:w-2.5 transition-all"
                     style={{
@@ -523,7 +623,7 @@ export default function WorkHistoryPanel({
                     }}
                   />
 
-                  {/* 2. Header Bar: Waktu & Lokasi dengan Warna Garis Asli */}
+                  {/* Header Bar: Waktu & Lokasi dengan Warna Garis Asli */}
                   <div className="flex items-center justify-between text-xs pl-2 flex-wrap gap-1.5">
                     <div className="flex items-center space-x-1.5 text-blue-700 font-mono font-bold text-xs">
                       <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
@@ -559,7 +659,7 @@ export default function WorkHistoryPanel({
                     </div>
                   </div>
 
-                  {/* 3. Identifikasi Nama Garis / Warna Seksi Pada Peta */}
+                  {/* Identifikasi Nama Garis / Warna Seksi Pada Peta */}
                   <div className="pl-2">
                     <div className="flex items-center space-x-1.5">
                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -585,14 +685,14 @@ export default function WorkHistoryPanel({
                     </h4>
                   </div>
 
-                  {/* 4. Deskripsi Hasil Pekerjaan & Nilai Ukur */}
+                  {/* Deskripsi Hasil Pekerjaan & Nilai Ukur */}
                   <div className="pl-2">
                     <div className="bg-slate-50/90 p-3 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-normal">
                       {log.description}
                     </div>
                   </div>
 
-                  {/* 5. Pelaksana & Tag Target */}
+                  {/* Pelaksana & Tag Target */}
                   <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100 pl-2 flex-wrap gap-1">
                     <span className="flex items-center space-x-1.5">
                       <HardHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -611,6 +711,28 @@ export default function WorkHistoryPanel({
                       {log.targetCode}
                     </span>
                   </div>
+
+                  {/* Admin Action Buttons (Edit & Delete) */}
+                  {isAdmin && (
+                    <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 pl-2">
+                      <button
+                        onClick={() => handleOpenEdit(log)}
+                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-1 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Edit Catatan Pekerjaan"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirmId(log.id)}
+                        className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 py-1 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Hapus Catatan Pekerjaan"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Hapus</span>
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               );
@@ -632,6 +754,205 @@ export default function WorkHistoryPanel({
         </div>
 
       </div>
+
+      {/* ========================================================
+          ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN
+          ======================================================== */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            
+            {/* Form Top Ribbon */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-amber-500 to-emerald-500" />
+
+            {/* Form Header */}
+            <div className="p-4 sm:p-5 flex items-start justify-between border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-center space-x-3">
+                <div className={`p-2.5 rounded-xl text-white shadow-sm ${editingLogId ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+                  {editingLogId ? <Edit3 className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    {editingLogId ? 'Edit Catatan Pekerjaan LAA' : 'Input Catatan Pekerjaan Baru'}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    UPT Resor LAA 1.9 Jatinegara • Mode Administrator
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsFormOpen(false)}
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form Fields */}
+            <form onSubmit={handleFormSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
+              
+              {/* Target Seksi / Line */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span>Target Line / Seksi / Naspan / Wesel:</span>
+                  <span className="text-[10px] text-blue-600 font-mono">Wajib</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.targetCode}
+                  onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
+                  placeholder="Contoh: NASPAN 1 JNG-KLD (HU), WESEL W83A1, DS 5"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900"
+                />
+              </div>
+
+              {/* Jenis Pekerjaan */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  Jenis Tindakan / Pekerjaan:
+                </label>
+                <select
+                  value={formData.actionType}
+                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
+                >
+                  <option value="PENGUKURAN_KETEBALAN_KAWAT">PENGUKURAN KETEBALAN KAWAT KONTAK</option>
+                  <option value="PENYETELAN_DROPPER">PENYETELAN DROPPER & KETINGGIAN (STAGGER)</option>
+                  <option value="THERMOVISION_HOTSPOT">THERMOVISION SCANNING / PEMERIKSAAN SUHU</option>
+                  <option value="PEMBERSIHAN_ISOLATOR">PEMBERSIHAN ISOLATOR KERAMIK & FRP</option>
+                  <option value="PEMERIKSAAN_STEADY_ARM">PEMERIKSAAN STEADY ARM & PIPA KLEM</option>
+                  <option value="UJI_ISOLASI_AIR_SECTION">UJI TAHANAN ISOLASI AIR SECTION / AIR JOINT</option>
+                  <option value="PERBAIKAN_JUMPER_WIRE">PERBAIKAN / PENGGANTIAN JUMPER WIRE</option>
+                  <option value="INSPEKSI_ZIG_ZAG_WIRE">INSPEKSI ZIG-ZAG KAWAT KONTAK</option>
+                  <option value="PENGGANTIAN_DROPPER_PUTUS">PENGGANTIAN DROPPER PUTUS / KENDOR</option>
+                  <option value="INSPEKSI_WESEL">INSPEKSI MEKANIKAL WESEL & SEPUR SIMPAN</option>
+                  <option value="PERAWATAN_PISAU_DS">PERAWATAN PISAU KONTAK DISCONNECTING SWITCH</option>
+                  <option value="KALIBRASI_PENENGANG_BEBAN">KALIBRASI PULLEY / BANDUL PENENGANG BEBAN</option>
+                  <option value="PEMELIHARAAN_RUTIN">PEMELIHARAAN RUTIN PREVENTIF</option>
+                </select>
+              </div>
+
+              {/* Pelaksana / Teknisi */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  Pelaksana / Teknisi Bertugas:
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.technician}
+                  onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
+                  placeholder="Contoh: Regu Pemeliharaan LAA (Ahmad Subarkah)"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900"
+                />
+              </div>
+
+              {/* Tanggal & Waktu WIB */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  Waktu Pelaksanaan Pekerjaan (WIB):
+                </label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={formData.timestamp}
+                  onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
+                />
+              </div>
+
+              {/* Uraian Pekerjaan (Description) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  Uraian Hasil Pekerjaan & Nilai Pengukuran:
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Jelaskan detail tindakan teknis, nilai ukur (mm/volt/ohm), kondisi komponen, serta window kerja malam..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed"
+                />
+              </div>
+
+              {/* Status */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  Status Pekerjaan:
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
+                >
+                  <option value="COMPLETED">SELESAI (COMPLETED)</option>
+                  <option value="IN_PROGRESS">SEDANG PROSES (IN PROGRESS)</option>
+                  <option value="SCHEDULED">TERJADWAL (SCHEDULED)</option>
+                </select>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center space-x-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="w-1/3 py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-2/3 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingLogId ? 'Simpan Perubahan' : 'Catat Pekerjaan Baru'}</span>
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          DELETE CONFIRMATION DIALOG
+          ======================================================== */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl p-5 shadow-2xl border border-slate-200 max-w-sm w-full space-y-3.5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-2 text-rose-600">
+              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Hapus Catatan Pekerjaan?</h4>
+            </div>
+            
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Catatan riwayat pekerjaan pemeliharaan ini akan dihapus secara permanen dari basis data UPT Resor LAA 1.9.
+            </p>
+
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => handleConfirmDelete(deleteConfirmId)}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs font-bold shadow-sm transition cursor-pointer"
+              >
+                Ya, Hapus Catatan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
