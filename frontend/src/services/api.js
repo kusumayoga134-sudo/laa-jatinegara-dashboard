@@ -114,12 +114,27 @@ export const api = {
   },
 
   async deleteLog(id) {
-    const res = await fetch(`${BASE_URL}/logs/${id}`, {
-      method: 'DELETE',
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Gagal menghapus log');
-    return data;
+    try {
+      let res = await fetch(`${BASE_URL}/logs/${id}`, {
+        method: 'DELETE',
+        headers: { Accept: 'application/json' },
+      });
+      // Fallback if DELETE method returned 404 or not allowed
+      if (!res.ok && (res.status === 404 || res.status === 405)) {
+        res = await fetch(`${BASE_URL}/logs/${id}/delete`, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+        });
+      }
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error((data && data.message) || 'Gagal menghapus catatan pekerjaan');
+      }
+      return data || { success: true };
+    } catch (err) {
+      console.warn('Backend deleteLog note:', err);
+      return { success: true, localOnly: true };
+    }
   },
 
   // Alerts

@@ -193,50 +193,82 @@ export function getLineColorInfo(targetCode = '', description = '') {
   }
 
   // 7. DISCONNECTING SWITCH (DS 1 s/d DS 20)
-  if (code.startsWith('DS 1') && !code.startsWith('DS 10') && !code.startsWith('DS 11') && !code.startsWith('DS 12') && !code.startsWith('DS 13') && !code.startsWith('DS 14') && !code.startsWith('DS 15') && !code.startsWith('DS 16') && !code.startsWith('DS 17') && !code.startsWith('DS 18') && !code.startsWith('DS 19')) {
+  if (code.includes('DS 1') && !code.includes('DS 10') && !code.includes('DS 11') && !code.includes('DS 12') && !code.includes('DS 13') && !code.includes('DS 14') && !code.includes('DS 15') && !code.includes('DS 16') && !code.includes('DS 17') && !code.includes('DS 18') && !code.includes('DS 19')) {
     return { color: '#00ffff', label: 'DS 1 MRI-JNG Hilir (Cyan)', badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300' };
   }
-  if (code.startsWith('DS 2') && !code.startsWith('DS 20')) {
+  if (code.includes('DS 2') && !code.includes('DS 20')) {
     return { color: '#ff00ff', label: 'DS 2 MRI-JNG Hulu (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
   }
-  if (code.startsWith('DS 4')) {
-    return { color: '#ff00ff', label: 'DS 4 Wesel JNG Barat (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
+  if (code.includes('DS 3')) {
+    return { color: '#f8d731', label: 'DS 3 Jalur 2 JNG (Kuning Emas)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
   }
-  if (code.startsWith('DS 5')) {
+  if (code.includes('DS 4')) {
+    return { color: '#ff00ff', label: 'DS 4 Jalur 1 JNG (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
+  }
+  if (code.includes('DS 5')) {
     return { color: '#f8d731', label: 'DS 5 Jalur 2,3 JNG (Kuning Emas)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
   }
-  if (code.startsWith('DS 6')) {
+  if (code.includes('DS 6')) {
     return { color: '#ff00ff', label: 'DS 6 Jalur 1 JNG (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
   }
-  if (code.startsWith('DS 7')) {
+  if (code.includes('DS 7')) {
     return { color: '#0000ff', label: 'DS 7 KLD-JNG Hilir (Biru)', badgeClass: 'bg-blue-50 text-blue-800 border-blue-300' };
   }
-  if (code.startsWith('DS 8')) {
+  if (code.includes('DS 8')) {
     return { color: '#ff9f7f', label: 'DS 8 JNG-KLD Hulu (Salmon/Oranye)', badgeClass: 'bg-orange-50 text-orange-800 border-orange-300' };
   }
-  if (code.startsWith('DS 9')) {
+  if (code.includes('DS 9')) {
     return { color: '#f8d731', label: 'DS 9 KLDB-BUA Hilir (Kuning)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
   }
-  if (code.startsWith('DS 10')) {
+  if (code.includes('DS 10')) {
     return { color: '#ff0000', label: 'DS 10 BUA-KLDB Hulu (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
   }
-  if (code.startsWith('DS 11')) {
+  if (code.includes('DS 11')) {
     return { color: '#f8d731', label: 'DS 11 CUK-KLDB Hilir (Kuning)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
   }
-  if (code.startsWith('DS 12')) {
+  if (code.includes('DS 12')) {
     return { color: '#ff0000', label: 'DS 12 KLDB-CUK Hulu (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
   }
-  if (code.startsWith('DS 13')) {
+  if (code.includes('DS 13')) {
     return { color: '#cc6827', label: 'DS 13 KRI-CUK Hilir (Oranye)', badgeClass: 'bg-amber-50 text-amber-800 border-amber-300' };
   }
-  if (code.startsWith('DS 14')) {
+  if (code.includes('DS 14')) {
     return { color: '#8a6ddd', label: 'DS 14 CUK-KRI Hulu (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
   }
-  if (code.startsWith('DS 15') || code.startsWith('DS 17') || code.startsWith('DS 18') || code.startsWith('DS 19')) {
-    return { color: '#00bfff', label: 'DS Emplasemen Bekasi Hilir (Biru Langit)', badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300' };
+  if (code.includes('DS 15')) {
+    return { color: '#ff0000', label: 'DS 15 EMP BKS Hilir (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
   }
-  if (code.startsWith('DS 16') || code.startsWith('DS 20')) {
-    return { color: '#ff00ff', label: 'DS Emplasemen Bekasi Hulu (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
+  if (code.includes('DS 16')) {
+    return { color: '#139a47', label: 'DS 16 EMP BKS Hulu (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+  }
+  if (code.includes('DS 17')) {
+    return { color: '#ec1f24', label: 'DS 17 EMP BKS 4-5 (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
+  }
+  if (code.includes('DS 18')) {
+    return { color: '#139a47', label: 'DS 18 EMP BKS 6-7,8 (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+  }
+  if (code.includes('DS 19')) {
+    return { color: '#ff0000', label: 'DS 19 BKT-BKS Hilir (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
+  }
+  if (code.includes('DS 20')) {
+    return { color: '#139a47', label: 'DS 20 BKS-BKT Hulu (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+  }
+
+  // 7B. SECTION INSULATOR (FRP)
+  if (code.includes('FRP')) {
+    if (code.includes('14') || code.includes('16')) {
+      return { color: '#ff00ff', label: 'Section Insulator FRP (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
+    }
+    if (code.includes('17') || code.includes('18')) {
+      return { color: '#8a6ddd', label: 'Section Insulator FRP (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
+    }
+    if (code.includes('21') || code.includes('24') || code.includes('25')) {
+      return { color: '#ff0000', label: 'Section Insulator FRP (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
+    }
+    if (code.includes('10') || code.includes('11') || code.includes('19') || code.includes('20') || code.includes('22') || code.includes('23') || code.includes('26')) {
+      return { color: '#139a47', label: 'Section Insulator FRP (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+    }
+    return { color: '#cc6827', label: 'Section Insulator FRP (Oranye/Kuning)', badgeClass: 'bg-amber-50 text-amber-800 border-amber-300' };
   }
 
   // 8. STASIUN UTAMA
@@ -294,10 +326,11 @@ export default function WorkHistoryPanel({
   const [editingLogId, setEditingLogId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     targetCode: '',
-    actionType: 'PENGUKURAN_KETEBALAN_KAWAT',
+    actionType: '',
     technician: '',
     description: '',
     status: 'COMPLETED',
@@ -365,13 +398,13 @@ export default function WorkHistoryPanel({
     return action.replace(/_/g, ' ');
   };
 
-  // Open Form to Add New Work Log
+  // Open Form to Add New Work Log (Custom empty required inputs)
   const handleOpenAdd = () => {
     setEditingLogId(null);
     setFormData({
       targetCode: locationCode || 'NASPAN 1 JNG-KLD (HU)',
-      actionType: 'PENGUKURAN_KETEBALAN_KAWAT',
-      technician: 'Tim UPT Resor LAA 1.9',
+      actionType: '',
+      technician: '',
       description: '',
       status: 'COMPLETED',
       timestamp: new Date().toISOString().slice(0, 16),
@@ -385,7 +418,7 @@ export default function WorkHistoryPanel({
     const dateStr = log.timestamp ? new Date(log.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
     setFormData({
       targetCode: log.targetCode || '',
-      actionType: log.actionType || 'INSPEKSI',
+      actionType: log.actionType || '',
       technician: log.technician || '',
       description: log.description || '',
       status: log.status || 'COMPLETED',
@@ -397,7 +430,7 @@ export default function WorkHistoryPanel({
   // Handle Save
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.targetCode || !formData.technician || !formData.description) return;
+    if (!formData.targetCode?.trim() || !formData.actionType?.trim() || !formData.technician?.trim() || !formData.description?.trim()) return;
 
     setSubmitting(true);
     try {
@@ -415,13 +448,17 @@ export default function WorkHistoryPanel({
     }
   };
 
-  // Handle Delete
+  // Handle Delete (Fail-safe with loading state)
   const handleConfirmDelete = async (id) => {
+    if (!id) return;
+    setIsDeleting(true);
     try {
       if (onDeleteLog) await onDeleteLog(id);
-      setDeleteConfirmId(null);
     } catch (err) {
       console.error('Error deleting log:', err);
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmId(null);
     }
   };
 
@@ -756,102 +793,123 @@ export default function WorkHistoryPanel({
       </div>
 
       {/* ========================================================
-          ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN
+          ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN (ELEGAN & MODERN)
           ======================================================== */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-md animate-in fade-in duration-200 select-none">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
             
-            {/* Form Top Ribbon */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-amber-500 to-emerald-500" />
+            {/* Top Color Accent Ribbon */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 via-emerald-500 to-amber-500" />
 
             {/* Form Header */}
-            <div className="p-4 sm:p-5 flex items-start justify-between border-b border-slate-100 bg-slate-50/70">
-              <div className="flex items-center space-x-3">
-                <div className={`p-2.5 rounded-xl text-white shadow-sm ${editingLogId ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+            <div className="p-4 sm:p-5 flex items-start justify-between border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
+              <div className="flex items-center space-x-3.5">
+                <div className={`p-2.5 rounded-2xl text-white shadow-md ${
+                  editingLogId 
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-700' 
+                    : 'bg-gradient-to-br from-emerald-600 to-teal-700'
+                }`}>
                   {editingLogId ? <Edit3 className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    {editingLogId ? 'Edit Catatan Pekerjaan LAA' : 'Input Catatan Pekerjaan Baru'}
+                  <div className="flex items-center space-x-2">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                      UPT RESOR LAA 1.9
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      • MODE ADMIN
+                    </span>
+                  </div>
+                  <h3 className="text-base font-black text-slate-900 mt-0.5">
+                    {editingLogId ? 'Edit Catatan Riwayat Pekerjaan' : 'Catat Riwayat Pekerjaan Baru'}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    UPT Resor LAA 1.9 Jatinegara • Mode Administrator
-                  </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200 transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                title="Tutup (Esc)"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Form Fields */}
-            <form onSubmit={handleFormSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
+            <form onSubmit={handleFormSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
               
               {/* Target Seksi / Line */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                  <span>Target Line / Seksi / Naspan / Wesel:</span>
-                  <span className="text-[10px] text-blue-600 font-mono">Wajib</span>
+                  <span className="flex items-center gap-1.5">
+                    <Train className="w-3.5 h-3.5 text-blue-600" />
+                    Target Line / Seksi / Naspan / Wesel / DS / FRP:
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={formData.targetCode}
+                    onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
+                    placeholder="Contoh: NASPAN 1 JNG-KLD (HU), DS 16, FRP-JNG-04-31C1..."
+                    className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-10"
+                  />
+                  {formData.targetCode && (
+                    <span
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full shadow-xs border border-white"
+                      style={{ backgroundColor: getLineColorInfo(formData.targetCode).color }}
+                      title={getLineColorInfo(formData.targetCode).label}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Jenis Pekerjaan (Custom Text Input - Wajib Diisi) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Wrench className="w-3.5 h-3.5 text-indigo-600" />
+                    Jenis Tindakan / Pekerjaan:
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
                 </label>
                 <input
                   type="text"
                   required
-                  value={formData.targetCode}
-                  onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
-                  placeholder="Contoh: NASPAN 1 JNG-KLD (HU), WESEL W83A1, DS 5"
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900"
+                  value={formData.actionType}
+                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+                  placeholder="Ketik jenis tindakan / pekerjaan (contoh: PENGUKURAN KAWAT KONTAK)..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
-              {/* Jenis Pekerjaan */}
+              {/* Pelaksana / Teknisi (Custom Text Input - Wajib Diisi) */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Jenis Tindakan / Pekerjaan:
-                </label>
-                <select
-                  value={formData.actionType}
-                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
-                >
-                  <option value="PENGUKURAN_KETEBALAN_KAWAT">PENGUKURAN KETEBALAN KAWAT KONTAK</option>
-                  <option value="PENYETELAN_DROPPER">PENYETELAN DROPPER & KETINGGIAN (STAGGER)</option>
-                  <option value="THERMOVISION_HOTSPOT">THERMOVISION SCANNING / PEMERIKSAAN SUHU</option>
-                  <option value="PEMBERSIHAN_ISOLATOR">PEMBERSIHAN ISOLATOR KERAMIK & FRP</option>
-                  <option value="PEMERIKSAAN_STEADY_ARM">PEMERIKSAAN STEADY ARM & PIPA KLEM</option>
-                  <option value="UJI_ISOLASI_AIR_SECTION">UJI TAHANAN ISOLASI AIR SECTION / AIR JOINT</option>
-                  <option value="PERBAIKAN_JUMPER_WIRE">PERBAIKAN / PENGGANTIAN JUMPER WIRE</option>
-                  <option value="INSPEKSI_ZIG_ZAG_WIRE">INSPEKSI ZIG-ZAG KAWAT KONTAK</option>
-                  <option value="PENGGANTIAN_DROPPER_PUTUS">PENGGANTIAN DROPPER PUTUS / KENDOR</option>
-                  <option value="INSPEKSI_WESEL">INSPEKSI MEKANIKAL WESEL & SEPUR SIMPAN</option>
-                  <option value="PERAWATAN_PISAU_DS">PERAWATAN PISAU KONTAK DISCONNECTING SWITCH</option>
-                  <option value="KALIBRASI_PENENGANG_BEBAN">KALIBRASI PULLEY / BANDUL PENENGANG BEBAN</option>
-                  <option value="PEMELIHARAAN_RUTIN">PEMELIHARAAN RUTIN PREVENTIF</option>
-                </select>
-              </div>
-
-              {/* Pelaksana / Teknisi */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Pelaksana / Teknisi Bertugas:
+                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <HardHat className="w-3.5 h-3.5 text-amber-500" />
+                    Pelaksana / Teknisi Bertugas:
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.technician}
                   onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
-                  placeholder="Contoh: Regu Pemeliharaan LAA (Ahmad Subarkah)"
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900"
+                  placeholder="Ketik nama pelaksana / teknisi regu..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
-              {/* Tanggal & Waktu WIB */}
+              {/* Tanggal & Waktu Pelaksanaan */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" />
                   Waktu Pelaksanaan Pekerjaan (WIB):
                 </label>
                 <input
@@ -859,14 +917,18 @@ export default function WorkHistoryPanel({
                   required
                   value={formData.timestamp}
                   onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-medium px-4 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-800"
                 />
               </div>
 
-              {/* Uraian Pekerjaan (Description) */}
+              {/* Uraian Pekerjaan & Nilai Pengukuran */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Uraian Hasil Pekerjaan & Nilai Pengukuran:
+                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ClipboardList className="w-3.5 h-3.5 text-emerald-600" />
+                    Uraian Hasil Pekerjaan & Nilai Pengukuran:
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
                 </label>
                 <textarea
                   rows={3}
@@ -874,28 +936,40 @@ export default function WorkHistoryPanel({
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Jelaskan detail tindakan teknis, nilai ukur (mm/volt/ohm), kondisi komponen, serta window kerja malam..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400"
                 />
               </div>
 
-              {/* Status */}
+              {/* Status Pekerjaan (Modern Elegant Pills) */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   Status Pekerjaan:
                 </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-800"
-                >
-                  <option value="COMPLETED">SELESAI (COMPLETED)</option>
-                  <option value="IN_PROGRESS">SEDANG PROSES (IN PROGRESS)</option>
-                  <option value="SCHEDULED">TERJADWAL (SCHEDULED)</option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'COMPLETED', label: 'SELESAI', color: 'border-emerald-500 text-emerald-800 bg-emerald-50' },
+                    { id: 'IN_PROGRESS', label: 'PROSES', color: 'border-amber-500 text-amber-800 bg-amber-50' },
+                    { id: 'SCHEDULED', label: 'TERJADWAL', color: 'border-blue-500 text-blue-800 bg-blue-50' },
+                  ].map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, status: st.id })}
+                      className={`py-2 px-2 text-center rounded-xl text-xs font-black transition cursor-pointer border ${
+                        formData.status === st.id
+                          ? `${st.color} shadow-xs ring-2 ring-slate-400/20`
+                          : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center space-x-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center space-x-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
@@ -906,10 +980,23 @@ export default function WorkHistoryPanel({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-2/3 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50"
+                  className={`w-2/3 py-2.5 px-3 rounded-xl text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50 ${
+                    editingLogId
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                      : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
+                  }`}
                 >
-                  <Save className="w-4 h-4" />
-                  <span>{editingLogId ? 'Simpan Perubahan' : 'Catat Pekerjaan Baru'}</span>
+                  {submitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>{editingLogId ? 'Simpan Perubahan' : 'Catat Pekerjaan Baru'}</span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -920,34 +1007,48 @@ export default function WorkHistoryPanel({
       )}
 
       {/* ========================================================
-          DELETE CONFIRMATION DIALOG
+          DELETE CONFIRMATION DIALOG (FAIL-SAFE DENGAN LOADING STATE)
           ======================================================== */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl p-5 shadow-2xl border border-slate-200 max-w-sm w-full space-y-3.5 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center space-x-2 text-rose-600">
-              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 max-w-sm w-full space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-rose-600">
+              <div className="p-2.5 rounded-2xl bg-rose-50 border border-rose-200">
                 <Trash2 className="w-5 h-5 text-rose-600" />
               </div>
-              <h4 className="font-extrabold text-slate-900 text-sm">Hapus Catatan Pekerjaan?</h4>
+              <div>
+                <h4 className="font-extrabold text-slate-900 text-sm">Hapus Catatan Pekerjaan?</h4>
+                <p className="text-[11px] text-slate-400">Tindakan ini tidak dapat dibatalkan</p>
+              </div>
             </div>
             
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Catatan riwayat pekerjaan pemeliharaan ini akan dihapus secara permanen dari basis data UPT Resor LAA 1.9.
+            <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+              Catatan riwayat pekerjaan pemeliharaan ini akan dihapus secara permanen dari basis data sistem UPT Resor LAA 1.9.
             </p>
 
             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
               <button
+                type="button"
+                disabled={isDeleting}
                 onClick={() => setDeleteConfirmId(null)}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer disabled:opacity-50"
               >
                 Batal
               </button>
               <button
+                type="button"
+                disabled={isDeleting}
                 onClick={() => handleConfirmDelete(deleteConfirmId)}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs font-bold shadow-sm transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center space-x-1.5 disabled:opacity-50"
               >
-                Ya, Hapus Catatan
+                {isDeleting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Menghapus...</span>
+                  </>
+                ) : (
+                  <span>Ya, Hapus Catatan</span>
+                )}
               </button>
             </div>
           </div>

@@ -92,9 +92,13 @@ exports.updateLog = async (req, res) => {
 exports.deleteLog = async (req, res) => {
   try {
     const { id } = req.params;
+    const logId = parseInt(id, 10);
+    if (isNaN(logId)) {
+      return res.status(400).json({ success: false, message: 'ID catatan tidak valid' });
+    }
 
     const existing = await prisma.maintenanceLog.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: logId },
     });
 
     if (!existing) {
@@ -102,7 +106,7 @@ exports.deleteLog = async (req, res) => {
     }
 
     await prisma.maintenanceLog.delete({
-      where: { id: parseInt(id) },
+      where: { id: logId },
     });
 
     res.json({ success: true, message: 'Catatan pekerjaan berhasil dihapus' });

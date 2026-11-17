@@ -38,6 +38,8 @@ router.get('/logs', logController.getAllLogs);
 router.post('/logs', logController.createLog);
 router.put('/logs/:id', logController.updateLog);
 router.delete('/logs/:id', logController.deleteLog);
+router.post('/logs/:id/delete', logController.deleteLog);
+router.post('/logs/delete/:id', logController.deleteLog);
 
 // SCADA Alerts
 router.get('/alerts', alertController.getAllAlerts);
