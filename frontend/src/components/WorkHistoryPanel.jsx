@@ -265,7 +265,7 @@ export function getLineColorInfo(targetCode = '', description = '') {
     if (code.includes('21') || code.includes('24') || code.includes('25')) {
       return { color: '#ff0000', label: 'Section Insulator FRP (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
     }
-    if (code.includes('10') || code.includes('11') || code.includes('19') || code.includes('20') || code.includes('22') || code.includes('23') || code.includes('26')) {
+    if (code.includes('08') || code.includes('09') || code.includes('10') || code.includes('11') || code.includes('19') || code.includes('20') || code.includes('22') || code.includes('23') || code.includes('26')) {
       return { color: '#139a47', label: 'Section Insulator FRP (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
     }
     return { color: '#cc6827', label: 'Section Insulator FRP (Oranye/Kuning)', badgeClass: 'bg-amber-50 text-amber-800 border-amber-300' };
