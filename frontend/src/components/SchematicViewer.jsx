@@ -286,7 +286,7 @@ export default function SchematicViewer({
     {
       id: 'jng_mri_hi_naspan1',
       code: 'JNG-MRI NASPAN 1 HI',
-      title: 'NASPAN 1 JNG-MRI HI (KM 11+400 - KM 11+880)',
+      title: 'NASPAN 1 JNG-MRI HI (Jalur Hilir)',
       km: 'KM 1+880 - KM 2+000',
       category: 'ST. JATINEGARA',
       d: 'M 486.4 656.2 L 728.7 656.2',
@@ -308,7 +308,7 @@ export default function SchematicViewer({
     {
       id: 'mri_jng_hu_naspan1',
       code: 'MRI-JNG NASPAN 1 HU',
-      title: 'MRI-JNG NASPAN 1 HU (KM 11+400 - KM 11+880)',
+      title: 'MRI-JNG NASPAN 1 HU (Jalur Hulu)',
       km: 'KM 1+854 - KM 2+123',
       category: 'ST. JATINEGARA',
       d: 'M 486.4 703.5 L 728.9 703.5',
