@@ -25,13 +25,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     const p = password.trim();
 
     if (!u || !p) {
-      setError('Harap isi User dan Password.');
+      setError('Harap masukkan User ID dan Password.');
       return;
     }
 
     setLoading(true);
 
-    // Verifikasi Pengaman: User 1.9, Password 191
+    // Verifikasi Pengaman Resmi
     if (u === '1.9' && p === '191') {
       setTimeout(() => {
         setLoading(false);
@@ -48,7 +48,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     } else {
       setTimeout(() => {
         setLoading(false);
-        setError('Kredensial salah! Masukkan User: 1.9 dan Password: 191');
+        setError('Kredensial tidak valid. Periksa kembali User ID dan Password Anda.');
       }, 300);
     }
   };
@@ -97,37 +97,33 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-blue-600" />
-              <span>User ID Pengaman:</span>
+              <span>User ID:</span>
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan user (contoh: 1.9)"
+                placeholder="Masukkan User ID"
                 autoFocus
                 className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400"
               />
             </div>
           </div>
 
-          {/* Password Input (3 Angka) */}
+          {/* Password Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-blue-600" />
-                <span>Password (3 Digit Angka):</span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">Format: 3 Angka</span>
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-blue-600" />
+              <span>Password:</span>
             </label>
             <div className="relative">
               <input
                 type="password"
-                maxLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan 3 angka password (191)"
-                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-mono font-bold tracking-widest px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal"
+                placeholder="Masukkan Password"
+                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
               />
             </div>
           </div>
@@ -136,10 +132,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-3 text-[11px] text-blue-800 space-y-1">
             <div className="font-bold flex items-center gap-1">
               <KeyRound className="w-3.5 h-3.5 text-blue-600" />
-              <span>Akses Khusus UPT Resor LAA 1.9:</span>
+              <span>Akses Khusus Administrator:</span>
             </div>
             <p className="text-slate-600 text-[10.5px] leading-relaxed">
-              Mode Admin mengaktifkan hak akses untuk <strong>input pekerjaan baru</strong>, <strong>edit riwayat</strong>, dan <strong>hapus data</strong> di setiap line.
+              Masuk menggunakan kredensial resmi untuk mengelola pencatatan, pengeditan, dan penghapusan data riwayat pekerjaan.
             </p>
           </div>
 
