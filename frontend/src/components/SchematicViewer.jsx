@@ -429,7 +429,7 @@ export default function SchematicViewer({
     {
       id: 'jng_jalur_3',
       code: 'JALUR 3 JNG',
-      title: 'ST. JATINEGARA (Jalur 3 Peron)',
+      title: 'ST. JATINEGARA (Jalur 3)',
       km: 'KM 11+600 - KM 11+900',
       category: 'ST. JATINEGARA',
       d: 'M 796.4 606.0 L 1475.4 606.0',
@@ -451,7 +451,7 @@ export default function SchematicViewer({
     {
       id: 'jng_jalur_2',
       code: 'JALUR 2 JNG',
-      title: 'ST. JATINEGARA (Jalur 2 Peron Hilir)',
+      title: 'ST. JATINEGARA (Jalur 2)',
       km: 'KM 11+500 - KM 11+900',
       category: 'ST. JATINEGARA',
       d: 'M 740.6 656.1 L 1475.1 656.1',
@@ -462,7 +462,7 @@ export default function SchematicViewer({
     {
       id: 'jng_jalur_1',
       code: 'JALUR 1 JNG',
-      title: 'ST. JATINEGARA (Jalur 1 Peron Hulu)',
+      title: 'ST. JATINEGARA (Jalur 1)',
       km: 'KM 11+500 - KM 11+900',
       category: 'ST. JATINEGARA',
       d: 'M 740.4 703.5 L 1475.3 703.5',
