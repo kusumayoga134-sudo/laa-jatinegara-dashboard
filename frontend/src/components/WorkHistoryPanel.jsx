@@ -192,83 +192,19 @@ export function getLineColorInfo(targetCode = '', description = '') {
     };
   }
 
-  // 7. DISCONNECTING SWITCH (DS 1 s/d DS 20)
-  if (code.includes('DS 1') && !code.includes('DS 10') && !code.includes('DS 11') && !code.includes('DS 12') && !code.includes('DS 13') && !code.includes('DS 14') && !code.includes('DS 15') && !code.includes('DS 16') && !code.includes('DS 17') && !code.includes('DS 18') && !code.includes('DS 19')) {
-    return { color: '#00ffff', label: 'DS 1 MRI-JNG Hilir (Cyan)', badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300' };
-  }
-  if (code.includes('DS 2') && !code.includes('DS 20')) {
-    return { color: '#ff00ff', label: 'DS 2 MRI-JNG Hulu (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
-  }
-  if (code.includes('DS 3')) {
-    return { color: '#f8d731', label: 'DS 3 Jalur 2 JNG (Kuning Emas)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
-  }
-  if (code.includes('DS 4')) {
-    return { color: '#ff00ff', label: 'DS 4 Jalur 1 JNG (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
-  }
-  if (code.includes('DS 5')) {
-    return { color: '#f8d731', label: 'DS 5 Jalur 2,3 JNG (Kuning Emas)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
-  }
-  if (code.includes('DS 6')) {
-    return { color: '#ff00ff', label: 'DS 6 Jalur 1 JNG (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
-  }
-  if (code.includes('DS 7')) {
-    return { color: '#0000ff', label: 'DS 7 KLD-JNG Hilir (Biru)', badgeClass: 'bg-blue-50 text-blue-800 border-blue-300' };
-  }
-  if (code.includes('DS 8')) {
-    return { color: '#ff9f7f', label: 'DS 8 JNG-KLD Hulu (Salmon/Oranye)', badgeClass: 'bg-orange-50 text-orange-800 border-orange-300' };
-  }
-  if (code.includes('DS 9')) {
-    return { color: '#f8d731', label: 'DS 9 KLDB-BUA Hilir (Kuning)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
-  }
-  if (code.includes('DS 10')) {
-    return { color: '#ff0000', label: 'DS 10 BUA-KLDB Hulu (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('DS 11')) {
-    return { color: '#f8d731', label: 'DS 11 CUK-KLDB Hilir (Kuning)', badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300' };
-  }
-  if (code.includes('DS 12')) {
-    return { color: '#ff0000', label: 'DS 12 KLDB-CUK Hulu (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('DS 13')) {
-    return { color: '#cc6827', label: 'DS 13 KRI-CUK Hilir (Oranye)', badgeClass: 'bg-amber-50 text-amber-800 border-amber-300' };
-  }
-  if (code.includes('DS 14')) {
-    return { color: '#8a6ddd', label: 'DS 14 CUK-KRI Hulu (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
-  }
-  if (code.includes('DS 15')) {
-    return { color: '#ff0000', label: 'DS 15 EMP BKS Hilir (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('DS 16')) {
-    return { color: '#139a47', label: 'DS 16 EMP BKS Hulu (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
-  }
-  if (code.includes('DS 17')) {
-    return { color: '#ec1f24', label: 'DS 17 EMP BKS 4-5 (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('DS 18')) {
-    return { color: '#139a47', label: 'DS 18 EMP BKS 6-7,8 (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
-  }
-  if (code.includes('DS 19')) {
-    return { color: '#ff0000', label: 'DS 19 BKT-BKS Hilir (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('DS 20')) {
-    return { color: '#139a47', label: 'DS 20 BKS-BKT Hulu (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+  // 7. DISCONNECTING SWITCH (DS 1 s/d DS 20) - HITAM
+  if (code.includes('DS ') || code.startsWith('DS-') || code.startsWith('DS_') || code.includes('DISCONNECTING SWITCH')) {
+    return { color: '#000000', label: 'Disconnecting Switch (DS)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
   }
 
-  // 7B. SECTION INSULATOR (FRP)
-  if (code.includes('FRP')) {
-    if (code.includes('14') || code.includes('16')) {
-      return { color: '#ff00ff', label: 'Section Insulator FRP (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
-    }
-    if (code.includes('17') || code.includes('18')) {
-      return { color: '#8a6ddd', label: 'Section Insulator FRP (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
-    }
-    if (code.includes('21') || code.includes('24') || code.includes('25')) {
-      return { color: '#ff0000', label: 'Section Insulator FRP (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-    }
-    if (code.includes('08') || code.includes('09') || code.includes('10') || code.includes('11') || code.includes('19') || code.includes('20') || code.includes('22') || code.includes('23') || code.includes('26')) {
-      return { color: '#139a47', label: 'Section Insulator FRP (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
-    }
-    return { color: '#cc6827', label: 'Section Insulator FRP (Oranye/Kuning)', badgeClass: 'bg-amber-50 text-amber-800 border-amber-300' };
+  // 7B. SECTION INSULATOR (FRP) - HITAM
+  if (code.includes('FRP') || code.includes('SECTION INSULATOR')) {
+    return { color: '#000000', label: 'Section Insulator (FRP)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
+  }
+
+  // 7C. PEMISAH SEKSI (AS/AJ) - HITAM
+  if (code.includes('AIR JOINT') || code.includes('AIR SECTION') || code.includes('OVERLAP') || code.includes('AS ') || code.includes('AJ ')) {
+    return { color: '#000000', label: 'Pemisah Seksi (AS/AJ)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
   }
 
   // 8. STASIUN UTAMA
