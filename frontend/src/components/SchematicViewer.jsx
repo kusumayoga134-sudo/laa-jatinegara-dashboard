@@ -319,7 +319,7 @@ export default function SchematicViewer({
     {
       id: 'jng_jalur_8',
       code: 'JALUR 8 JNG',
-      title: 'ST. JATINEGARA (Jalur 8 Peron Utama)',
+      title: 'ST. JATINEGARA (Jalur 8)',
       km: 'KM 11+700 - KM 11+800',
       category: 'ST. JATINEGARA',
       d: 'M 991.5 322.4 L 1421.8 322.4',
