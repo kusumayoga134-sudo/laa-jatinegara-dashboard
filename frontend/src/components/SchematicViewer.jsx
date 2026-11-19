@@ -17,205 +17,12 @@ import {
   ClipboardList,
 } from 'lucide-react';
 
-export default function SchematicViewer({
-  logs = [],
-  selectedLocation,
-  onSelectLocation,
-  isAdmin = false,
-  onOpenAddLog,
-}) {
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-
-  
-  const [hoveredLine, setHoveredLine] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const containerRef = useRef(null);
-  const viewerWrapperRef = useRef(null);
-  const pinchRef = useRef({ distance: 0, initialZoom: 1 });
-  const touchStartPos = useRef({ x: 0, y: 0 });
-  const hasMovedRef = useRef(false);
-
-  const [viewportBase, setViewportBase] = useState({ width: 1420, height: 615 });
-
-  // Responsive Fit Calculation: Guarantees that at Zoom 100%, the entire map fits perfectly centered without ANY side cut off!
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const calculateFit = () => {
-      const cw = el.clientWidth;
-      const ch = el.clientHeight;
-      if (!cw || !ch) return;
-
-      const pad = window.innerWidth < 640 ? 8 : 20;
-      const maxW = Math.max(cw - pad * 2, 280);
-      const maxH = Math.max(ch - pad * 2, 160);
-      const mapRatio = 3275 / 1419; // ~2.30796
-
-      let w, h;
-      if (maxW / maxH > mapRatio) {
-        h = maxH;
-        w = maxH * mapRatio;
-      } else {
-        w = maxW;
-        h = maxW / mapRatio;
-      }
-      setViewportBase({ width: Math.round(w), height: Math.round(h) });
-    };
-
-    calculateFit();
-    const ro = new ResizeObserver(calculateFit);
-    ro.observe(el);
-    window.addEventListener('resize', calculateFit);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', calculateFit);
-    };
-  }, []);
-
-  // Zoom handlers (Min 100% - Max 1000%)
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 10.0));
-  const handleZoomOut = () =>
-    setZoom((prev) => {
-      const next = Math.max(prev - 0.25, 1.0);
-      if (next === 1.0) setPosition({ x: 0, y: 0 });
-      return next;
-    });
-  const handleResetZoom = () => {
-    setZoom(1.0);
-    setPosition({ x: 0, y: 0 });
-  };
-
-  // Drag handlers
-  const handleMouseDown = (e) => {
-    if (e.target.closest('button')) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
-
-  const handleMouseMove = (e) => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-    }
-
-    if (!isDragging) return;
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-
-  // Mobile Touch Gestures (Single finger Pan & 2-finger Pinch Zoom)
-  const handleTouchStart = (e) => {
-    if (e.target.closest('button')) return;
-
-    if (e.touches.length === 1) {
-      setIsDragging(true);
-      hasMovedRef.current = false;
-      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      setDragStart({
-        x: e.touches[0].clientX - position.x,
-        y: e.touches[0].clientY - position.y,
-      });
-    } else if (e.touches.length === 2) {
-      setIsDragging(false);
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      pinchRef.current = {
-        distance: dist,
-        initialZoom: zoom,
-      };
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (e.touches.length === 1 && isDragging) {
-      const deltaX = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
-      const deltaY = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
-      if (deltaX > 6 || deltaY > 6) {
-        hasMovedRef.current = true;
-      }
-      setPosition({
-        x: e.touches[0].clientX - dragStart.x,
-        y: e.touches[0].clientY - dragStart.y,
-      });
-    } else if (e.touches.length === 2 && pinchRef.current.distance > 0) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      const factor = dist / pinchRef.current.distance;
-      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 10.0);
-      setZoom(nextZoom);
-      if (nextZoom <= 1.0) {
-        setPosition({ x: 0, y: 0 });
-      }
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (e.touches.length === 0) {
-      setIsDragging(false);
-      pinchRef.current = { distance: 0, initialZoom: 1 };
-    } else if (e.touches.length === 1) {
-      setIsDragging(true);
-      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      setDragStart({
-        x: e.touches[0].clientX - position.x,
-        y: e.touches[0].clientY - position.y,
-      });
-    }
-  };
-
-  // Wheel zoom (Min 100% - Max 1000%)
-  const handleWheel = (e) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
-    setZoom((prev) => {
-      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 10.0);
-      if (next === 1.0) setPosition({ x: 0, y: 0 });
-      return next;
-    });
-  };
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!viewerWrapperRef.current) return;
-    if (!document.fullscreenElement) {
-      viewerWrapperRef.current.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
-    }
-  };
-
-  const imageSrc = '/peta-laa-cropped-hd.png';
-
-  // Complete List of Catenary Lines:
-  // - Horizontal Naspan Tracks (46 Segments)
-  // - Diagonal / Sloping Crossing Turnouts (17 Segments)
-  // Every single segment has a strictly unique ID so only 1 line glows when clicked!
-  const allTrackLines = [
+// =========================================================================
+// ALL_TRACK_LINES: MASTER DATA SEMUA JALUR, NASPAN, WESEL, DS, FRP, AS/AJ
+// Single source of truth untuk seluruh aplikasi (Peta & Riwayat Pekerjaan).
+// File allMapLocations.js otomatis membaca dan tersinkron dari sini secara real-time.
+// =========================================================================
+export const ALL_TRACK_LINES = [
     {
       id: 'kpb_jng_hi_aj',
       code: 'NASPAN 9 KPB-JNG',
@@ -2649,7 +2456,212 @@ export default function SchematicViewer({
       startDivider: { type: 'FRP', label: '( Section Insulator (FRP-JNG-26-73) )', km: 'KM 26+500' },
       endDivider: { type: 'WESEL', label: 'Wesel W73 Bekasi', km: 'KM 26+500' },
     },
-  ];
+  
+];
+
+export const allTrackLines = ALL_TRACK_LINES;
+
+export default function SchematicViewer({
+  logs = [],
+  selectedLocation,
+  onSelectLocation,
+  isAdmin = false,
+  onOpenAddLog,
+}) {
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  
+  const [hoveredLine, setHoveredLine] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const containerRef = useRef(null);
+  const viewerWrapperRef = useRef(null);
+  const pinchRef = useRef({ distance: 0, initialZoom: 1 });
+  const touchStartPos = useRef({ x: 0, y: 0 });
+  const hasMovedRef = useRef(false);
+
+  const [viewportBase, setViewportBase] = useState({ width: 1420, height: 615 });
+
+  // Responsive Fit Calculation: Guarantees that at Zoom 100%, the entire map fits perfectly centered without ANY side cut off!
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const calculateFit = () => {
+      const cw = el.clientWidth;
+      const ch = el.clientHeight;
+      if (!cw || !ch) return;
+
+      const pad = window.innerWidth < 640 ? 8 : 20;
+      const maxW = Math.max(cw - pad * 2, 280);
+      const maxH = Math.max(ch - pad * 2, 160);
+      const mapRatio = 3275 / 1419; // ~2.30796
+
+      let w, h;
+      if (maxW / maxH > mapRatio) {
+        h = maxH;
+        w = maxH * mapRatio;
+      } else {
+        w = maxW;
+        h = maxW / mapRatio;
+      }
+      setViewportBase({ width: Math.round(w), height: Math.round(h) });
+    };
+
+    calculateFit();
+    const ro = new ResizeObserver(calculateFit);
+    ro.observe(el);
+    window.addEventListener('resize', calculateFit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', calculateFit);
+    };
+  }, []);
+
+  // Zoom handlers (Min 100% - Max 1000%)
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 10.0));
+  const handleZoomOut = () =>
+    setZoom((prev) => {
+      const next = Math.max(prev - 0.25, 1.0);
+      if (next === 1.0) setPosition({ x: 0, y: 0 });
+      return next;
+    });
+  const handleResetZoom = () => {
+    setZoom(1.0);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  // Drag handlers
+  const handleMouseDown = (e) => {
+    if (e.target.closest('button')) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+
+    if (!isDragging) return;
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Mobile Touch Gestures (Single finger Pan & 2-finger Pinch Zoom)
+  const handleTouchStart = (e) => {
+    if (e.target.closest('button')) return;
+
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      hasMovedRef.current = false;
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchRef.current = {
+        distance: dist,
+        initialZoom: zoom,
+      };
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1 && isDragging) {
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
+      if (deltaX > 6 || deltaY > 6) {
+        hasMovedRef.current = true;
+      }
+      setPosition({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y,
+      });
+    } else if (e.touches.length === 2 && pinchRef.current.distance > 0) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / pinchRef.current.distance;
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 10.0);
+      setZoom(nextZoom);
+      if (nextZoom <= 1.0) {
+        setPosition({ x: 0, y: 0 });
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+      pinchRef.current = { distance: 0, initialZoom: 1 };
+    } else if (e.touches.length === 1) {
+      setIsDragging(true);
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    }
+  };
+
+  // Wheel zoom (Min 100% - Max 1000%)
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
+    setZoom((prev) => {
+      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 10.0);
+      if (next === 1.0) setPosition({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!viewerWrapperRef.current) return;
+    if (!document.fullscreenElement) {
+      viewerWrapperRef.current.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  const imageSrc = '/peta-laa-cropped-hd.png';
+
+  // Complete List of Catenary Lines:
+  // - Horizontal Naspan Tracks (46 Segments)
+  // - Diagonal / Sloping Crossing Turnouts (17 Segments)
+  // Every single segment has a strictly unique ID so only 1 line glows when clicked!
+  // Reference to master track lines (auto-synchronized)
+  const allTrackLines = ALL_TRACK_LINES;
+
 
   // Smart line-to-log matching function (Fuzzy, aliases & ID matching)
   const getLineLogs = (lineOrCode) => {
