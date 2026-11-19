@@ -373,8 +373,8 @@ export default function SchematicViewer({
     },
     {
       id: 'jng_jalur_7_ext',
-      code: 'JALUR 4 JNG',
-      title: 'Jalur 4 Lanjutan Emplasemen Timur JNG',
+      code: 'JALUR 7 JNG',
+      title: 'Jalur 7 Lanjutan Emplasemen Timur JNG',
       km: 'KM 11+850 - KM 12+100',
       category: 'ST. JATINEGARA',
       d: 'M 1568.0 512.7 L 1718.7 512.7',
