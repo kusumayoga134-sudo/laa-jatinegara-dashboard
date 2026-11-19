@@ -100,7 +100,7 @@ export const ALL_MAP_LOCATIONS = [
     "id": "jng_jalur_4",
     "code": "JALUR 4 JNG",
     "title": "ST. JATINEGARA (Jalur 4)",
-    "km": "KM 11+500 - KM 11+800",
+    "km": "KM 1+049 - KM 12+000",
     "category": "ST. JATINEGARA",
     "color": "#cc6827"
   },
@@ -111,22 +111,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 11+850 - KM 12+100",
     "category": "ST. JATINEGARA",
     "color": "#139a47"
-  },
-  {
-    "id": "jng_jalur_w21a2_mid",
-    "code": "JALUR W21A2",
-    "title": "Jalur Antara Wesel W21A2 Emplasemen Barat JNG",
-    "km": "KM 11+500 - KM 11+600",
-    "category": "ST. JATINEGARA (EMPLASEMEN BARAT)",
-    "color": "#cc6827"
-  },
-  {
-    "id": "jng_jalur_mid_timur",
-    "code": "JALUR W23B",
-    "title": "Jalur Wesel 23B JNG Emplasemen Timur",
-    "km": "KM 11+880 - KM 12+000",
-    "category": "ST. JATINEGARA",
-    "color": "#cc6827"
   },
   {
     "id": "jng_jalur_mid_green",
@@ -653,14 +637,6 @@ export const ALL_MAP_LOCATIONS = [
     "code": "WESEL W21C1",
     "title": "Wesel FRP-JNG-07-21C1 ke W21C1 (KM 11+500)",
     "km": "KM 11+500",
-    "category": "ST. JATINEGARA (EMPLASEMEN BARAT)",
-    "color": "#cc6827"
-  },
-  {
-    "id": "wesel_w21c2_828",
-    "code": "WESEL W21C2",
-    "title": "Wesel W21C2 ke Jalur Antara W21A2 (KM 11+550)",
-    "km": "KM 11+550",
     "category": "ST. JATINEGARA (EMPLASEMEN BARAT)",
     "color": "#cc6827"
   },
