@@ -715,13 +715,13 @@ export default function SchematicViewer({
     {
       id: 'cuk_jalur_4_peron',
       code: 'NASPAN 9 EMPL CUK',
-      title: 'ST. CAKUNG (Jalur 4 Bawah Peron)',
+      title: 'ST. CAKUNG (Jalur 4)',
       km: 'KM 20+900 - KM 21+000',
       category: 'ST. CAKUNG',
-      d: 'M 2452.2 1153.9 L 2583.0 1153.9',
+      d: 'M 2414.9 1112.0 L 2452.2 1153.9 L 2583.0 1153.9 L 2616.9 1112.1',
       color: '#cc6827',
-      startDivider: { type: 'WESEL', label: 'Wesel W23A', km: 'KM 20+900' },
-      endDivider: { type: 'WESEL', label: 'Wesel W21B', km: 'KM 21+000' },
+      startDivider: { type: 'WESEL', label: 'Wesel W23A (Jalur 3 Cakung)', km: 'KM 20+900' },
+      endDivider: { type: 'WESEL', label: 'Wesel W21B (Jalur 3 Cakung)', km: 'KM 21+000' },
     },
     {
       id: 'naspan_10_cuk_kri_hu',
