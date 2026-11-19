@@ -2865,17 +2865,83 @@ export default function SchematicViewer({
     },
   ];
 
-  const getLineLogs = (code) => {
-    if (!code) return [];
-    return logs.filter(
-      (l) =>
-        l.targetCode &&
-        (l.targetCode.toLowerCase().includes(code.toLowerCase()) ||
-          code.toLowerCase().includes(l.targetCode.toLowerCase()))
-    );
+  // Smart line-to-log matching function (Fuzzy, aliases & ID matching)
+  const getLineLogs = (lineOrCode) => {
+    if (!lineOrCode) return [];
+    const code = typeof lineOrCode === 'string' ? lineOrCode : (lineOrCode.code || '');
+    const title = typeof lineOrCode === 'object' ? (lineOrCode.title || '') : '';
+    const id = typeof lineOrCode === 'object' ? (lineOrCode.id || '') : '';
+
+    return logs.filter((l) => {
+      if (!l || !l.targetCode) return false;
+      const tc = l.targetCode.trim().toLowerCase();
+      const c = code.trim().toLowerCase();
+      const t = title.trim().toLowerCase();
+      const i = id.trim().toLowerCase();
+
+      // Direct ID match
+      if (i && (l.targetId === i || tc === i)) return true;
+
+      // Direct code match
+      if (c && (tc.includes(c) || c.includes(tc))) return true;
+
+      // Direct title match
+      if (t && (tc.includes(t) || t.includes(tc))) return true;
+
+      // Normalized alphanumeric comparison (ignoring punctuation like '.', '-', '(', ')')
+      const normTc = tc.replace(/[^a-z0-9]/g, '');
+      const normC = c.replace(/[^a-z0-9]/g, '');
+      const normT = t.replace(/[^a-z0-9]/g, '');
+
+      if (normC && (normTc.includes(normC) || normC.includes(normTc))) return true;
+      if (normT && (normTc.includes(normT) || normT.includes(normTc))) return true;
+
+      return false;
+    });
   };
 
-  const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine.code) : [];
+  // Calculate center coordinate (X, Y) for any line, turnout, switch, or overlap
+  const getLineCenter = (line) => {
+    if (line.xStart !== undefined && line.xEnd !== undefined && line.y !== undefined) {
+      return { x: (line.xStart + line.xEnd) / 2, y: line.y };
+    }
+    const nums = (line.d || '').match(/[-+]?[0-9]*\.?[0-9]+/g);
+    if (!nums || nums.length < 2) return null;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < nums.length - 1; i += 2) {
+      const x = parseFloat(nums[i]);
+      const y = parseFloat(nums[i + 1]);
+      if (!isNaN(x) && !isNaN(y)) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (minX === Infinity) return null;
+    return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+  };
+
+  // Pre-calculate lines that have active maintenance work logs
+  const linesWithLogs = React.useMemo(() => {
+    const list = [];
+    allTrackLines.forEach((line) => {
+      const lineLogs = getLineLogs(line);
+      if (lineLogs.length > 0) {
+        const center = getLineCenter(line);
+        if (center) {
+          list.push({
+            line,
+            logs: lineLogs,
+            center,
+          });
+        }
+      }
+    });
+    return list;
+  }, [logs, allTrackLines]);
+
+  const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine) : [];
 
   const formatAction = (str) => {
     if (!str) return 'Pekerjaan Pemeliharaan';
@@ -2907,16 +2973,31 @@ export default function SchematicViewer({
       {/* Top Toolbar White Mode */}
       <div className="bg-white/95 border-b border-slate-200 px-3 sm:px-5 py-2 sm:py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-20 backdrop-blur-md">
         
-        {/* Left Instruction */}
-        <div className="flex items-center space-x-1.5 shrink-0">
-          <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        {/* Left Instruction & Active Work Status */}
+        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 flex-wrap gap-y-1">
+          <div className="flex items-center space-x-1.5 shrink-0">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
+            <p className="text-[11px] sm:text-sm text-slate-700 font-medium leading-tight">
+              <span>
+                Setiap line / garis terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
+              </span>
+            </p>
           </div>
-          <p className="text-[11px] sm:text-sm text-slate-700 font-medium leading-tight">
-            <span>
-              Setiap line / garis terpisah oleh <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, dan <strong className="text-orange-700 font-bold">DS</strong>
-            </span>
-          </p>
+
+          {linesWithLogs.length > 0 && (
+            <div
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] sm:text-xs font-bold shadow-2xs animate-in fade-in"
+              title="Garis lintasan dengan tanda merah kedip menandakan ada riwayat pekerjaan yang tercatat"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+              </span>
+              <span>{linesWithLogs.length} Lokasi Berpenanda Pekerjaan</span>
+            </div>
+          )}
         </div>
 
         {/* Right Tools: Resolution & Zoom */}
@@ -3195,6 +3276,8 @@ export default function SchematicViewer({
                 const isHovered = hoveredLine?.id === line.id;
                 // CRITICAL FIX: Only match strictly by unique line.id so clicking 1 line NEVER highlights 3 lines!
                 const isActive = selectedLocation?.id === line.id;
+                const lineLogs = getLineLogs(line);
+                const hasWork = lineLogs.length > 0;
 
                 return (
                   <g
@@ -3216,6 +3299,24 @@ export default function SchematicViewer({
                       strokeLinejoin="round"
                       fill="none"
                     />
+
+                    {/* 1B. Ambient Subtle Breathing Red Glow along track if line has recorded work */}
+                    {hasWork && !isHovered && !isActive && (
+                      <path
+                        d={line.d}
+                        stroke="#ef4444"
+                        strokeWidth={line.isCrossing ? "8" : "7"}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        opacity="0.35"
+                        style={{
+                          filter: 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.75))',
+                        }}
+                      >
+                        <animate attributeName="opacity" values="0.25;0.6;0.25" dur="2s" repeatCount="indefinite" />
+                      </path>
+                    )}
 
                     {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS/AJ) */}
                     {(isHovered || isActive) && (() => {
@@ -3281,6 +3382,131 @@ export default function SchematicViewer({
                         </>
                       );
                     })()}
+                  </g>
+                );
+              })}
+
+              {/* ========================================================
+                  ACTIVE WORK BEACONS (TITIK MERAH GLOW KEDIP-KEDIP OTOMATIS)
+                  Displayed automatically at line centers when work exists!
+                  Hovering triggers detailed popup card, clicking opens drawer.
+                  ======================================================== */}
+              {linesWithLogs.map(({ line, logs: lineLogs, center }) => {
+                const count = lineLogs.length;
+
+                return (
+                  <g
+                    key={`work-beacon-${line.id}`}
+                    className="pointer-events-auto cursor-pointer"
+                    onMouseEnter={() => setHoveredLine(line)}
+                    onMouseLeave={() => setHoveredLine(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setHoveredLine(line);
+                      if (onSelectLocation) onSelectLocation(line);
+                    }}
+                  >
+                    {/* 1. Radar Ping Ring 1 (Pulse Kedip Cepat) */}
+                    <circle
+                      cx={center.x}
+                      cy={center.y}
+                      r="8"
+                      fill="none"
+                      stroke="#ef4444"
+                      strokeWidth="3.2"
+                      opacity="0.9"
+                    >
+                      <animate attributeName="r" values="8;26;40" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.9;0.35;0" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="stroke-width" values="3.2;1.8;0.3" dur="2s" repeatCount="indefinite" />
+                    </circle>
+
+                    {/* 2. Radar Ping Ring 2 (Pulse Gelombang Kedua, delay 1s) */}
+                    <circle
+                      cx={center.x}
+                      cy={center.y}
+                      r="8"
+                      fill="none"
+                      stroke="#dc2626"
+                      strokeWidth="3.2"
+                      opacity="0.9"
+                    >
+                      <animate attributeName="r" values="8;26;40" dur="2s" begin="1s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.9;0.35;0" dur="2s" begin="1s" repeatCount="indefinite" />
+                      <animate attributeName="stroke-width" values="3.2;1.8;0.3" dur="2s" begin="1s" repeatCount="indefinite" />
+                    </circle>
+
+                    {/* 3. Soft Glowing Red Halo Aura */}
+                    <circle
+                      cx={center.x}
+                      cy={center.y}
+                      r="15"
+                      fill="#ef4444"
+                      opacity="0.3"
+                    >
+                      <animate attributeName="opacity" values="0.2;0.55;0.2" dur="1.5s" repeatCount="indefinite" />
+                      <animate attributeName="r" values="14;16;14" dur="1.5s" repeatCount="indefinite" />
+                    </circle>
+
+                    {/* 4. Core Solid Red Beacon Dot with Crisp White Border */}
+                    <circle
+                      cx={center.x}
+                      cy={center.y}
+                      r="8.5"
+                      fill="#dc2626"
+                      stroke="#ffffff"
+                      strokeWidth="2.4"
+                      style={{
+                        filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px #ef4444)',
+                      }}
+                    >
+                      <animate attributeName="r" values="8;9.2;8" dur="1.5s" repeatCount="indefinite" />
+                    </circle>
+
+                    {/* 5. Center White Spark / Glass Reflection */}
+                    <circle
+                      cx={center.x - 2.2}
+                      cy={center.y - 2.2}
+                      r="2.6"
+                      fill="#ffffff"
+                      opacity="0.95"
+                    />
+
+                    {/* 6. Multi-Job Counter Badge (if count > 1) */}
+                    {count > 1 && (
+                      <g transform={`translate(${center.x + 8}, ${center.y - 13})`}>
+                        <rect
+                          x="0"
+                          y="0"
+                          width={count > 9 ? 22 : 16}
+                          height="14"
+                          rx="7"
+                          fill="#991b1b"
+                          stroke="#ffffff"
+                          strokeWidth="1.2"
+                          style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
+                        />
+                        <text
+                          x={count > 9 ? 11 : 8}
+                          y="10.5"
+                          textAnchor="middle"
+                          fill="#ffffff"
+                          fontSize="9"
+                          fontWeight="900"
+                          fontFamily="monospace, system-ui, sans-serif"
+                        >
+                          {count}
+                        </text>
+                      </g>
+                    )}
+
+                    {/* 7. Generous Hit-Area for effortless cursor hovering & clicking */}
+                    <circle
+                      cx={center.x}
+                      cy={center.y}
+                      r="24"
+                      fill="transparent"
+                    />
                   </g>
                 );
               })}

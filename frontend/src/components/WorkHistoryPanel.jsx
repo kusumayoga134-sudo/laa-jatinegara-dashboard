@@ -789,11 +789,66 @@ export default function WorkHistoryPanel({
                   <input
                     type="text"
                     required
+                    list="locations-datalist"
                     value={formData.targetCode}
                     onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
-                    placeholder="Contoh: NASPAN 1 JNG-KLD (HU), DS 16, FRP-JNG-04-31C1..."
+                    placeholder="Contoh: ST. JATINEGARA (Jalur 1), DS 4, NASPAN 1 JNG-KLD (HU)..."
                     className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-10"
                   />
+                  <datalist id="locations-datalist">
+                    <option value="ST. JATINEGARA (Jalur 1)" />
+                    <option value="ST. JATINEGARA (Jalur 2)" />
+                    <option value="ST. JATINEGARA (Jalur 3)" />
+                    <option value="ST. JATINEGARA (Jalur 4)" />
+                    <option value="ST. JATINEGARA (Jalur 5)" />
+                    <option value="ST. JATINEGARA (Jalur 6)" />
+                    <option value="ST. JATINEGARA (Jalur 7)" />
+                    <option value="ST. JATINEGARA (Jalur 8)" />
+                    <option value="NASPAN 1 JNG-KLD (HU)" />
+                    <option value="NASPAN 1 JNG-KLD (HI)" />
+                    <option value="NASPAN 2 JNG-KLD" />
+                    <option value="NASPAN 3 JNG-KLD" />
+                    <option value="NASPAN 4 JNG-KLD" />
+                    <option value="NASPAN 4B KLD-BUA" />
+                    <option value="NASPAN 5 BUA" />
+                    <option value="NASPAN 6 BUA" />
+                    <option value="NASPAN 7 BUA-KLDB" />
+                    <option value="NASPAN 8 BUA-KLDB" />
+                    <option value="NASPAN 9 EMPL CUK" />
+                    <option value="NASPAN 10 CUK-KRI" />
+                    <option value="NASPAN 11 CUK-KRI" />
+                    <option value="NASPAN 12 BKS-KRI" />
+                    <option value="NASPAN 13 BKS-KRI" />
+                    <option value="NASPAN 9 KPB-JNG" />
+                    <option value="NASPAN 9 JNG-KPB" />
+                    <option value="DS 1" />
+                    <option value="DS 2" />
+                    <option value="DS 3" />
+                    <option value="DS 4" />
+                    <option value="DS 5" />
+                    <option value="DS 6" />
+                    <option value="DS 7" />
+                    <option value="DS 8" />
+                    <option value="DS 9" />
+                    <option value="DS 10" />
+                    <option value="DS 11" />
+                    <option value="DS 12" />
+                    <option value="DS 13" />
+                    <option value="DS 14" />
+                    <option value="DS 15" />
+                    <option value="DS 16" />
+                    <option value="DS 17" />
+                    <option value="DS 18" />
+                    <option value="DS 19" />
+                    <option value="DS 20" />
+                    <option value="FRP-JNG-01-31A1" />
+                    <option value="FRP-JNG-02-11A" />
+                    <option value="FRP-JNG-06-41B" />
+                    <option value="AJ KM 10+000" />
+                    <option value="AS KM 11+200" />
+                    <option value="AJ KM 18+800" />
+                    <option value="AS KM 26+900" />
+                  </datalist>
                   {formData.targetCode && (
                     <span
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full shadow-xs border border-white"
