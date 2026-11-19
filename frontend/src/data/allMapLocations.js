@@ -569,22 +569,6 @@ export const ALL_MAP_LOCATIONS = [
     "color": "#cc6827"
   },
   {
-    "id": "wesel_w81c_991",
-    "code": "WESEL W81C",
-    "title": "Wesel W81C (Percabangan Jalur 7 ke Jalur 8)",
-    "km": "KM 11+700",
-    "category": "ST. JATINEGARA (EMPLASEMEN BARAT)",
-    "color": "#139a47"
-  },
-  {
-    "id": "wesel_w83a1_1421",
-    "code": "WESEL W83A1",
-    "title": "Wesel W83A1 (Jalur 8 ke Jalur 7)",
-    "km": "KM 11+800",
-    "category": "ST. JATINEGARA (EMPLASEMEN TIMUR)",
-    "color": "#139a47"
-  },
-  {
     "id": "wesel_w83a1_1476",
     "code": "WESEL W83A1",
     "title": "Wesel W83A1 (Crossover Jalur 7 ke Jalur 4/3)",
