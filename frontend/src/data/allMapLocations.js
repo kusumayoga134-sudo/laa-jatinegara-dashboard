@@ -363,7 +363,7 @@ export const ALL_MAP_LOCATIONS = [
   {
     "id": "cuk_jalur_4_peron",
     "code": "NASPAN 9 EMPL CUK",
-    "title": "ST. CAKUNG (Jalur 4 Bawah Peron)",
+    "title": "ST. CAKUNG (Jalur 4)",
     "km": "KM 20+900 - KM 21+000",
     "category": "ST. CAKUNG",
     "color": "#cc6827"
@@ -807,22 +807,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 20+820",
     "category": "ST. CAKUNG",
     "color": "#8a6ddd"
-  },
-  {
-    "id": "wesel_w23a_cuk",
-    "code": "WESEL W23A",
-    "title": "Wesel W23A ke Jalur 4 Peron Cakung (KM 20+900)",
-    "km": "KM 20+900",
-    "category": "ST. CAKUNG",
-    "color": "#cc6827"
-  },
-  {
-    "id": "wesel_w21b_cuk",
-    "code": "WESEL W21B",
-    "title": "Wesel W21B dari Jalur 4 Peron Cakung (KM 21+000)",
-    "km": "KM 21+000",
-    "category": "ST. CAKUNG",
-    "color": "#cc6827"
   },
   {
     "id": "wesel_w11a_cuk",
