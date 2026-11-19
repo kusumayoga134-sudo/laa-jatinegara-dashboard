@@ -76,7 +76,7 @@ export const ALL_MAP_LOCATIONS = [
     "id": "jng_jalur_7",
     "code": "JALUR 7 JNG",
     "title": "ST. JATINEGARA (Jalur 7)",
-    "km": "KM 11+082 - KM 12+123",
+    "km": "KM 11+082 - KM 12+089",
     "category": "ST. JATINEGARA",
     "color": "#139a47"
   },
@@ -567,14 +567,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 11+350",
     "category": "ST. JATINEGARA (EMPLASEMEN BARAT)",
     "color": "#cc6827"
-  },
-  {
-    "id": "wesel_w83a1_1476",
-    "code": "WESEL W83A1",
-    "title": "Wesel W83A1 (Crossover Jalur 7 ke Jalur 4/3)",
-    "km": "KM 11+800 - KM 12+000",
-    "category": "ST. JATINEGARA (EMPLASEMEN TIMUR)",
-    "color": "#139a47"
   },
   {
     "id": "wesel_w63a_1452",
