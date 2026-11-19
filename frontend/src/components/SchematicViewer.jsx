@@ -275,7 +275,7 @@ export default function SchematicViewer({
     {
       id: 'jng_mri_hi_western',
       code: 'JNG-MRI',
-      title: 'Manggarai - Jatinegara (Jalur Hilir)',
+      title: 'JNG-MRI (Jalur Hilir)',
       km: 'KM 1+599 - KM 1+880',
       category: 'JNG-MRI',
       d: 'M 310.2 656.2 L 474.5 656.2',
@@ -286,7 +286,7 @@ export default function SchematicViewer({
     {
       id: 'jng_mri_hi_naspan1',
       code: 'JNG-MRI NASPAN 1 HI',
-      title: 'NASPAN 1 JNG-MRI HI (Jalur Hilir)',
+      title: 'NASPAN 1 (JNG-MRI Jalur Hilir)',
       km: 'KM 1+823 - KM 2+221',
       category: 'ST. JATINEGARA',
       d: 'M 486.4 656.2 L 728.7 656.2',
@@ -297,7 +297,7 @@ export default function SchematicViewer({
     {
       id: 'mri_jng_hu_western',
       code: 'MRI-JNG',
-      title: 'Manggarai - Jatinegara (Jalur Hulu)',
+      title: 'MRI-JNG (Jalur Hulu)',
       km: 'KM 1+599 - KM 1+854',
       category: 'MRI-JNG',
       d: 'M 310.2 703.5 L 474.5 703.5',
@@ -308,7 +308,7 @@ export default function SchematicViewer({
     {
       id: 'mri_jng_hu_naspan1',
       code: 'MRI-JNG NASPAN 1 HU',
-      title: 'MRI-JNG NASPAN 1 HU (Jalur Hulu)',
+      title: 'NASPAN 1 (MRI-JNG Jalur Hulu)',
       km: 'KM 1+823 - KM 2+220',
       category: 'ST. JATINEGARA',
       d: 'M 486.4 703.5 L 728.9 703.5',
