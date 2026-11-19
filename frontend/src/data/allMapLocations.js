@@ -1659,7 +1659,7 @@ export const ALL_MAP_LOCATIONS = [
   {
     "id": "overlap_as_11900_j3",
     "code": "AIR SECTION (AS)",
-    "title": "Overlap Air Section (AS) KM 11+900 Jalur 3",
+    "title": "Overlap Air Section (AS) KM 11+900 (Jalur 3)",
     "km": "KM 11+900",
     "category": "PEMISAH SEKSI (AS/AJ)",
     "color": "#000000"
