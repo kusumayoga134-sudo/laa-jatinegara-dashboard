@@ -1829,6 +1829,19 @@ export default function SchematicViewer({
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
     },
     {
+      id: 'overlap_as_11900_j3',
+      code: 'AIR SECTION (AS)',
+      title: 'Overlap Air Section (AS) KM 11+900 Jalur 3 (Bypass DS 5)',
+      km: 'KM 11+900',
+      category: 'PEMISAH SEKSI (AS/AJ)',
+      d: 'M 1475.5 596.9 L 1487.9 616.7 M 1478.5 596.9 L 1490.9 616.7',
+      hitD: 'M 1472.0 594.0 L 1494.0 620.0',
+      color: '#000000',
+      isCrossing: true,
+      startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
+      endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
+    },
+    {
       id: 'overlap_as_12500_hi',
       code: 'AIR SECTION (AS)',
       title: 'Overlap Air Section (AS) KM 12+500',
@@ -3300,24 +3313,6 @@ export default function SchematicViewer({
                       fill="none"
                     />
 
-                    {/* 1B. Ambient Subtle Breathing Red Glow along track if line has recorded work */}
-                    {hasWork && !isHovered && !isActive && (
-                      <path
-                        d={line.d}
-                        stroke="#ef4444"
-                        strokeWidth={line.isCrossing ? "8" : "7"}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                        opacity="0.35"
-                        style={{
-                          filter: 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.75))',
-                        }}
-                      >
-                        <animate attributeName="opacity" values="0.25;0.6;0.25" dur="2s" repeatCount="indefinite" />
-                      </path>
-                    )}
-
                     {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS/AJ) */}
                     {(isHovered || isActive) && (() => {
                       const isSymbol = line.category === 'DISCONNECTING SWITCH (DS)' ||
@@ -3388,15 +3383,19 @@ export default function SchematicViewer({
 
               {/* ========================================================
                   ACTIVE WORK BEACONS (TITIK MERAH GLOW KEDIP-KEDIP OTOMATIS)
-                  Displayed automatically at line centers when work exists!
-                  Hovering triggers detailed popup card, clicking opens drawer.
+                  - Glow HANYA pada titik saja (tidak menimpa line).
+                  - Jika ada > 1 pekerjaan, jumlah titik ditambahkan sesuai jumlahnya.
+                  - Hovering triggers detailed popup card, clicking opens drawer.
                   ======================================================== */}
               {linesWithLogs.map(({ line, logs: lineLogs, center }) => {
                 const count = lineLogs.length;
+                const displayCount = Math.min(count, 5);
+                const dotSpacing = 22;
+                const startX = center.x - ((displayCount - 1) * dotSpacing) / 2;
 
                 return (
                   <g
-                    key={`work-beacon-${line.id}`}
+                    key={`work-beacon-group-${line.id}`}
                     className="pointer-events-auto cursor-pointer"
                     onMouseEnter={() => setHoveredLine(line)}
                     onMouseLeave={() => setHoveredLine(null)}
@@ -3406,79 +3405,111 @@ export default function SchematicViewer({
                       if (onSelectLocation) onSelectLocation(line);
                     }}
                   >
-                    {/* 1. Radar Ping Ring 1 (Pulse Kedip Cepat) */}
-                    <circle
-                      cx={center.x}
-                      cy={center.y}
-                      r="8"
-                      fill="none"
-                      stroke="#ef4444"
-                      strokeWidth="3.2"
-                      opacity="0.9"
-                    >
-                      <animate attributeName="r" values="8;26;40" dur="2s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.9;0.35;0" dur="2s" repeatCount="indefinite" />
-                      <animate attributeName="stroke-width" values="3.2;1.8;0.3" dur="2s" repeatCount="indefinite" />
-                    </circle>
+                    {/* Render each individual glowing beacon dot matching exact work count */}
+                    {Array.from({ length: displayCount }).map((_, idx) => {
+                      const dotX = startX + idx * dotSpacing;
+                      const dotY = center.y;
+                      const phaseDelay = (idx * 0.35).toFixed(2);
 
-                    {/* 2. Radar Ping Ring 2 (Pulse Gelombang Kedua, delay 1s) */}
-                    <circle
-                      cx={center.x}
-                      cy={center.y}
-                      r="8"
-                      fill="none"
-                      stroke="#dc2626"
-                      strokeWidth="3.2"
-                      opacity="0.9"
-                    >
-                      <animate attributeName="r" values="8;26;40" dur="2s" begin="1s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.9;0.35;0" dur="2s" begin="1s" repeatCount="indefinite" />
-                      <animate attributeName="stroke-width" values="3.2;1.8;0.3" dur="2s" begin="1s" repeatCount="indefinite" />
-                    </circle>
+                      return (
+                        <g key={`dot-${line.id}-${idx}`}>
+                          {/* 1. Radar Ping Ring (Pulse Kedip Cepat) */}
+                          <circle
+                            cx={dotX}
+                            cy={dotY}
+                            r="8"
+                            fill="none"
+                            stroke="#ef4444"
+                            strokeWidth="3"
+                            opacity="0.9"
+                          >
+                            <animate
+                              attributeName="r"
+                              values="8;24;36"
+                              dur="2s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                            <animate
+                              attributeName="opacity"
+                              values="0.9;0.35;0"
+                              dur="2s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                            <animate
+                              attributeName="stroke-width"
+                              values="3;1.6;0.3"
+                              dur="2s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                          </circle>
 
-                    {/* 3. Soft Glowing Red Halo Aura */}
-                    <circle
-                      cx={center.x}
-                      cy={center.y}
-                      r="15"
-                      fill="#ef4444"
-                      opacity="0.3"
-                    >
-                      <animate attributeName="opacity" values="0.2;0.55;0.2" dur="1.5s" repeatCount="indefinite" />
-                      <animate attributeName="r" values="14;16;14" dur="1.5s" repeatCount="indefinite" />
-                    </circle>
+                          {/* 2. Soft Glowing Red Halo Aura (Strictly around dot only) */}
+                          <circle
+                            cx={dotX}
+                            cy={dotY}
+                            r="13"
+                            fill="#ef4444"
+                            opacity="0.3"
+                          >
+                            <animate
+                              attributeName="opacity"
+                              values="0.2;0.55;0.2"
+                              dur="1.6s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                            <animate
+                              attributeName="r"
+                              values="12;14.5;12"
+                              dur="1.6s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                          </circle>
 
-                    {/* 4. Core Solid Red Beacon Dot with Crisp White Border */}
-                    <circle
-                      cx={center.x}
-                      cy={center.y}
-                      r="8.5"
-                      fill="#dc2626"
-                      stroke="#ffffff"
-                      strokeWidth="2.4"
-                      style={{
-                        filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px #ef4444)',
-                      }}
-                    >
-                      <animate attributeName="r" values="8;9.2;8" dur="1.5s" repeatCount="indefinite" />
-                    </circle>
+                          {/* 3. Core Solid Red Beacon Dot with Crisp White Border */}
+                          <circle
+                            cx={dotX}
+                            cy={dotY}
+                            r="8"
+                            fill="#dc2626"
+                            stroke="#ffffff"
+                            strokeWidth="2.4"
+                            style={{
+                              filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 8px #ef4444)',
+                            }}
+                          >
+                            <animate
+                              attributeName="r"
+                              values="7.5;8.6;7.5"
+                              dur="1.6s"
+                              begin={`${phaseDelay}s`}
+                              repeatCount="indefinite"
+                            />
+                          </circle>
 
-                    {/* 5. Center White Spark / Glass Reflection */}
-                    <circle
-                      cx={center.x - 2.2}
-                      cy={center.y - 2.2}
-                      r="2.6"
-                      fill="#ffffff"
-                      opacity="0.95"
-                    />
+                          {/* 4. Center White Light Spark */}
+                          <circle
+                            cx={dotX - 2}
+                            cy={dotY - 2}
+                            r="2.4"
+                            fill="#ffffff"
+                            opacity="0.95"
+                          />
+                        </g>
+                      );
+                    })}
 
-                    {/* 6. Multi-Job Counter Badge (if count > 1) */}
-                    {count > 1 && (
-                      <g transform={`translate(${center.x + 8}, ${center.y - 13})`}>
+                    {/* If more than 5 jobs, show small +N tag */}
+                    {count > 5 && (
+                      <g transform={`translate(${startX + (displayCount - 1) * dotSpacing + 12}, ${center.y - 10})`}>
                         <rect
                           x="0"
                           y="0"
-                          width={count > 9 ? 22 : 16}
+                          width="24"
                           height="14"
                           rx="7"
                           fill="#991b1b"
@@ -3487,7 +3518,7 @@ export default function SchematicViewer({
                           style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
                         />
                         <text
-                          x={count > 9 ? 11 : 8}
+                          x="12"
                           y="10.5"
                           textAnchor="middle"
                           fill="#ffffff"
@@ -3495,16 +3526,18 @@ export default function SchematicViewer({
                           fontWeight="900"
                           fontFamily="monospace, system-ui, sans-serif"
                         >
-                          {count}
+                          +{count - 5}
                         </text>
                       </g>
                     )}
 
-                    {/* 7. Generous Hit-Area for effortless cursor hovering & clicking */}
-                    <circle
-                      cx={center.x}
-                      cy={center.y}
-                      r="24"
+                    {/* Combined Generous Hit-Area for effortless cursor hovering & clicking */}
+                    <rect
+                      x={startX - 18}
+                      y={center.y - 18}
+                      width={(displayCount - 1) * dotSpacing + 36 + (count > 5 ? 28 : 0)}
+                      height="36"
+                      rx="18"
                       fill="transparent"
                     />
                   </g>

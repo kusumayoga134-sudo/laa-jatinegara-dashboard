@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   PlusCircle,
   Edit3,
@@ -15,7 +15,9 @@ import {
   Search,
   Filter,
   CalendarDays,
+  ChevronDown,
 } from 'lucide-react';
+import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
 
 // ========================================================
 // COLOR RESOLVER: Pemetaan Warna Asli Garis AutoCAD DWG
@@ -272,6 +274,44 @@ export default function WorkHistoryPanel({
     status: 'COMPLETED',
     timestamp: new Date().toISOString().slice(0, 16),
   });
+
+  // Custom Elegant Auto-Suggest States for all 208 map locations
+  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+  const [suggestCategory, setSuggestCategory] = useState('ALL');
+  const suggestWrapperRef = useRef(null);
+
+  // Close auto-suggest when clicked outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (suggestWrapperRef.current && !suggestWrapperRef.current.contains(e.target)) {
+        setIsSuggestOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filtered suggestion list based on category & input search
+  const filteredSuggestions = useMemo(() => {
+    const q = (formData.targetCode || '').trim().toLowerCase();
+    return ALL_MAP_LOCATIONS.filter((item) => {
+      // Category tab filter
+      if (suggestCategory === 'JALUR' && !item.title.includes('Jalur') && !item.title.includes('ST.')) return false;
+      if (suggestCategory === 'NASPAN' && !item.title.includes('NASPAN') && !item.code.includes('NASPAN')) return false;
+      if (suggestCategory === 'WESEL' && !item.title.includes('Wesel') && !item.title.includes('Crossing')) return false;
+      if (suggestCategory === 'DS' && item.category !== 'DISCONNECTING SWITCH (DS)') return false;
+      if (suggestCategory === 'FRP' && item.category !== 'SECTION INSULATOR (FRP)') return false;
+      if (suggestCategory === 'AS_AJ' && item.category !== 'PEMISAH SEKSI (AS/AJ)') return false;
+
+      // Search query filter
+      if (!q) return true;
+      const t = (item.title || '').toLowerCase();
+      const c = (item.code || '').toLowerCase();
+      const km = (item.km || '').toLowerCase();
+      const cat = (item.category || '').toLowerCase();
+      return t.includes(q) || c.includes(q) || km.includes(q) || cat.includes(q);
+    });
+  }, [formData.targetCode, suggestCategory]);
 
   if (!locationData) return null;
 
@@ -785,76 +825,117 @@ export default function WorkHistoryPanel({
                   </span>
                   <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    list="locations-datalist"
-                    value={formData.targetCode}
-                    onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
-                    placeholder="Contoh: ST. JATINEGARA (Jalur 1), DS 4, NASPAN 1 JNG-KLD (HU)..."
-                    className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-10"
-                  />
-                  <datalist id="locations-datalist">
-                    <option value="ST. JATINEGARA (Jalur 1)" />
-                    <option value="ST. JATINEGARA (Jalur 2)" />
-                    <option value="ST. JATINEGARA (Jalur 3)" />
-                    <option value="ST. JATINEGARA (Jalur 4)" />
-                    <option value="ST. JATINEGARA (Jalur 5)" />
-                    <option value="ST. JATINEGARA (Jalur 6)" />
-                    <option value="ST. JATINEGARA (Jalur 7)" />
-                    <option value="ST. JATINEGARA (Jalur 8)" />
-                    <option value="NASPAN 1 JNG-KLD (HU)" />
-                    <option value="NASPAN 1 JNG-KLD (HI)" />
-                    <option value="NASPAN 2 JNG-KLD" />
-                    <option value="NASPAN 3 JNG-KLD" />
-                    <option value="NASPAN 4 JNG-KLD" />
-                    <option value="NASPAN 4B KLD-BUA" />
-                    <option value="NASPAN 5 BUA" />
-                    <option value="NASPAN 6 BUA" />
-                    <option value="NASPAN 7 BUA-KLDB" />
-                    <option value="NASPAN 8 BUA-KLDB" />
-                    <option value="NASPAN 9 EMPL CUK" />
-                    <option value="NASPAN 10 CUK-KRI" />
-                    <option value="NASPAN 11 CUK-KRI" />
-                    <option value="NASPAN 12 BKS-KRI" />
-                    <option value="NASPAN 13 BKS-KRI" />
-                    <option value="NASPAN 9 KPB-JNG" />
-                    <option value="NASPAN 9 JNG-KPB" />
-                    <option value="DS 1" />
-                    <option value="DS 2" />
-                    <option value="DS 3" />
-                    <option value="DS 4" />
-                    <option value="DS 5" />
-                    <option value="DS 6" />
-                    <option value="DS 7" />
-                    <option value="DS 8" />
-                    <option value="DS 9" />
-                    <option value="DS 10" />
-                    <option value="DS 11" />
-                    <option value="DS 12" />
-                    <option value="DS 13" />
-                    <option value="DS 14" />
-                    <option value="DS 15" />
-                    <option value="DS 16" />
-                    <option value="DS 17" />
-                    <option value="DS 18" />
-                    <option value="DS 19" />
-                    <option value="DS 20" />
-                    <option value="FRP-JNG-01-31A1" />
-                    <option value="FRP-JNG-02-11A" />
-                    <option value="FRP-JNG-06-41B" />
-                    <option value="AJ KM 10+000" />
-                    <option value="AS KM 11+200" />
-                    <option value="AJ KM 18+800" />
-                    <option value="AS KM 26+900" />
-                  </datalist>
-                  {formData.targetCode && (
-                    <span
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full shadow-xs border border-white"
-                      style={{ backgroundColor: getLineColorInfo(formData.targetCode).color }}
-                      title={getLineColorInfo(formData.targetCode).label}
+                <div ref={suggestWrapperRef} className="relative">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={formData.targetCode}
+                      onFocus={() => setIsSuggestOpen(true)}
+                      onChange={(e) => {
+                        setFormData({ ...formData, targetCode: e.target.value });
+                        setIsSuggestOpen(true);
+                      }}
+                      placeholder="Ketik atau pilih line, naspan, wesel, DS, FRP..."
+                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-16"
                     />
+
+                    {/* Right Action Icons: Live Color Dot & Toggle Chevron */}
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center space-x-1.5">
+                      {formData.targetCode && (
+                        <span
+                          className="w-3.5 h-3.5 rounded-full shadow-xs border border-white shrink-0"
+                          style={{ backgroundColor: getLineColorInfo(formData.targetCode).color }}
+                          title={getLineColorInfo(formData.targetCode).label}
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setIsSuggestOpen((prev) => !prev)}
+                        className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition cursor-pointer"
+                        title="Buka / Tutup Daftar Saran Lokasi"
+                      >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSuggestOpen ? 'rotate-180 text-blue-600' : ''}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CUSTOM ELEGANT AUTO-SUGGEST DROPDOWN */}
+                  {isSuggestOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-1.5 z-70 bg-white/98 border border-slate-200 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
+                      
+                      {/* Category Filter Tabs */}
+                      <div className="bg-slate-50/90 border-b border-slate-200/90 p-1.5 flex items-center space-x-1 overflow-x-auto text-[10.5px] font-bold scrollbar-none">
+                        {[
+                          { id: 'ALL', label: 'Semua (208)' },
+                          { id: 'JALUR', label: 'Jalur / Stasiun' },
+                          { id: 'NASPAN', label: 'Naspan' },
+                          { id: 'WESEL', label: 'Wesel' },
+                          { id: 'DS', label: 'DS (20)' },
+                          { id: 'FRP', label: 'FRP (25)' },
+                          { id: 'AS_AJ', label: 'AS / AJ (24)' },
+                        ].map((tab) => (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setSuggestCategory(tab.id)}
+                            className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer ${
+                              suggestCategory === tab.id
+                                ? 'bg-blue-600 text-white shadow-2xs font-extrabold'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Suggestion Items List */}
+                      <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 p-1">
+                        {filteredSuggestions.length === 0 ? (
+                          <div className="p-4 text-center text-xs text-slate-400 italic">
+                            Tidak ada lokasi terdaftar yang cocok dengan pencarian. Anda dapat tetap mengetik lokasi custom.
+                          </div>
+                        ) : (
+                          filteredSuggestions.map((item) => (
+                            <button
+                              key={`${item.id}-${item.title}`}
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, targetCode: item.title });
+                                setIsSuggestOpen(false);
+                              }}
+                              className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50/80 transition flex items-center justify-between gap-2.5 group cursor-pointer"
+                            >
+                              <div className="flex items-center space-x-2.5 min-w-0">
+                                <span
+                                  className="w-3 h-3 rounded-full shrink-0 border border-slate-300 shadow-2xs group-hover:scale-110 transition-transform"
+                                  style={{ backgroundColor: item.color }}
+                                />
+                                <div className="min-w-0">
+                                  <div className="text-xs font-bold text-slate-800 group-hover:text-blue-700 truncate leading-snug">
+                                    {item.title}
+                                  </div>
+                                  <div className="text-[10.5px] font-mono text-slate-400 group-hover:text-slate-600 truncate">
+                                    {item.km}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80 uppercase tracking-wider shrink-0">
+                                {item.category.replace(/ST\. JATINEGARA.*|PETAK /g, '').slice(0, 16)}
+                              </span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+
+                      {/* Footer Info */}
+                      <div className="bg-slate-50 px-3 py-1.5 border-t border-slate-200/80 flex items-center justify-between text-[10.5px] text-slate-400 font-medium">
+                        <span>{filteredSuggestions.length} lokasi terdeteksi</span>
+                        <span className="italic">Klik untuk memilih langsung</span>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
