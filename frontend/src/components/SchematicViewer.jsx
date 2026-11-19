@@ -364,7 +364,7 @@ export default function SchematicViewer({
       id: 'jng_jalur_4',
       code: 'JALUR 4 JNG',
       title: 'ST. JATINEGARA (Jalur 4)',
-      km: 'KM 11+122 - KM 12+800',
+      km: 'KM 11+122 - KM 12+283',
       category: 'ST. JATINEGARA',
       d: 'M 828.5 512.7 L 1461.9 512.7',
       color: '#cc6827',
