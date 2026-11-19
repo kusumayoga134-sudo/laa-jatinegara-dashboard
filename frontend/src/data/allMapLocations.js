@@ -443,7 +443,7 @@ export const ALL_MAP_LOCATIONS = [
   {
     "id": "bks_jalur_simpan_960",
     "code": "ST. BEKASI",
-    "title": "Jalur Stabling / Simpan Atas St. Bekasi",
+    "title": "ST. BEKASI (Jalur 8)",
     "km": "KM 26+200 - KM 26+500",
     "category": "ST. BEKASI (STABLING)",
     "color": "#139a47"
@@ -871,14 +871,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 26+580",
     "category": "ST. BEKASI (EMPLASEMEN BARAT)",
     "color": "#ec1f24"
-  },
-  {
-    "id": "wesel_w71c_1319",
-    "code": "WESEL W71C",
-    "title": "Wesel W71C Stabling Atas Bekasi (KM 26+200)",
-    "km": "KM 26+200",
-    "category": "ST. BEKASI (STABLING)",
-    "color": "#139a47"
   },
   {
     "id": "wesel_w71c1_1341",
