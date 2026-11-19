@@ -713,14 +713,6 @@ export const ALL_MAP_LOCATIONS = [
     "color": "#ff00ff"
   },
   {
-    "id": "wesel_w83a2_1461",
-    "code": "WESEL W83A2",
-    "title": "Wesel Jalur 4 ke Jalur 3 Timur (KM 11+800)",
-    "km": "KM 11+800",
-    "category": "ST. JATINEGARA (EMPLASEMEN TIMUR)",
-    "color": "#cc6827"
-  },
-  {
     "id": "wesel_w83a2_1628",
     "code": "WESEL W83A2",
     "title": "Wesel W83A2 (Crossover Jalur 4 Timur, KM 11+900)",
