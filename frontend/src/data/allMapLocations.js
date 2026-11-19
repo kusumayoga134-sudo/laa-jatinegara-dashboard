@@ -458,10 +458,10 @@ export const ALL_MAP_LOCATIONS = [
   },
   {
     "id": "bks_jalur_1_end",
-    "code": "ST. BEKASI",
-    "title": "Jalur 1 Ujung Barat Bekasi (Arah Bekasi Timur)",
-    "km": "KM 26+900 - KM 27+200",
-    "category": "ST. BEKASI",
+    "code": "PETAK BKS-BKT",
+    "title": "BKS-BKT (Jalur Hulu)",
+    "km": "KM 26+800 - KM 27+200",
+    "category": "PETAK BKS-BKT",
     "color": "#139a47"
   },
   {
@@ -823,14 +823,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 21+100",
     "category": "ST. CAKUNG",
     "color": "#cc6827"
-  },
-  {
-    "id": "wesel_w73_bks_460",
-    "code": "WESEL W73",
-    "title": "Wesel W73 Barat Bekasi (KM 26+800)",
-    "km": "KM 26+800",
-    "category": "ST. BEKASI (EMPLASEMEN BARAT)",
-    "color": "#ec1f24"
   },
   {
     "id": "wesel_w73_bks_807",
