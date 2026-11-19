@@ -249,9 +249,9 @@ export const ALL_MAP_LOCATIONS = [
     "color": "#f8d731"
   },
   {
-    "id": "loop_menurun_bua_kldb_hilir",
-    "code": "LOOP BUA-KLDB HI",
-    "title": "Jalur Menurun Loop Buaran - Klender Baru (Hilir / Luar)",
+    "id": "naspan_8b_bua_kldb_hi",
+    "code": "NASPAN 8B BUA-KLDB",
+    "title": "NASPAN 8B BUA-KLDB (Jalur Hilir, AJ KM 18+800 s/d AJ KM 19+300)",
     "km": "KM 18+800 - KM 19+300",
     "category": "TIKUNGAN LOOP BUA-KLDB",
     "color": "#f8d731"
@@ -329,9 +329,9 @@ export const ALL_MAP_LOCATIONS = [
     "color": "#ff0000"
   },
   {
-    "id": "loop_menurun_bua_kldb_hulu",
-    "code": "LOOP BUA-KLDB HU",
-    "title": "Jalur Menurun Loop Buaran - Klender Baru (Hulu / Dalam)",
+    "id": "naspan_8b_bua_kldb_hu",
+    "code": "NASPAN 8B BUA-KLDB",
+    "title": "NASPAN 8B BUA-KLDB (Jalur Hulu, AJ KM 18+800 s/d AJ KM 19+300)",
     "km": "KM 18+800 - KM 19+300",
     "category": "TIKUNGAN LOOP BUA-KLDB",
     "color": "#ff0000"
@@ -606,7 +606,7 @@ export const ALL_MAP_LOCATIONS = [
     "title": "Wesel W83A1 (Crossover Jalur 7 ke Jalur 4/3)",
     "km": "KM 11+800 - KM 12+000",
     "category": "ST. JATINEGARA (EMPLASEMEN TIMUR)",
-    "color": "#cc6827"
+    "color": "#139a47"
   },
   {
     "id": "wesel_w63a_1452",
@@ -847,70 +847,6 @@ export const ALL_MAP_LOCATIONS = [
     "km": "KM 12+350",
     "category": "ST. JATINEGARA (EMPLASEMEN TIMUR)",
     "color": "#ff00ff"
-  },
-  {
-    "id": "loop_slope_3112_702",
-    "code": "LOOP BUA-KLDB",
-    "title": "Tikungan Loop Menurun Buaran - Klender Baru (Hulu Atas)",
-    "km": "KM 18+800 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
-  },
-  {
-    "id": "loop_slope_3122_655",
-    "code": "LOOP BUA-KLDB",
-    "title": "Tikungan Loop Menurun Buaran - Klender Baru (Hilir Atas)",
-    "km": "KM 18+800 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
-  },
-  {
-    "id": "loop_vert_hi",
-    "code": "LOOP BUA-KLDB",
-    "title": "Kabel Loop Vertikal Hilir Menurun Buaran - Klender Baru",
-    "km": "KM 19+000",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#f8d731"
-  },
-  {
-    "id": "loop_vert_hu",
-    "code": "LOOP BUA-KLDB",
-    "title": "Kabel Loop Vertikal Hulu Menurun Buaran - Klender Baru",
-    "km": "KM 19+000",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
-  },
-  {
-    "id": "loop_slope_3143_1021",
-    "code": "LOOP BUA-KLDB",
-    "title": "Tikungan Loop Menurun Buaran - Klender Baru (Hulu Bawah)",
-    "km": "KM 19+000 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
-  },
-  {
-    "id": "loop_slope_3122_1112",
-    "code": "LOOP BUA-KLDB",
-    "title": "Tikungan Loop Menurun Buaran - Klender Baru (Hilir Bawah)",
-    "km": "KM 19+000 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
-  },
-  {
-    "id": "naspan_8_bua_kldb_hi",
-    "code": "NASPAN 8 BUA-KLDB",
-    "title": "NASPAN 8 BUA-KLDB (Jalur Masuk Klender Baru Hilir)",
-    "km": "KM 19+000 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#f8d731"
-  },
-  {
-    "id": "naspan_8_bua_kldb_hu",
-    "code": "NASPAN 8 BUA-KLDB",
-    "title": "NASPAN 8 BUA-KLDB (Jalur Masuk Klender Baru Hulu)",
-    "km": "KM 19+000 - KM 19+300",
-    "category": "TIKUNGAN LOOP BUA-KLDB",
-    "color": "#ff0000"
   },
   {
     "id": "wesel_w23b_cuk",
