@@ -372,7 +372,7 @@ export default function SchematicViewer({
       endDivider: { type: 'WESEL', label: 'Wesel W83A2', km: 'KM 11+800' },
     },
     {
-      id: 'jng_jalur_4_ext',
+      id: 'jng_jalur_7_ext',
       code: 'JALUR 4 JNG',
       title: 'Jalur 4 Lanjutan Emplasemen Timur JNG',
       km: 'KM 11+850 - KM 12+100',
