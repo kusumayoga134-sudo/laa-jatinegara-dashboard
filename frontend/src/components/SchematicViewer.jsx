@@ -233,7 +233,7 @@ export default function SchematicViewer({
     {
       id: 'kpb_jng_hi_naspan9',
       code: 'NASPAN 9 KPB-JNG',
-      title: 'NASPAN 9 KPB-JNG (Jalur Hilir Pondok Jati - Jatinegara)',
+      title: 'NASPAN 9 KPB-JNG (JNG-POK Jalur Hilir)',
       km: 'KM 9+890 - KM 11+227',
       category: 'PERCABANGAN KRAMAT',
       d: 'M 218.7 370.4 L 587.7 370.4',
@@ -261,7 +261,7 @@ export default function SchematicViewer({
     {
       id: 'kpb_jng_hu_naspan',
       code: 'NASPAN 9 JNG-KPB',
-      title: 'NASPAN 9 JNG-KPB (Jalur Hulu Pondok Jati - Jatinegara)',
+      title: 'NASPAN 9 JNG-KPB (POK-JNG Jalur Hulu)',
       km: 'KM 9+890 - KM 11+227',
       category: 'NASPAN 9 JNG-KPB',
       d: 'M 218.7 418.2 L 587.7 418.2',
