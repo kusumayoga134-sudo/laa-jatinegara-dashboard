@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import SchematicViewer from './components/SchematicViewer';
+import SchematicViewer, { computeLinesWithLogs } from './components/SchematicViewer';
 import WorkHistoryPanel from './components/WorkHistoryPanel';
 import LoginModal from './components/LoginModal';
+import PdfExportModal from './components/PdfExportModal';
 import { api } from './services/api';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -25,6 +26,7 @@ export default function App() {
   });
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isExportPdfOpen, setIsExportPdfOpen] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ message, type });
@@ -174,6 +176,7 @@ export default function App() {
         onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={handleLogout}
         onOpenAddLog={handleOpenAddLog}
+        onOpenExportPdf={() => setIsExportPdfOpen(true)}
         onOpenAllLogs={() =>
           setSelectedLocation({
             code: '',
@@ -193,6 +196,7 @@ export default function App() {
           onSelectLocation={(loc) => setSelectedLocation(loc)}
           isAdmin={isAdmin}
           onOpenAddLog={handleOpenAddLog}
+          onOpenExportPdf={() => setIsExportPdfOpen(true)}
         />
       </main>
 
@@ -215,6 +219,13 @@ export default function App() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Ultra HD PDF & Print Export Modal */}
+      <PdfExportModal
+        isOpen={isExportPdfOpen}
+        onClose={() => setIsExportPdfOpen(false)}
+        linesWithLogs={computeLinesWithLogs(logs)}
       />
 
       {/* Minimalist White Footer */}

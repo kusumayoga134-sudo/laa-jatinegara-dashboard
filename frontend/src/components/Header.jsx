@@ -11,6 +11,7 @@ import {
   Lock,
   LogOut,
   PlusCircle,
+  FileText,
 } from 'lucide-react';
 
 export default function Header({
@@ -20,6 +21,7 @@ export default function Header({
   onOpenLogin,
   onLogout,
   onOpenAddLog,
+  onOpenExportPdf,
 }) {
   const [time, setTime] = useState(new Date());
 
@@ -144,6 +146,17 @@ export default function Header({
                 <span>+ Catat</span>
               </button>
             )}
+
+            {onOpenExportPdf && (
+              <button
+                onClick={onOpenExportPdf}
+                className="bg-white hover:bg-rose-50 active:scale-95 border border-slate-200 hover:border-rose-300 rounded-xl py-1.5 px-2.5 flex items-center justify-center space-x-1 shadow-xs cursor-pointer text-left text-xs font-bold text-rose-700 shrink-0"
+                title="Export PDF Ultra HD"
+              >
+                <FileText className="w-3.5 h-3.5 text-rose-600" />
+                <span>PDF</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -243,6 +256,28 @@ export default function Header({
                 </div>
               </div>
             </button>
+
+            {/* Export PDF Button */}
+            {onOpenExportPdf && (
+              <button
+                onClick={onOpenExportPdf}
+                className="bg-white hover:bg-rose-50 border border-slate-200/90 hover:border-rose-300 rounded-xl px-3 py-1.5 flex items-center space-x-2 shadow-xs hover:shadow-md transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+                title="Buka Menu Export PDF & Cetak Peta Ultra HD"
+              >
+                <div className="p-1.5 rounded-lg bg-rose-100/80 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all shadow-2xs">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-[9px] text-slate-500 group-hover:text-rose-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5">
+                    <span>CETAK PETA</span>
+                  </div>
+                  <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1 mt-0.5">
+                    <span className="text-rose-600">Export</span>
+                    <span className="font-semibold text-slate-700 text-xs">PDF</span>
+                  </div>
+                </div>
+              </button>
+            )}
 
             {/* Live Clock Widget */}
             <div className="flex items-center space-x-2 bg-slate-50/90 border border-slate-200/90 rounded-xl px-3 py-1.5 shadow-2xs text-right">

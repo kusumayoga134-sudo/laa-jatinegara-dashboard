@@ -15,6 +15,7 @@ import {
   GitCommit,
   X,
   ClipboardList,
+  FileText,
 } from 'lucide-react';
 
 // =========================================================================
@@ -2461,12 +2462,90 @@ export const ALL_TRACK_LINES = [
 
 export const allTrackLines = ALL_TRACK_LINES;
 
+// Smart line-to-log matching function (Fuzzy, aliases & ID matching)
+export const matchLineLogs = (lineOrCode, logs = []) => {
+  if (!lineOrCode || !logs) return [];
+  const code = typeof lineOrCode === 'string' ? lineOrCode : (lineOrCode.code || '');
+  const title = typeof lineOrCode === 'object' ? (lineOrCode.title || '') : '';
+  const id = typeof lineOrCode === 'object' ? (lineOrCode.id || '') : '';
+
+  return logs.filter((l) => {
+    if (!l || !l.targetCode) return false;
+    const tc = l.targetCode.trim().toLowerCase();
+    const c = code.trim().toLowerCase();
+    const t = title.trim().toLowerCase();
+    const i = id.trim().toLowerCase();
+
+    // Direct ID match
+    if (i && (l.targetId === i || tc === i)) return true;
+
+    // Direct code match
+    if (c && (tc.includes(c) || c.includes(tc))) return true;
+
+    // Direct title match
+    if (t && (tc.includes(t) || t.includes(tc))) return true;
+
+    // Normalized alphanumeric comparison (ignoring punctuation like '.', '-', '(', ')')
+    const normTc = tc.replace(/[^a-z0-9]/g, '');
+    const normC = c.replace(/[^a-z0-9]/g, '');
+    const normT = t.replace(/[^a-z0-9]/g, '');
+
+    if (normC && (normTc.includes(normC) || normC.includes(normTc))) return true;
+    if (normT && (normTc.includes(normT) || normT.includes(normTc))) return true;
+
+    return false;
+  });
+};
+
+// Calculate center coordinate (X, Y) for any line, turnout, switch, or overlap
+export const getLineCenter = (line) => {
+  if (!line) return null;
+  if (line.xStart !== undefined && line.xEnd !== undefined && line.y !== undefined) {
+    return { x: (line.xStart + line.xEnd) / 2, y: line.y };
+  }
+  const nums = (line.d || '').match(/[-+]?[0-9]*\.?[0-9]+/g);
+  if (!nums || nums.length < 2) return null;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i < nums.length - 1; i += 2) {
+    const x = parseFloat(nums[i]);
+    const y = parseFloat(nums[i + 1]);
+    if (!isNaN(x) && !isNaN(y)) {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  if (minX === Infinity) return null;
+  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+};
+
+// Pre-calculate all lines that have active maintenance work logs
+export const computeLinesWithLogs = (logs = []) => {
+  const list = [];
+  ALL_TRACK_LINES.forEach((line) => {
+    const lineLogs = matchLineLogs(line, logs);
+    if (lineLogs.length > 0) {
+      const center = getLineCenter(line);
+      if (center) {
+        list.push({
+          line,
+          logs: lineLogs,
+          center,
+        });
+      }
+    }
+  });
+  return list;
+};
+
 export default function SchematicViewer({
   logs = [],
   selectedLocation,
   onSelectLocation,
   isAdmin = false,
   onOpenAddLog,
+  onOpenExportPdf,
 }) {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -2663,81 +2742,11 @@ export default function SchematicViewer({
   const allTrackLines = ALL_TRACK_LINES;
 
 
-  // Smart line-to-log matching function (Fuzzy, aliases & ID matching)
-  const getLineLogs = (lineOrCode) => {
-    if (!lineOrCode) return [];
-    const code = typeof lineOrCode === 'string' ? lineOrCode : (lineOrCode.code || '');
-    const title = typeof lineOrCode === 'object' ? (lineOrCode.title || '') : '';
-    const id = typeof lineOrCode === 'object' ? (lineOrCode.id || '') : '';
-
-    return logs.filter((l) => {
-      if (!l || !l.targetCode) return false;
-      const tc = l.targetCode.trim().toLowerCase();
-      const c = code.trim().toLowerCase();
-      const t = title.trim().toLowerCase();
-      const i = id.trim().toLowerCase();
-
-      // Direct ID match
-      if (i && (l.targetId === i || tc === i)) return true;
-
-      // Direct code match
-      if (c && (tc.includes(c) || c.includes(tc))) return true;
-
-      // Direct title match
-      if (t && (tc.includes(t) || t.includes(tc))) return true;
-
-      // Normalized alphanumeric comparison (ignoring punctuation like '.', '-', '(', ')')
-      const normTc = tc.replace(/[^a-z0-9]/g, '');
-      const normC = c.replace(/[^a-z0-9]/g, '');
-      const normT = t.replace(/[^a-z0-9]/g, '');
-
-      if (normC && (normTc.includes(normC) || normC.includes(normTc))) return true;
-      if (normT && (normTc.includes(normT) || normT.includes(normTc))) return true;
-
-      return false;
-    });
-  };
-
-  // Calculate center coordinate (X, Y) for any line, turnout, switch, or overlap
-  const getLineCenter = (line) => {
-    if (line.xStart !== undefined && line.xEnd !== undefined && line.y !== undefined) {
-      return { x: (line.xStart + line.xEnd) / 2, y: line.y };
-    }
-    const nums = (line.d || '').match(/[-+]?[0-9]*\.?[0-9]+/g);
-    if (!nums || nums.length < 2) return null;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    for (let i = 0; i < nums.length - 1; i += 2) {
-      const x = parseFloat(nums[i]);
-      const y = parseFloat(nums[i + 1]);
-      if (!isNaN(x) && !isNaN(y)) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-    }
-    if (minX === Infinity) return null;
-    return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
-  };
+  // Line-to-log matching using shared helper
+  const getLineLogs = (lineOrCode) => matchLineLogs(lineOrCode, logs);
 
   // Pre-calculate lines that have active maintenance work logs
-  const linesWithLogs = React.useMemo(() => {
-    const list = [];
-    allTrackLines.forEach((line) => {
-      const lineLogs = getLineLogs(line);
-      if (lineLogs.length > 0) {
-        const center = getLineCenter(line);
-        if (center) {
-          list.push({
-            line,
-            logs: lineLogs,
-            center,
-          });
-        }
-      }
-    });
-    return list;
-  }, [logs, allTrackLines]);
+  const linesWithLogs = React.useMemo(() => computeLinesWithLogs(logs), [logs]);
 
   const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine) : [];
 
@@ -2801,7 +2810,17 @@ export default function SchematicViewer({
         {/* Right Tools: Resolution & Zoom */}
         <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
           
-          
+          {onOpenExportPdf && (
+            <button
+              onClick={onOpenExportPdf}
+              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 transition cursor-pointer text-xs font-bold shadow-2xs active:scale-95 shrink-0"
+              title="Export Peta ke PDF Ultra HD (Lengkap dengan Radar & Riwayat Pekerjaan)"
+            >
+              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600" />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </button>
+          )}
 
           <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl p-0.5 sm:p-1 border border-slate-200">
             <button
