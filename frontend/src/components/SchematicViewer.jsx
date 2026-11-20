@@ -16,6 +16,7 @@ import {
   X,
   ClipboardList,
   FileText,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 // =========================================================================
@@ -4026,6 +4027,27 @@ export default function SchematicViewer({
               </div>
             </button>
           )}
+
+          {/* Unduh Master Data Excel Button */}
+          <a
+            href="/MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
+            download="MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
+            className="h-9 sm:h-10 bg-slate-50/90 hover:bg-emerald-50/60 border border-slate-200/90 hover:border-emerald-300 rounded-xl px-2.5 sm:px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left no-underline"
+            title="Unduh Master Data Seluruh Jalur & Peralatan dalam format Excel (.xlsx)"
+          >
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-100/90 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+              <FileSpreadsheet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
+            <div>
+              <div className="text-[9px] text-slate-500 group-hover:text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+                <span>MASTER DATA</span>
+              </div>
+              <div className="font-black text-slate-900 text-[11px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+                <span className="text-emerald-600">Unduh</span>
+                <span className="font-semibold text-slate-700 font-sans">Excel</span>
+              </div>
+            </div>
+          </a>
 
           {/* Zoom Controls */}
           <div className="h-9 sm:h-10 flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl px-1 sm:px-1.5 border border-slate-200 shadow-2xs shrink-0">
