@@ -23,6 +23,57 @@ export function formatLogTimestamp(timestamp) {
 }
 
 /**
+ * Geometric helper: Detect intersection between two 2D line segments
+ */
+function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+  if (denom === 0) return false;
+  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+}
+
+/**
+ * Geometric helper: Detect if a line segment intersects a rectangular card box
+ */
+function lineIntersectsCard(x1, y1, x2, y2, card, padding = 4) {
+  const rx = card.x - padding;
+  const ry = card.y - padding;
+  const rw = card.cardW + padding * 2;
+  const rh = card.cardH + padding * 2;
+
+  // Endpoint inside rectangle check
+  if (x1 >= rx && x1 <= rx + rw && y1 >= ry && y1 <= ry + rh) return true;
+  if (x2 >= rx && x2 <= rx + rw && y2 >= ry && y2 <= ry + rh) return true;
+
+  // Line intersection with any of 4 borders of the rectangle
+  return (
+    lineIntersectsLine(x1, y1, x2, y2, rx, ry, rx + rw, ry) ||
+    lineIntersectsLine(x1, y1, x2, y2, rx + rw, ry, rx + rw, ry + rh) ||
+    lineIntersectsLine(x1, y1, x2, y2, rx + rw, ry + rh, rx, ry + rh) ||
+    lineIntersectsLine(x1, y1, x2, y2, rx, ry + rh, rx, ry)
+  );
+}
+
+/**
+ * Protected CAD Drawing Zones
+ * Callout boxes MUST NEVER cover these areas:
+ * - Native CAD Header Banner (Danantara & KAI logos, Document title)
+ * - Upper Corridor Naspan Row (NASPAN 1 through 8, DS 8)
+ * - St. Cakung Naspan 9 Emplasemen & DS 11/13
+ * - Lower Corridor Petak Naspan Row (NASPAN 10 through 13)
+ * - Native CAD Legend Table (Top Right)
+ */
+const PROTECTED_CAD_ZONES = [
+  { name: 'CAD Header Banner', x1: 0, y1: 0, x2: 3275, y2: 215 },
+  { name: 'CAD Legend Table', x1: 2880, y1: 200, x2: 3250, y2: 470 },
+  { name: 'Upper Naspan Row', x1: 1350, y1: 710, x2: 3150, y2: 830 },
+  { name: 'Cakung Naspan 9 & DS', x1: 2280, y1: 1130, x2: 2940, y2: 1250 },
+  { name: 'Lower Naspan Row', x1: 1600, y1: 1130, x2: 2280, y2: 1240 },
+  { name: 'Bottom Border Frame', x1: 0, y1: 1385, x2: 3275, y2: 1419 },
+];
+
+/**
  * Generate Ultra HD Canvas from CAD base map + track glows + radar dots + callout cards
  */
 export async function renderUltraHdCanvas({
