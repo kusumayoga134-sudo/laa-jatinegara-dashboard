@@ -1332,7 +1332,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 206.1 360.9 L 218.7 380.7',
       hitD: 'M 206.1 360.9 L 218.7 380.7',
-      color: '#000000',
+      color: '#ff7fdf',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 10+000', km: 'KM 10+000' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 10+000', km: 'KM 10+000' },
@@ -1345,7 +1345,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 206.1 408.7 L 218.7 428.5',
       hitD: 'M 206.1 408.7 L 218.7 428.5',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 10+000', km: 'KM 10+000' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 10+000', km: 'KM 10+000' },
@@ -1358,7 +1358,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 590.2 360.9 L 602.8 380.7',
       hitD: 'M 590.2 360.9 L 602.8 380.7',
-      color: '#000000',
+      color: '#139a47',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+200', km: 'KM 11+200' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+200', km: 'KM 11+200' },
@@ -1371,7 +1371,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 585.2 408.7 L 597.8 428.5',
       hitD: 'M 585.2 408.7 L 597.8 428.5',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+200', km: 'KM 11+200' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+200', km: 'KM 11+200' },
@@ -1384,7 +1384,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 474.7 646.6 L 486.5 666.4',
       hitD: 'M 474.7 646.6 L 486.5 666.4',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 1+880', km: 'KM 1+880' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 1+880', km: 'KM 1+880' },
@@ -1397,7 +1397,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 474.7 694.5 L 486.5 714.2',
       hitD: 'M 474.7 694.5 L 486.5 714.2',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 1+880', km: 'KM 1+880' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 1+880', km: 'KM 1+880' },
@@ -1410,7 +1410,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 728.8 646.6 L 740.8 666.4',
       hitD: 'M 728.8 646.6 L 740.8 666.4',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 2+000', km: 'KM 2+000' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 2+000', km: 'KM 2+000' },
@@ -1423,7 +1423,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 728.8 694.5 L 740.7 713.7',
       hitD: 'M 728.8 694.5 L 740.7 713.7',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 2+000', km: 'KM 2+000' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 2+000', km: 'KM 2+000' },
@@ -1436,7 +1436,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1475.5 646.6 L 1487.9 666.4',
       hitD: 'M 1475.5 646.6 L 1487.9 666.4',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
@@ -1449,7 +1449,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1475.8 694.5 L 1487.7 713.5',
       hitD: 'M 1475.8 694.5 L 1487.7 713.5',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
@@ -1462,7 +1462,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1476.0 598.0 L 1487.4 615.6',
       hitD: 'M 1476.0 598.0 L 1487.4 615.6',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 11+900', km: 'KM 11+900' },
@@ -1475,7 +1475,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1942.6 646.3 L 1954.5 666.4',
       hitD: 'M 1942.6 646.3 L 1954.5 666.4',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 12+500', km: 'KM 12+500' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 12+500', km: 'KM 12+500' },
@@ -1488,7 +1488,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1942.6 695.1 L 1954.5 714.2',
       hitD: 'M 1942.6 695.1 L 1954.5 714.2',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 12+500', km: 'KM 12+500' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 12+500', km: 'KM 12+500' },
@@ -1501,7 +1501,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2078.8 646.6 L 2091.4 666.4',
       hitD: 'M 2078.8 646.6 L 2091.4 666.4',
-      color: '#000000',
+      color: '#0000ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 13+300', km: 'KM 13+300' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 13+300', km: 'KM 13+300' },
@@ -1514,7 +1514,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2077.2 694.5 L 2089.8 714.2',
       hitD: 'M 2077.2 694.5 L 2089.8 714.2',
-      color: '#000000',
+      color: '#ff9f7f',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 13+300', km: 'KM 13+300' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 13+300', km: 'KM 13+300' },
@@ -1527,7 +1527,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2159.0 646.1 L 2171.7 666.1',
       hitD: 'M 2159.0 646.1 L 2171.7 666.1',
-      color: '#000000',
+      color: '#0000ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+100', km: 'KM 14+100' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+100', km: 'KM 14+100' },
@@ -1540,7 +1540,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2157.0 693.2 L 2169.7 713.0',
       hitD: 'M 2157.0 693.2 L 2169.7 713.0',
-      color: '#000000',
+      color: '#ff9f7f',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+100', km: 'KM 14+100' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+100', km: 'KM 14+100' },
@@ -1553,7 +1553,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2245.5 646.1 L 2258.1 665.9',
       hitD: 'M 2245.5 646.1 L 2258.1 665.9',
-      color: '#000000',
+      color: '#0000ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+700', km: 'KM 14+700' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+700', km: 'KM 14+700' },
@@ -1566,7 +1566,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2243.9 693.8 L 2256.5 713.5',
       hitD: 'M 2243.9 693.8 L 2256.5 713.5',
-      color: '#000000',
+      color: '#ff9f7f',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+700', km: 'KM 14+700' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 14+700', km: 'KM 14+700' },
@@ -1579,7 +1579,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2512.6 646.7 L 2524.4 666.3',
       hitD: 'M 2512.6 646.7 L 2524.4 666.3',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 15+450', km: 'KM 15+450' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 15+450', km: 'KM 15+450' },
@@ -1592,7 +1592,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2512.0 694.9 L 2523.3 714.1',
       hitD: 'M 2512.0 694.9 L 2523.3 714.1',
-      color: '#000000',
+      color: '#00ff00',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 15+450', km: 'KM 15+450' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 15+450', km: 'KM 15+450' },
@@ -1605,7 +1605,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2630.9 647.0 L 2643.6 666.8',
       hitD: 'M 2630.9 647.0 L 2643.6 666.8',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 16+500', km: 'KM 16+500' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 16+500', km: 'KM 16+500' },
@@ -1618,7 +1618,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2629.4 694.6 L 2642.2 714.6',
       hitD: 'M 2629.4 694.6 L 2642.2 714.6',
-      color: '#000000',
+      color: '#00ff00',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 16+500', km: 'KM 16+500' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 16+500', km: 'KM 16+500' },
@@ -1631,7 +1631,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2737.4 646.7 L 2749.2 665.8',
       hitD: 'M 2737.4 646.7 L 2749.2 665.8',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+239', km: 'KM 17+239' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+239', km: 'KM 17+239' },
@@ -1644,7 +1644,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2737.4 694.5 L 2749.2 713.5',
       hitD: 'M 2737.4 694.5 L 2749.2 713.5',
-      color: '#000000',
+      color: '#00ff00',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+239', km: 'KM 17+239' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+239', km: 'KM 17+239' },
@@ -1657,7 +1657,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2981.4 646.9 L 2993.2 665.8',
       hitD: 'M 2981.4 646.9 L 2993.2 665.8',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+900', km: 'KM 17+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+900', km: 'KM 17+900' },
@@ -1670,7 +1670,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2980.4 694.5 L 2992.4 713.6',
       hitD: 'M 2980.4 694.5 L 2992.4 713.6',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+900', km: 'KM 17+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 17+900', km: 'KM 17+900' },
@@ -1683,7 +1683,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3090.4 646.1 L 3103.1 665.9',
       hitD: 'M 3090.4 646.1 L 3103.1 665.9',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 18+800', km: 'KM 18+800' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 18+800', km: 'KM 18+800' },
@@ -1696,7 +1696,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3090.4 693.9 L 3103.1 713.7',
       hitD: 'M 3090.4 693.9 L 3103.1 713.7',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 18+800', km: 'KM 18+800' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 18+800', km: 'KM 18+800' },
@@ -1709,7 +1709,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3035.6 1103.4 L 3048.2 1123.2',
       hitD: 'M 3035.6 1103.4 L 3048.2 1123.2',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 19+300', km: 'KM 19+300' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 19+300', km: 'KM 19+300' },
@@ -1722,7 +1722,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3035.6 1055.7 L 3048.2 1075.5',
       hitD: 'M 3035.6 1055.7 L 3048.2 1075.5',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 19+300', km: 'KM 19+300' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 19+300', km: 'KM 19+300' },
@@ -1735,7 +1735,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2812.3 1112.9 L 2825.2 1112.9',
       hitD: 'M 2812.3 1112.9 L 2825.2 1112.9',
-      color: '#000000',
+      color: '#f8d731',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 20+150', km: 'KM 20+150' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 20+150', km: 'KM 20+150' },
@@ -1748,7 +1748,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2807.6 1065.2 L 2819.5 1065.1',
       hitD: 'M 2807.6 1065.2 L 2819.5 1065.1',
-      color: '#000000',
+      color: '#ff0000',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 20+150', km: 'KM 20+150' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 20+150', km: 'KM 20+150' },
@@ -1761,7 +1761,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2332.1 1112.8 L 2344.0 1112.8',
       hitD: 'M 2332.1 1112.8 L 2344.0 1112.8',
-      color: '#000000',
+      color: '#cc6827',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 21+400', km: 'KM 21+400' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 21+400', km: 'KM 21+400' },
@@ -1774,7 +1774,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2331.3 1062.9 L 2342.7 1064.5',
       hitD: 'M 2331.3 1062.9 L 2342.7 1064.5',
-      color: '#000000',
+      color: '#8a6ddd',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 21+400', km: 'KM 21+400' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 21+400', km: 'KM 21+400' },
@@ -1787,7 +1787,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2208.1 1103.3 L 2220.8 1123.1',
       hitD: 'M 2208.1 1103.3 L 2220.8 1123.1',
-      color: '#000000',
+      color: '#cc6827',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 22+700', km: 'KM 22+700' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 22+700', km: 'KM 22+700' },
@@ -1800,7 +1800,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2206.8 1054.7 L 2217.6 1071.6',
       hitD: 'M 2206.8 1054.7 L 2217.6 1071.6',
-      color: '#000000',
+      color: '#8a6ddd',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 22+700', km: 'KM 22+700' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 22+700', km: 'KM 22+700' },
@@ -1813,7 +1813,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2052.8 1103.0 L 2065.4 1122.8',
       hitD: 'M 2052.8 1103.0 L 2065.4 1122.8',
-      color: '#000000',
+      color: '#cc6827',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 23+750', km: 'KM 23+750' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 23+750', km: 'KM 23+750' },
@@ -1826,7 +1826,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2060.7 1053.6 L 2073.3 1073.4',
       hitD: 'M 2060.7 1053.6 L 2073.3 1073.4',
-      color: '#000000',
+      color: '#8a6ddd',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 23+750', km: 'KM 23+750' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 23+750', km: 'KM 23+750' },
@@ -1839,7 +1839,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1810.2 1054.2 L 1822.9 1074.1',
       hitD: 'M 1810.2 1054.2 L 1822.9 1074.1',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 24+400', km: 'KM 24+400' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 24+400', km: 'KM 24+400' },
@@ -1852,7 +1852,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1739.6 1053.8 L 1752.3 1073.6 M 1752.3 1053.8 L 1739.6 1073.6',
       hitD: 'M 1739.6 1053.8 L 1752.3 1073.6 M 1752.3 1053.8 L 1739.6 1073.6',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 25+000', km: 'KM 25+000' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 25+000', km: 'KM 25+000' },
@@ -1865,7 +1865,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1739.6 1103.7 L 1752.3 1123.5',
       hitD: 'M 1739.6 1103.7 L 1752.3 1123.5',
-      color: '#000000',
+      color: '#00bfff',
       isCrossing: true,
       startDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 25+000', km: 'KM 25+000' },
       endDivider: { type: 'AJ', label: 'Overlap Air Joint (AJ) KM 25+000', km: 'KM 25+000' },
@@ -1878,7 +1878,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1626.3 1103.9 L 1639.0 1123.7',
       hitD: 'M 1626.3 1103.9 L 1639.0 1123.7',
-      color: '#000000',
+      color: '#00bfff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 25+750', km: 'KM 25+750' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 25+750', km: 'KM 25+750' },
@@ -1891,7 +1891,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1627.9 1053.8 L 1640.5 1073.6',
       hitD: 'M 1627.9 1053.8 L 1640.5 1073.6',
-      color: '#000000',
+      color: '#ff00ff',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 25+750', km: 'KM 25+750' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 25+750', km: 'KM 25+750' },
@@ -1904,7 +1904,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 592.3 1103.7 L 600.2 1123.0',
       hitD: 'M 592.3 1103.7 L 600.2 1123.0',
-      color: '#000000',
+      color: '#ec1f24',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 26+900', km: 'KM 26+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 26+900', km: 'KM 26+900' },
@@ -1917,7 +1917,7 @@ export const ALL_TRACK_LINES = [
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 592.3 1053.7 L 600.2 1073.0',
       hitD: 'M 592.3 1053.7 L 600.2 1073.0',
-      color: '#000000',
+      color: '#139a47',
       isCrossing: true,
       startDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 26+900', km: 'KM 26+900' },
       endDivider: { type: 'AS', label: 'Overlap Air Section (AS) KM 26+900', km: 'KM 26+900' },
@@ -3355,24 +3355,23 @@ export default function SchematicViewer({
 
                         {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS/AJ) */}
                         {(isHovered || isActive) && (() => {
-                          const isSymbol = line.category === 'DISCONNECTING SWITCH (DS)' ||
-                                           line.category === 'SECTION INSULATOR (FRP)' ||
-                                           line.category === 'PEMISAH SEKSI (AS/AJ)' ||
-                                           line.id.startsWith('ds_') ||
-                                           line.id.startsWith('frp_') ||
-                                           line.id.startsWith('overlap_');
+                          // DS and FRP are mechanical apparatus. Overlaps (AS/AJ) are track wire joints that glow with authentic track color & 3D white laser center!
+                          const isMechanicalApparatus = line.category === 'DISCONNECTING SWITCH (DS)' ||
+                                                        line.category === 'SECTION INSULATOR (FRP)' ||
+                                                        line.id.startsWith('ds_') ||
+                                                        line.id.startsWith('frp_');
                           
-                          const strokeCol = isSymbol ? '#000000' : line.color;
-                          const outerStrokeCol = isSymbol ? '#ffffff' : line.color;
-                          const outerWidth = isSymbol ? (line.id.startsWith('ds_') ? '8' : '10') : '11';
-                          const coreWidth = isSymbol ? (line.id.startsWith('ds_') ? '4' : '6') : '6';
-                          const glowFilter = isSymbol
-                            ? 'drop-shadow(0 0 6px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(0,0,0,0.6))'
+                          const strokeCol = isMechanicalApparatus ? '#000000' : line.color;
+                          const outerStrokeCol = isMechanicalApparatus ? '#ffffff' : line.color;
+                          const outerWidth = isMechanicalApparatus ? (line.id.startsWith('ds_') ? '8' : '10') : '11';
+                          const coreWidth = isMechanicalApparatus ? (line.id.startsWith('ds_') ? '4' : '6') : '6';
+                          const glowFilter = isMechanicalApparatus
+                            ? 'drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(56,189,248,0.8))'
                             : `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`;
 
                           return (
                             <>
-                              {/* Outer Glow / Halo (White for black symbols for crisp high contrast) */}
+                              {/* Outer Glow / Halo (Vibrant colored glow for tracks, wesel & overlaps; Crisp white halo for DS/FRP) */}
                               <path
                                 d={line.d}
                                 stroke={outerStrokeCol}
@@ -3381,12 +3380,12 @@ export default function SchematicViewer({
                                 strokeLinejoin="round"
                                 fill="none"
                                 style={{
-                                  opacity: isSymbol ? 0.95 : 0.85,
-                                  filter: isSymbol ? undefined : glowFilter,
+                                  opacity: isMechanicalApparatus ? 0.95 : 0.85,
+                                  filter: isMechanicalApparatus ? undefined : glowFilter,
                                 }}
                               />
 
-                              {/* Core Solid Line (BLACK for DS, FRP, AS/AJ) */}
+                              {/* Core Solid Line */}
                               <path
                                 d={line.d}
                                 stroke={strokeCol}
@@ -3395,12 +3394,12 @@ export default function SchematicViewer({
                                 strokeLinejoin="round"
                                 fill="none"
                                 style={{
-                                  filter: isSymbol ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                                  filter: isMechanicalApparatus ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
                                 }}
                               />
 
-                              {/* 3D Embossed White Laser Centerline for regular track lines */}
-                              {!isSymbol && (
+                              {/* 3D Embossed White Laser Centerline for regular track lines, wesel, and overlaps (AS/AJ) */}
+                              {!isMechanicalApparatus && (
                                 <path
                                   d={line.d}
                                   stroke="#ffffff"
