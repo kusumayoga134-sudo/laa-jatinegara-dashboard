@@ -220,52 +220,70 @@ export async function renderUltraHdCanvas({
 
   // 4. Draw Callout Boxes with Arrows pointing directly to radar beacons (Collision-Free Layout)
   if (showCallouts && linesWithLogs.length > 0) {
-    const cardW = 280 * scale;
-    const headerHeight = 38 * scale;
-    const logItemHeight = 44 * scale;
+    const cardW = 205 * scale;
+    const headerHeight = 26 * scale;
+    const logItemHeight = 30 * scale;
+    const gapX = 14 * scale;
+    const gapY = 10 * scale;
+    const minX = 25 * scale;
+    const maxX = totalWidth - cardW - 25 * scale;
 
-    // Step 1: Pre-calculate card properties and natural target coordinates
+    // Step 1: Pre-calculate card properties and safe non-track gutter zones
+    // Zone 1 (Top Gutter): Above Upper Tracks (CAD Y < 340, Canvas Y: mapYOffset + 140 to mapYOffset + 320)
+    // Zone 2 (Middle Gutter): Between Tracks (CAD Y 760 - 940, Canvas Y: mapYOffset + 760 to mapYOffset + 940)
+    // Zone 3 (Bottom Gutter): Below Lower Tracks (CAD Y > 1180, Canvas Y: mapYOffset + 1180 to mapYOffset + 1380)
     const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
       const targetX = toCanvasX(center.x);
       const targetY = toCanvasY(center.y);
-      const displayLogs = logs.slice(0, 3);
-      const footerExtra = logs.length > 3 ? 18 * scale : 0;
-      const cardH = headerHeight + displayLogs.length * logItemHeight + 10 * scale + footerExtra;
+      const displayLogs = logs.slice(0, 2);
+      const footerExtra = logs.length > 2 ? 14 * scale : 0;
+      const cardH = headerHeight + displayLogs.length * logItemHeight + 6 * scale + footerExtra;
 
-      // Smart Corridor & Direction Assignment:
-      // Upper corridor tracks: center.y < 850
-      // Lower corridor tracks: center.y >= 850
-      const isUpper = center.y < 850;
-      let side = 'above';
-      let boundaryY;
+      const cadY = center.y;
+      const code = (line.code || '').toLowerCase();
+      const title = (line.title || '').toLowerCase();
 
-      if (isUpper) {
-        // Hilir tracks (y <= 675) placed ABOVE upper rail corridor
-        // Hulu tracks (y > 675) placed BELOW upper rail corridor
-        const isHi = /\b(hi|hilir)\b/i.test(line.code) || /\b(hi|hilir)\b/i.test(line.title) || center.y <= 675;
+      let zone;
+      let side;
+      let baseY;
+      let minY;
+      let maxY;
+
+      if (cadY < 850) {
+        // Upper corridor (Jatinegara - Klender - Buaran)
+        const isHi = /\b(hi|hilir)\b/i.test(code) || /\b(hi|hilir)\b/i.test(title) || cadY <= 675;
         if (isHi) {
+          zone = 'top';
           side = 'above';
-          boundaryY = toCanvasY(Math.min(center.y - 30, 620));
+          baseY = mapYOffset + 240 * scale - cardH;
+          minY = mapYOffset + 20 * scale;
+          maxY = mapYOffset + 320 * scale - cardH;
         } else {
+          zone = 'middle';
           side = 'below';
-          boundaryY = toCanvasY(Math.max(center.y + 30, 740));
+          baseY = mapYOffset + 775 * scale;
+          minY = mapYOffset + 760 * scale;
+          maxY = mapYOffset + 930 * scale - cardH;
         }
       } else {
-        // Lower corridor tracks (Cakung - Kranji - Bekasi)
-        if (center.y <= 1085) {
+        // Lower corridor (Cakung - Kranji - Bekasi)
+        const isHu = /\b(hu|hulu)\b/i.test(code) || /\b(hu|hulu)\b/i.test(title) || cadY <= 1085;
+        if (isHu) {
+          zone = 'middle';
           side = 'above';
-          boundaryY = toCanvasY(Math.min(center.y - 30, 940));
+          baseY = mapYOffset + 925 * scale - cardH;
+          minY = mapYOffset + 760 * scale;
+          maxY = mapYOffset + 930 * scale - cardH;
         } else {
+          zone = 'bottom';
           side = 'below';
-          boundaryY = toCanvasY(Math.max(center.y + 30, 1170));
+          baseY = mapYOffset + 1180 * scale;
+          minY = mapYOffset + 1175 * scale;
+          maxY = mapYOffset + 1380 * scale - cardH;
         }
       }
 
-      let initialY = side === 'above' ? boundaryY - cardH : boundaryY;
-      let initialX = targetX - cardW / 2;
-      const minX = 25 * scale;
-      const maxX = totalWidth - cardW - 25 * scale;
-      initialX = Math.max(minX, Math.min(maxX, initialX));
+      const initialX = Math.max(minX, Math.min(maxX, targetX - cardW / 2));
 
       return {
         line,
@@ -279,51 +297,107 @@ export async function renderUltraHdCanvas({
         headerHeight,
         logItemHeight,
         footerExtra,
+        zone,
         side,
-        isUpper,
+        baseY,
+        minY,
+        maxY,
         x: initialX,
-        y: initialY,
+        y: baseY,
       };
     });
 
-    // Step 2: Group cards by [corridor, side] to resolve collisions
-    const groups = {};
+    // Helper: 2D Bounding Box Overlap Checker with safety gap
+    const checkOverlap = (a, b) => {
+      return (
+        a.x < b.x + b.cardW + gapX &&
+        a.x + a.cardW + gapX > b.x &&
+        a.y < b.y + b.cardH + gapY &&
+        a.y + a.cardH + gapY > b.y
+      );
+    };
+
+    // Step 2: Resolve collisions within each safe gutter zone
+    const zones = { top: [], middle: [], bottom: [] };
     preparedCards.forEach((c) => {
-      const key = `${c.isUpper ? 'upper' : 'lower'}_${c.side}`;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(c);
+      if (zones[c.zone]) zones[c.zone].push(c);
     });
 
-    // Step 3: Collision resolution (Horizontal shifting & Vertical Tiering)
-    Object.values(groups).forEach((group) => {
+    Object.values(zones).forEach((group) => {
+      if (!group || group.length === 0) return;
       group.sort((a, b) => a.targetX - b.targetX);
 
-      for (let i = 1; i < group.length; i++) {
-        const prev = group[i - 1];
+      for (let i = 0; i < group.length; i++) {
         const curr = group[i];
-        const gap = 16 * scale;
-        const overlap = (prev.x + prev.cardW + gap) - curr.x;
+        for (let j = 0; j < i; j++) {
+          const prev = group[j];
+          if (checkOverlap(curr, prev)) {
+            const shiftX = (prev.x + prev.cardW + gapX) - curr.x;
+            const targetCenter = curr.targetX - cardW / 2;
+            const distFromTarget = Math.abs((curr.x + shiftX) - targetCenter);
 
-        if (overlap > 0) {
-          // If shift is moderate (< 90 scale), try pushing horizontally
-          const canShiftRight = (curr.x + overlap + curr.cardW) <= (totalWidth - 25 * scale);
-          const shiftDistance = Math.abs((curr.x + overlap) - (curr.targetX - curr.cardW / 2));
-
-          if (canShiftRight && shiftDistance < 100 * scale) {
-            curr.x += overlap;
-          } else {
-            // Otherwise, elevate / lower to Tier 2 to completely avoid overlap
-            if (curr.side === 'above') {
-              curr.y = prev.y - curr.cardH - 18 * scale;
+            if (curr.x + shiftX + curr.cardW <= maxX && distFromTarget <= 160 * scale) {
+              curr.x += shiftX;
             } else {
-              curr.y = prev.y + prev.cardH + 18 * scale;
+              if (curr.side === 'above') {
+                const newY = prev.y - curr.cardH - gapY;
+                if (newY >= curr.minY) {
+                  curr.y = newY;
+                } else {
+                  curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
+                }
+              } else {
+                const newY = prev.y + prev.cardH + gapY;
+                if (newY <= curr.maxY) {
+                  curr.y = newY;
+                } else {
+                  curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
+                }
+              }
             }
           }
         }
       }
     });
 
-    // Step 4: Render Callout Cards and Leader Arrows (Unified, Elegant CAD Styling)
+    // Step 3: Global relaxation pass across ALL cards to guarantee 100% zero overlap
+    for (let pass = 0; pass < 4; pass++) {
+      let hasOverlap = false;
+      for (let i = 0; i < preparedCards.length; i++) {
+        for (let j = i + 1; j < preparedCards.length; j++) {
+          const a = preparedCards[i];
+          const b = preparedCards[j];
+          if (checkOverlap(a, b)) {
+            hasOverlap = true;
+            const overlapX = Math.min(
+              a.x + a.cardW + gapX - b.x,
+              b.x + b.cardW + gapX - a.x
+            );
+            if (a.x <= b.x) {
+              if (b.x + overlapX + b.cardW <= maxX) {
+                b.x += overlapX;
+              } else if (a.x - overlapX >= minX) {
+                a.x -= overlapX;
+              }
+            } else {
+              if (a.x + overlapX + a.cardW <= maxX) {
+                a.x += overlapX;
+              } else if (b.x - overlapX >= minX) {
+                b.x -= overlapX;
+              }
+            }
+          }
+        }
+      }
+      if (!hasOverlap) break;
+    }
+
+    // Step 4: Final boundary clamping
+    preparedCards.forEach((c) => {
+      c.x = Math.max(minX, Math.min(maxX, c.x));
+    });
+
+    // Step 5: Render Callout Cards and Leader Arrows (Unified, Elegant CAD Styling)
     preparedCards.forEach((card) => {
       const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY, targetX, targetY, side } = card;
 
@@ -332,8 +406,15 @@ export async function renderUltraHdCanvas({
       // ==========================================
       // A. Draw Pointer Arrow / Leader Line
       // ==========================================
-      const arrowStartX = Math.max(cardX + 28 * scale, Math.min(cardX + cardW - 28 * scale, targetX));
-      const arrowStartY = side === 'above' ? cardY + cardH : cardY;
+      const arrowStartX = Math.max(cardX + 20 * scale, Math.min(cardX + cardW - 20 * scale, targetX));
+      let arrowStartY;
+      if (cardY + cardH < targetY) {
+        arrowStartY = cardY + cardH;
+      } else if (cardY > targetY) {
+        arrowStartY = cardY;
+      } else {
+        arrowStartY = cardY + cardH / 2;
+      }
 
       // Calculate direction from card anchor to radar target beacon
       const angle = Math.atan2(targetY - arrowStartY, targetX - arrowStartX);
@@ -346,7 +427,7 @@ export async function renderUltraHdCanvas({
 
       // Outer White Halo outline (ensures leader line stands out cleanly over tracks and background)
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 4.5 * scale;
+      ctx.lineWidth = 4.2 * scale;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -356,7 +437,7 @@ export async function renderUltraHdCanvas({
 
       // Soft Shadow outline
       ctx.strokeStyle = 'rgba(15, 23, 42, 0.20)';
-      ctx.lineWidth = 2.8 * scale;
+      ctx.lineWidth = 2.5 * scale;
       ctx.beginPath();
       ctx.moveTo(arrowStartX, arrowStartY);
       ctx.lineTo(arrowEndX, arrowEndY);
@@ -364,14 +445,14 @@ export async function renderUltraHdCanvas({
 
       // Sharp Core Leader Line in Unified Dark Slate (#0f172a, Senada & Professional!)
       ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 1.6 * scale;
+      ctx.lineWidth = 1.5 * scale;
       ctx.beginPath();
       ctx.moveTo(arrowStartX, arrowStartY);
       ctx.lineTo(arrowEndX, arrowEndY);
       ctx.stroke();
 
       // Sleek Architectural Arrowhead pointing at radar target
-      const headLen = 9.5 * scale;
+      const headLen = 8.5 * scale;
       const headAngle = Math.PI / 7.5;
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
@@ -394,25 +475,25 @@ export async function renderUltraHdCanvas({
       // Card Base Anchor Pin (Tactile anchor on card border)
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
-      ctx.arc(arrowStartX, arrowStartY, 3.2 * scale, 0, Math.PI * 2);
+      ctx.arc(arrowStartX, arrowStartY, 3 * scale, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(arrowStartX, arrowStartY, 1.4 * scale, 0, Math.PI * 2);
+      ctx.arc(arrowStartX, arrowStartY, 1.3 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // ==========================================
       // B. Draw Callout Box Container
       // ==========================================
-      const cardRadius = 8 * scale;
+      const cardRadius = 6 * scale;
       const trackColor = line.color || '#334155';
 
       // 1. Drop Shadow (Soft, ambient modern shadow)
       ctx.save();
-      ctx.shadowColor = 'rgba(15, 23, 42, 0.14)';
-      ctx.shadowBlur = 18 * scale;
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+      ctx.shadowBlur = 12 * scale;
       ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 6 * scale;
+      ctx.shadowOffsetY = 4 * scale;
       ctx.fillStyle = '#ffffff';
       roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
       ctx.fill();
@@ -429,17 +510,17 @@ export async function renderUltraHdCanvas({
 
       // Left Accent Strip in Track's authentic color (Provides clear identity without gaudy borders!)
       ctx.fillStyle = trackColor;
-      ctx.fillRect(cardX, cardY, 4.5 * scale, cardH);
+      ctx.fillRect(cardX, cardY, 3.5 * scale, cardH);
 
       // Header Background Banner (Subtle cool slate-50)
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(cardX + 4.5 * scale, cardY, cardW - 4.5 * scale, headerHeight);
+      ctx.fillRect(cardX + 3.5 * scale, cardY, cardW - 3.5 * scale, headerHeight);
 
       // Hairline Header Bottom Divider
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 1 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 4.5 * scale, cardY + headerHeight);
+      ctx.moveTo(cardX + 3.5 * scale, cardY + headerHeight);
       ctx.lineTo(cardX + cardW, cardY + headerHeight);
       ctx.stroke();
 
@@ -447,7 +528,7 @@ export async function renderUltraHdCanvas({
 
       // 3. Unified Sleek Outer Border Frame (Slate-300 hairline, senada across all cards!)
       ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.2 * scale;
+      ctx.lineWidth = 1 * scale;
       roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
       ctx.stroke();
 
@@ -455,67 +536,67 @@ export async function renderUltraHdCanvas({
       // C. Header Information & Badges
       // ==========================================
       // Header: Jewel Track Indicator Dot
-      const headerDotX = cardX + 16 * scale;
+      const headerDotX = cardX + 13 * scale;
       const headerDotY = cardY + headerHeight / 2;
 
       // Outer track color circle
       ctx.fillStyle = trackColor;
       ctx.beginPath();
-      ctx.arc(headerDotX, headerDotY, 5 * scale, 0, Math.PI * 2);
+      ctx.arc(headerDotX, headerDotY, 4 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Inner white center pip (gives it an optical lens / jewel look)
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(headerDotX, headerDotY, 1.8 * scale, 0, Math.PI * 2);
+      ctx.arc(headerDotX, headerDotY, 1.5 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Header: Track Title
       ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${10 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      const maxTitleW = cardW - 118 * scale;
+      const maxTitleW = cardW - 88 * scale;
       const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-      ctx.fillText(titleText, cardX + 26 * scale, headerDotY - 4 * scale);
+      ctx.fillText(titleText, cardX + 22 * scale, headerDotY - 4 * scale);
 
       // Header: KM Subtitle
       ctx.fillStyle = '#64748b';
-      ctx.font = `600 ${7.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
-      ctx.fillText(line.km || '', cardX + 26 * scale, headerDotY + 7 * scale);
+      ctx.font = `600 ${6.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+      ctx.fillText(line.km || '', cardX + 22 * scale, headerDotY + 5.5 * scale);
 
       // Header: Job Count Badge (Elegant Pill Badge)
-      const badgeW = 72 * scale;
-      const badgeH = 18 * scale;
-      const badgeX = cardX + cardW - badgeW - 10 * scale;
+      const badgeW = 60 * scale;
+      const badgeH = 15 * scale;
+      const badgeX = cardX + cardW - badgeW - 7 * scale;
       const badgeY = cardY + (headerHeight - badgeH) / 2;
 
       // Badge pill background (Sophisticated slate/indigo)
       ctx.fillStyle = '#f1f5f9';
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7.5 * scale);
       ctx.fill();
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 0.8 * scale;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7.5 * scale);
       ctx.stroke();
 
       // Badge indicator dot
       ctx.fillStyle = '#2563eb';
       ctx.beginPath();
-      ctx.arc(badgeX + 8.5 * scale, badgeY + badgeH / 2, 2.5 * scale, 0, Math.PI * 2);
+      ctx.arc(badgeX + 7.5 * scale, badgeY + badgeH / 2, 2 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Badge text
       ctx.fillStyle = '#1e293b';
-      ctx.font = `bold ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `bold ${6.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 7 * scale) / 2, badgeY + badgeH / 2);
+      ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 6 * scale) / 2, badgeY + badgeH / 2);
 
       // ==========================================
       // D. Draw Work Log Items Inside Callout
       // ==========================================
-      let currentLogY = cardY + headerHeight + 5 * scale;
+      let currentLogY = cardY + headerHeight + 4 * scale;
 
       displayLogs.forEach((log, logIdx) => {
         const { dateStr, timeStr } = formatLogTimestamp(log.timestamp);
@@ -523,97 +604,97 @@ export async function renderUltraHdCanvas({
         // Subtle divider between multiple log items
         if (logIdx > 0) {
           ctx.strokeStyle = '#f1f5f9';
-          ctx.lineWidth = 1 * scale;
+          ctx.lineWidth = 0.8 * scale;
           ctx.beginPath();
-          ctx.moveTo(cardX + 12 * scale, currentLogY - 2 * scale);
-          ctx.lineTo(cardX + cardW - 12 * scale, currentLogY - 2 * scale);
+          ctx.moveTo(cardX + 10 * scale, currentLogY - 2 * scale);
+          ctx.lineTo(cardX + cardW - 10 * scale, currentLogY - 2 * scale);
           ctx.stroke();
         }
 
-        const itemContentX = cardX + 14 * scale;
-        const itemContentW = cardW - 28 * scale;
-        const row1Y = currentLogY + 6 * scale;
+        const itemContentX = cardX + 12 * scale;
+        const itemContentW = cardW - 24 * scale;
+        const row1Y = currentLogY + 5 * scale;
 
         // Vector Clock Icon (Razor-sharp at any DPI, zero emoji rendering bugs)
-        const clockX = itemContentX + 3.5 * scale;
+        const clockX = itemContentX + 3 * scale;
         const clockY = row1Y;
         ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 0.9 * scale;
+        ctx.lineWidth = 0.8 * scale;
         ctx.beginPath();
-        ctx.arc(clockX, clockY, 3.2 * scale, 0, Math.PI * 2);
+        ctx.arc(clockX, clockY, 2.8 * scale, 0, Math.PI * 2);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(clockX, clockY);
-        ctx.lineTo(clockX, clockY - 1.8 * scale);
+        ctx.lineTo(clockX, clockY - 1.5 * scale);
         ctx.moveTo(clockX, clockY);
-        ctx.lineTo(clockX + 1.4 * scale, clockY);
+        ctx.lineTo(clockX + 1.2 * scale, clockY);
         ctx.stroke();
 
         // Timestamp Text
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#64748b';
-        ctx.font = `600 ${7.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
-        ctx.fillText(`${dateStr}  ${timeStr}`, itemContentX + 10 * scale, row1Y);
+        ctx.font = `600 ${6.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+        ctx.fillText(`${dateStr} ${timeStr}`, itemContentX + 8 * scale, row1Y);
 
         // Status Pill (Right Aligned)
         const rawStatus = (log.status || 'SELESAI').toUpperCase();
         const isProgress = rawStatus === 'PROGRESS';
-        const pillW = 56 * scale;
-        const pillH = 14 * scale;
-        const pillX = cardX + cardW - 14 * scale - pillW;
+        const pillW = 48 * scale;
+        const pillH = 12 * scale;
+        const pillX = cardX + cardW - 8 * scale - pillW;
         const pillY = row1Y - pillH / 2;
 
         ctx.fillStyle = isProgress ? '#fffbeb' : '#ecfdf5';
-        roundRect(ctx, pillX, pillY, pillW, pillH, 4 * scale);
+        roundRect(ctx, pillX, pillY, pillW, pillH, 3.5 * scale);
         ctx.fill();
         ctx.strokeStyle = isProgress ? '#fde68a' : '#a7f3d0';
-        ctx.lineWidth = 0.8 * scale;
-        roundRect(ctx, pillX, pillY, pillW, pillH, 4 * scale);
+        ctx.lineWidth = 0.7 * scale;
+        roundRect(ctx, pillX, pillY, pillW, pillH, 3.5 * scale);
         ctx.stroke();
 
         // Status Pill Text
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = isProgress ? '#b45309' : '#047857';
-        ctx.font = `bold ${7 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${6.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(isProgress ? '● PROGRES' : '✓ SELESAI', pillX + pillW / 2, row1Y);
 
         // Row 2: Action Name / Job Title
-        const row2Y = currentLogY + 18 * scale;
+        const row2Y = currentLogY + 14 * scale;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#0f172a';
-        ctx.font = `bold ${9 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${7.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', itemContentW);
         ctx.fillText(actionTitle, itemContentX, row2Y);
 
         // Row 3: Executor / Technician & Brief Note
-        const row3Y = currentLogY + 29 * scale;
+        const row3Y = currentLogY + 22.5 * scale;
         const techStr = log.technician ? log.technician : 'UPT Resor 1.9';
         const descStr = log.description ? ` • ${log.description}` : '';
-        const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 10 * scale);
+        const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 8 * scale);
 
         // Tiny team bullet
         ctx.fillStyle = '#94a3b8';
         ctx.beginPath();
-        ctx.arc(itemContentX + 2.5 * scale, row3Y, 2 * scale, 0, Math.PI * 2);
+        ctx.arc(itemContentX + 2 * scale, row3Y, 1.6 * scale, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#475569';
-        ctx.font = `500 ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-        ctx.fillText(infoFull, itemContentX + 8 * scale, row3Y);
+        ctx.font = `500 ${6.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillText(infoFull, itemContentX + 6 * scale, row3Y);
 
         currentLogY += logItemHeight;
       });
 
-      // Extra note if more than 3 logs
-      if (logs.length > 3) {
+      // Extra note if more than 2 logs
+      if (logs.length > 2) {
         ctx.fillStyle = '#64748b';
-        ctx.font = `italic 600 ${7.5 * scale}px sans-serif`;
+        ctx.font = `italic 600 ${6.5 * scale}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya pada seksi ini`, cardX + cardW / 2, currentLogY + 2 * scale);
+        ctx.fillText(`+ ${logs.length - 2} pekerjaan lainnya pada seksi ini`, cardX + cardW / 2, currentLogY + 4 * scale);
       }
 
       ctx.restore();
