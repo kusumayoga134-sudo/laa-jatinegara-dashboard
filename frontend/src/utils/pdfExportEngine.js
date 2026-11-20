@@ -266,9 +266,9 @@ export function computeCalloutLayout({
  */
 export function getElbowSvgPath(card) {
   const { startX, startY, elbowY, radarX, radarY, isUpper } = card;
-  const beaconRadius = 10;
+  const beaconRadius = 8;
   const arrowEndY = isUpper ? radarY - beaconRadius : radarY + beaconRadius;
-  const r = Math.min(8, Math.abs(radarX - startX) / 2);
+  const r = Math.min(6, Math.abs(radarX - startX) / 2);
 
   const dirX = radarX >= startX ? 1 : -1;
   const dirY1 = elbowY >= startY ? 1 : -1;
@@ -327,9 +327,9 @@ function drawOrthogonalElbow(ctx, card, scale) {
   const targetY = card.radarY * scale;
   const isUpper = card.isUpper;
 
-  const beaconRadius = 10 * scale;
+  const beaconRadius = 8 * scale;
   const arrowEndY = isUpper ? targetY - beaconRadius : targetY + beaconRadius;
-  const r = Math.min(8 * scale, Math.abs(targetX - startX) / 2);
+  const r = Math.min(6 * scale, Math.abs(targetX - startX) / 2);
 
   const dirX = targetX >= startX ? 1 : -1;
   const dirY1 = elbowY >= startY ? 1 : -1;
@@ -352,34 +352,34 @@ function drawOrthogonalElbow(ctx, card, scale) {
 
   ctx.save();
 
-  // Pass 1: Outer White Halo outline
+  // Pass 1: Thin Outer White Halo outline (protective contour)
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 5 * scale;
+  ctx.lineWidth = 2.8 * scale;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   constructPath(ctx);
   ctx.stroke();
 
-  // Pass 2: Bold Red Leader Line
+  // Pass 2: Slim Red Leader Line (CAD technical leader line: ~46% thinner)
   ctx.strokeStyle = '#dc2626';
-  ctx.lineWidth = 2.5 * scale;
+  ctx.lineWidth = 1.35 * scale;
   constructPath(ctx);
   ctx.stroke();
 
-  // Arrowhead pointing vertically into radar beacon
-  const headLen = 9 * scale;
-  const headW = 5.5 * scale;
+  // Architectural Arrowhead (~40% smaller and proportional)
+  const headLen = 5.5 * scale;
+  const headW = 3.3 * scale;
   ctx.fillStyle = '#dc2626';
   ctx.beginPath();
   if (isUpper) {
     ctx.moveTo(targetX, arrowEndY);
     ctx.lineTo(targetX - headW, arrowEndY - headLen);
-    ctx.lineTo(targetX, arrowEndY - headLen * 0.7);
+    ctx.lineTo(targetX, arrowEndY - headLen * 0.75);
     ctx.lineTo(targetX + headW, arrowEndY - headLen);
   } else {
     ctx.moveTo(targetX, arrowEndY);
     ctx.lineTo(targetX - headW, arrowEndY + headLen);
-    ctx.lineTo(targetX, arrowEndY + headLen * 0.7);
+    ctx.lineTo(targetX, arrowEndY + headLen * 0.75);
     ctx.lineTo(targetX + headW, arrowEndY + headLen);
   }
   ctx.closePath();
@@ -388,11 +388,11 @@ function drawOrthogonalElbow(ctx, card, scale) {
   // Card Base Anchor Pin
   ctx.fillStyle = '#dc2626';
   ctx.beginPath();
-  ctx.arc(startX, startY, 3.5 * scale, 0, Math.PI * 2);
+  ctx.arc(startX, startY, 2.2 * scale, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(startX, startY, 1.5 * scale, 0, Math.PI * 2);
+  ctx.arc(startX, startY, 1.0 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
@@ -609,50 +609,13 @@ export async function renderUltraHdCanvas({
   ctx.lineWidth = 2 * scale;
   ctx.strokeRect(0, 0, totalWidth, totalHeight);
 
-  // 2. Draw Track Glows for active work lines
-  const cadScaleX = (MAP_W / CAD_BASE_W) * scale;
-  const cadScaleY = (MAP_H / CAD_BASE_H) * scale;
-
-  linesWithLogs.forEach(({ line }) => {
-    if (!line.d) return;
-    const color = line.color || '#ef4444';
-
-    ctx.save();
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 8 * scale;
-    ctx.globalAlpha = 0.45;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 10 * scale;
-
-    ctx.translate(0, mapY);
-    ctx.scale(cadScaleX, cadScaleY);
-    const p = new Path2D(line.d);
-    ctx.stroke(p);
-    ctx.restore();
-
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3 * scale;
-    ctx.globalAlpha = 0.95;
-    ctx.translate(0, mapY);
-    ctx.scale(cadScaleX, cadScaleY);
-    ctx.stroke(p);
-    ctx.restore();
-
-    ctx.restore();
-  });
-
   // Calculate layout of callout cards
   const preparedCards = computeCalloutLayout({
     linesWithLogs,
     customPositions: customCardPositions,
   });
 
-  // 3. Draw Radar Glow Beacons
+  // 2. Draw Radar Glow Beacons (clean point beacons, without covering CAD track lines)
   if (showRadar) {
     preparedCards.forEach((card) => {
       const cx = card.radarX * scale;

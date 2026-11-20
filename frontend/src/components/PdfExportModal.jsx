@@ -517,48 +517,7 @@ export default function PdfExportModal({
                 draggable={false}
               />
 
-              {/* 2. Track Glows SVG Layer */}
-              <svg
-                viewBox={`0 0 ${CAD_BASE_W} ${CAD_BASE_H}`}
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: `${LANE_TOP_H}px`,
-                  width: `${MAP_W}px`,
-                  height: `${MAP_H}px`,
-                  pointerEvents: 'none',
-                  zIndex: 10,
-                }}
-              >
-                {linesWithLogs.map(({ line }) => {
-                  if (!line.d) return null;
-                  const color = line.color || '#ef4444';
-                  return (
-                    <g key={`glow-${line.id}`}>
-                      <path
-                        d={line.d}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="8"
-                        strokeOpacity="0.45"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d={line.d}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="3"
-                        strokeOpacity="0.95"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* 3. Radar Glow Beacons */}
+              {/* 2. Radar Glow Beacons (clean point beacons, without covering CAD track lines) */}
               {showRadar &&
                 activeCards.map((card) => {
                   const cx = card.radarX;
@@ -592,7 +551,7 @@ export default function PdfExportModal({
                   );
                 })}
 
-              {/* 4. SVG Layer: Orthogonal (Elbow) Leader Lines & Arrowheads (viewBox 0 0 2400 1480) */}
+              {/* 3. SVG Layer: Slim Orthogonal (Elbow) Leader Lines & Arrowheads (viewBox 0 0 2400 1480) */}
               {showCallouts && activeCards.length > 0 && (
                 <svg
                   viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
@@ -601,28 +560,28 @@ export default function PdfExportModal({
                 >
                   {activeCards.map((card) => {
                     const svgPath = getElbowSvgPath(card);
-                    const beaconRadius = 10;
+                    const beaconRadius = 8;
                     const arrowEndY = card.isUpper ? card.radarY - beaconRadius : card.radarY + beaconRadius;
-                    const headLen = 9;
-                    const headW = 5.5;
+                    const headLen = 5.5;
+                    const headW = 3.3;
 
                     return (
                       <g key={`arrow-${card.id}`}>
-                        {/* Outer White Halo */}
+                        {/* Outer White Halo (protective outline) */}
                         <path
                           d={svgPath}
                           fill="none"
                           stroke="#ffffff"
-                          strokeWidth="5"
+                          strokeWidth="2.8"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
-                        {/* Bold Red Leader Line */}
+                        {/* Slim Red Leader Line (technical CAD leader line) */}
                         <path
                           d={svgPath}
                           fill="none"
                           stroke="#dc2626"
-                          strokeWidth="2.5"
+                          strokeWidth="1.35"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
@@ -631,15 +590,15 @@ export default function PdfExportModal({
                         <polygon
                           points={
                             card.isUpper
-                              ? `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY - headLen} ${card.radarX},${arrowEndY - headLen * 0.7} ${card.radarX + headW},${arrowEndY - headLen}`
-                              : `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY + headLen} ${card.radarX},${arrowEndY + headLen * 0.7} ${card.radarX + headW},${arrowEndY + headLen}`
+                              ? `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY - headLen} ${card.radarX},${arrowEndY - headLen * 0.75} ${card.radarX + headW},${arrowEndY - headLen}`
+                              : `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY + headLen} ${card.radarX},${arrowEndY + headLen * 0.75} ${card.radarX + headW},${arrowEndY + headLen}`
                           }
                           fill="#dc2626"
                         />
 
                         {/* Base Anchor Dot */}
-                        <circle cx={card.startX} cy={card.startY} r="3.5" fill="#dc2626" />
-                        <circle cx={card.startX} cy={card.startY} r="1.5" fill="#ffffff" />
+                        <circle cx={card.startX} cy={card.startY} r="2.2" fill="#dc2626" />
+                        <circle cx={card.startX} cy={card.startY} r="1.0" fill="#ffffff" />
                       </g>
                     );
                   })}
