@@ -78,8 +78,6 @@ export default function PdfExportModal({
     };
   }, [isOpen, linesWithLogs, showCallouts, showRadar, showOfficialHeader, paperSize]);
 
-  if (!isOpen) return null;
-
   // Mouse Wheel Zoom for preview stage (Smooth Zoom In & Out with mouse scroll)
   useEffect(() => {
     const container = previewContainerRef.current;
@@ -198,6 +196,8 @@ export default function PdfExportModal({
       setIsExporting(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">

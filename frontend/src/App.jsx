@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import SchematicViewer, { computeLinesWithLogs } from './components/SchematicViewer';
 import WorkHistoryPanel from './components/WorkHistoryPanel';
@@ -152,6 +152,10 @@ export default function App() {
     }
   };
 
+  const exportLinesWithLogs = useMemo(() => {
+    return isExportPdfOpen ? computeLinesWithLogs(logs) : [];
+  }, [isExportPdfOpen, logs]);
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
@@ -239,7 +243,7 @@ export default function App() {
       <PdfExportModal
         isOpen={isExportPdfOpen}
         onClose={() => setIsExportPdfOpen(false)}
-        linesWithLogs={computeLinesWithLogs(logs)}
+        linesWithLogs={exportLinesWithLogs}
       />
 
       {/* Minimalist White Footer */}
