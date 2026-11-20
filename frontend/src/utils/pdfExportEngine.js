@@ -1,7 +1,24 @@
 /**
  * PDF & High-Resolution Export Engine for Peta Wilayah LAA UPT Resor 1.9 Jatinegara
- * Pure Client-Side, Ultra HD (600 DPI / CAD Precision), Zero External Dependencies.
+ * Single Fixed Virtual Canvas Architecture: 2400 x 1480 px
+ * (MAP: 2400 x 1040, TOP LANE: 220, BOTTOM LANE: 220)
+ * Ultra HD (600 DPI CAD Precision), Zero External Dependencies.
  */
+
+export const VIRTUAL_CANVAS = {
+  CANVAS_W: 2400,
+  CANVAS_H: 1480,
+  MAP_W: 2400,
+  MAP_H: 1040,
+  LANE_TOP_H: 220,
+  LANE_BOTTOM_H: 220,
+  CAD_BASE_W: 3275,
+  CAD_BASE_H: 1419,
+  CARD_W: 280,
+  CARD_H: 140,
+  GAP: 20,
+  MARGIN_X: 40,
+};
 
 // Helper to format timestamps in Indonesian
 export function formatLogTimestamp(timestamp) {
@@ -24,255 +41,177 @@ export function formatLogTimestamp(timestamp) {
 }
 
 /**
- * Geometric helper: Detect intersection between two 2D line segments
- */
-function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
-  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-  if (denom === 0) return false;
-  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
-  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
-  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
-}
-
-/**
- * Protected CAD Drawing Zones
- * Callout boxes MUST NEVER cover these areas:
- * - Native CAD Header Banner (Danantara & KAI logos, Document title)
- * - Native CAD Legend Table (Top Right)
- * - Station Titles (Exact CAD text positions: Jatinegara, Klender, Buaran, Cakung, Kranji, Bekasi, etc.)
- * - Track Corridors & Printed Naspan Rows
- * - Bottom Border Frame
- */
-export const PROTECTED_CAD_ZONES = [
-  // 1. Native CAD Header Banner (Danantara & KAI logos, Document title)
-  { name: 'CAD Header Banner', x1: 0, y1: 0, x2: 3275, y2: 165 },
-  // 2. Native CAD Legend Table (Top Right)
-  { name: 'CAD Legend Table', x1: 2870, y1: 160, x2: 3255, y2: 475 },
-  // 3. Station Titles (Exact CAD text positions)
-  { name: 'ST. JATINEGARA', x1: 980, y1: 160, x2: 1520, y2: 340 },
-  { name: 'ST. PONDOK JATI', x1: 150, y1: 450, x2: 420, y2: 540 },
-  { name: 'ST. KLENDER', x1: 1980, y1: 450, x2: 2360, y2: 530 },
-  { name: 'ST. BUARAN', x1: 2520, y1: 450, x2: 2870, y2: 530 },
-  { name: 'ST. CAKUNG', x1: 2380, y1: 670, x2: 2750, y2: 760 },
-  { name: 'ST. KRANJI', x1: 1780, y1: 670, x2: 2150, y2: 760 },
-  { name: 'ST. BEKASI', x1: 1100, y1: 670, x2: 1480, y2: 760 },
-  { name: 'ST. KLENDER BARU', x1: 2700, y1: 1160, x2: 3020, y2: 1245 },
-  // 4. Track Corridors & Printed Naspan Rows
-  { name: 'Upper Tracks & Naspans', x1: 1350, y1: 635, x2: 3180, y2: 835 },
-  { name: 'Cakung Emplasemen & DS', x1: 2280, y1: 1045, x2: 2950, y2: 1250 },
-  { name: 'Lower Tracks & Naspans', x1: 1580, y1: 1045, x2: 2280, y2: 1245 },
-  { name: 'Bekasi Emplasemen', x1: 980, y1: 960, x2: 1560, y2: 1230 },
-  // 5. Bottom CAD Border Frame & Bekasi Timur corner
-  { name: 'BEKASI_TIMUR', x1: 200, y1: 1220, x2: 520, y2: 1310 },
-  { name: 'Bottom Border Frame', x1: 0, y1: 1385, x2: 3275, y2: 1419 },
-];
-
-/**
  * 1D Deterministic Collision-Resolution & Corridor Placement Engine for Callout Cards
- * Guarantees ZERO overlap on tracks, ZERO overlap on station names (e.g. ST. JATINEGARA),
- * and generates smooth orthogonal (elbow) leader lines with staggered Y-offsets.
+ * Computes strictly bounded card positions on the 2400 x 1480 Virtual Canvas.
  */
 export function computeCalloutLayout({
   linesWithLogs = [],
   customPositions = {},
-  baseWidth = 3275,
-  baseHeight = 1419,
-  mapYOffset = 0,
-  scale = 1.0,
-  expandCanvasForManyLogs = false,
 }) {
-  const cardW = 180 * scale;
-  const headerHeight = 22 * scale;
-  const logItemHeight = 24 * scale;
-  const gapX = 18 * scale;
-  const minX = 35 * scale;
-  const maxX = baseWidth * scale - cardW - 35 * scale;
+  const {
+    CANVAS_W,
+    CANVAS_H,
+    MAP_W,
+    MAP_H,
+    LANE_TOP_H,
+    LANE_BOTTOM_H,
+    CAD_BASE_W,
+    CAD_BASE_H,
+    CARD_W,
+    CARD_H,
+    GAP,
+    MARGIN_X,
+  } = VIRTUAL_CANVAS;
 
-  // Forbidden zones for Upper Lane inside CAD coordinates (multiplied by scale)
-  // ST. JATINEGARA Zone: X = 980 to 1520 (Text at 180..240, tracks up to 320)
-  const forbiddenZonesUpper = [
-    { minX: 980 * scale, maxX: 1520 * scale, name: 'ST. JATINEGARA' },
-    { minX: 2880 * scale, maxX: (baseWidth - 20) * scale, name: 'KETERANGAN_BOX' },
-  ];
+  if (!linesWithLogs || linesWithLogs.length === 0) return [];
 
-  // Forbidden zones for Lower Lane inside CAD coordinates
-  // BEKASI TIMUR Zone: X = 200 to 520 (tracks up to Y = 1277)
-  const forbiddenZonesLower = [
-    { minX: 200 * scale, maxX: 520 * scale, name: 'BEKASI_TIMUR' },
-  ];
+  // Convert radar centers from CAD base coords (3275x1419) to Virtual Canvas coords (2400x1480)
+  const items = linesWithLogs.map(({ line, logs, center }) => {
+    const rawX = center && center.x != null ? center.x : 1600;
+    const rawY = center && center.y != null ? center.y : 700;
 
-  // Dedicated Safe Lane Y Coordinates
-  // Upper Lane: Y = 175 in CAD space (under header line Y=160, above Kramat Y=370, Klender Y=480)
-  // If canvas was expanded for >10 logs, park in the pristine top margin!
-  const upperLaneY = expandCanvasForManyLogs
-    ? 25 * scale
-    : mapYOffset + 175 * scale;
+    const radarX = Math.round((rawX / CAD_BASE_W) * MAP_W);
+    const radarY = Math.round(LANE_TOP_H + (rawY / CAD_BASE_H) * MAP_H);
 
-  // Lower Lane: Y = 1272 in CAD space (below Cakung tracks Y=1140 & label Y=1250, above bottom border Y=1395)
-  // If canvas was expanded for >10 logs, park in the pristine bottom margin!
-  const lowerLaneY = expandCanvasForManyLogs
-    ? (mapYOffset + baseHeight * scale + 20 * scale)
-    : mapYOffset + 1272 * scale;
-
-  // Partition cards into Upper and Lower corridors
-  const sortedItems = [...linesWithLogs].sort((a, b) => a.center.x - b.center.x);
-  const upperCards = [];
-  const lowerCards = [];
-
-  sortedItems.forEach(({ line, logs, center }) => {
-    const targetX = center.x * scale;
-    const targetY = mapYOffset + center.y * scale;
-    const displayLogs = logs.slice(0, 2);
-    const footerExtra = logs.length > 2 ? 12 * scale : 0;
-    const cardH = headerHeight + displayLogs.length * logItemHeight + 6 * scale + footerExtra;
-
-    const card = {
+    return {
       id: line.id,
       line,
       logs,
-      displayLogs,
-      center,
-      targetX,
-      targetY,
-      cardW,
-      cardH,
-      headerHeight,
-      logItemHeight,
-      footerExtra,
+      displayLogs: logs.slice(0, 2),
+      radarX,
+      radarY,
+      rawX,
+      rawY,
+      w: CARD_W,
+      h: CARD_H,
       x: 0,
       y: 0,
       isUpper: true,
+      startX: 0,
+      startY: 0,
       elbowY: 0,
     };
+  });
 
-    // Corridor assignment:
-    // If center.y >= 850 (Cakung, Kranji, Bekasi, Bekasi Timur) -> Lower Lane
-    // If center.y < 850:
-    // If target is inside Jatinegara (X: 980..1520) and upper lane already has cards,
-    // route to Lower Lane where there is plenty of whitespace!
-    if (center.y >= 850) {
-      card.isUpper = false;
-      lowerCards.push(card);
+  // Sort items by radarX ascending
+  items.sort((a, b) => a.radarX - b.radarX);
+
+  // Partition into Upper Lane and Lower Lane
+  const upperCards = [];
+  const lowerCards = [];
+
+  items.forEach((item) => {
+    // If rawY >= 850 (Cakung, Kranji, Bekasi, Bekasi Timur) -> Lower Lane
+    if (item.rawY >= 850) {
+      item.isUpper = false;
+      lowerCards.push(item);
     } else {
-      if (center.x >= 980 && center.x <= 1520 && upperCards.length >= 2) {
-        card.isUpper = false;
-        lowerCards.push(card);
-      } else {
-        card.isUpper = true;
-        upperCards.push(card);
-      }
+      item.isUpper = true;
+      upperCards.push(item);
     }
   });
 
-  // Helper: 1D Horizontal Collision Resolution with Forbidden Zone Evasion
-  const resolveCorridor = (cards, laneY, forbiddenZones, isUpper) => {
+  // Rebalance if one lane has more than 6 cards to maintain ample breathing room
+  while (upperCards.length > 6) {
+    const moved = upperCards.pop();
+    moved.isUpper = false;
+    lowerCards.push(moved);
+  }
+  while (lowerCards.length > 6) {
+    const moved = lowerCards.pop();
+    moved.isUpper = true;
+    upperCards.push(moved);
+  }
+
+  // 1D Horizontal Layout Function for a Single Lane
+  const layoutLane = (cards, laneY, isUpper) => {
     if (cards.length === 0) return;
 
-    // 1. Initial ideal X centered on target
+    cards.sort((a, b) => a.radarX - b.radarX);
+
+    // Compute proportional card width if crowded
+    let curCardW = CARD_W;
+    const maxAvailableW = CANVAS_W - 2 * MARGIN_X;
+    const neededW = cards.length * curCardW + (cards.length - 1) * GAP;
+    if (neededW > maxAvailableW) {
+      curCardW = Math.floor((maxAvailableW - (cards.length - 1) * GAP) / cards.length);
+    }
+
+    // Set initial position centered on radarX
     cards.forEach((card) => {
+      card.w = curCardW;
+      card.h = CARD_H;
       card.y = laneY;
       card.isUpper = isUpper;
-      card.x = Math.max(minX, Math.min(maxX, card.targetX - card.cardW / 2));
+      card.x = Math.round(card.radarX - curCardW / 2);
     });
 
-    // 2. Erode from Forbidden Zones
-    cards.forEach((card) => {
-      for (const zone of forbiddenZones) {
-        if (card.x + card.cardW > zone.minX && card.x < zone.maxX) {
-          const distToLeft = Math.abs(card.x + card.cardW - zone.minX);
-          const distToRight = Math.abs(card.x - zone.maxX);
-          if (distToLeft < distToRight && zone.minX - card.cardW >= minX) {
-            card.x = zone.minX - card.cardW - gapX;
-          } else {
-            card.x = zone.maxX + gapX;
-          }
-        }
-      }
-    });
-
-    // 3. Pass 1: Left-to-Right collision resolution
+    // Pass 1: Left-to-Right push
+    if (cards[0].x < MARGIN_X) cards[0].x = MARGIN_X;
     for (let i = 1; i < cards.length; i++) {
-      const prev = cards[i - 1];
-      const curr = cards[i];
-      const minAllowed = prev.x + prev.cardW + gapX;
-      if (curr.x < minAllowed) {
-        curr.x = minAllowed;
-      }
-      // Check forbidden zones
-      for (const zone of forbiddenZones) {
-        if (curr.x + curr.cardW > zone.minX && curr.x < zone.maxX) {
-          curr.x = zone.maxX + gapX;
-        }
+      const minX = cards[i - 1].x + cards[i - 1].w + GAP;
+      if (cards[i].x < minX) {
+        cards[i].x = minX;
       }
     }
 
-    // 4. Pass 2: Right-to-Left pushback if overflowing maxX
+    // Pass 2: Right-to-Left push if last card exceeds right margin
     const lastCard = cards[cards.length - 1];
-    if (lastCard && lastCard.x > maxX) {
-      lastCard.x = maxX;
+    if (lastCard.x + lastCard.w > CANVAS_W - MARGIN_X) {
+      lastCard.x = CANVAS_W - MARGIN_X - lastCard.w;
       for (let i = cards.length - 2; i >= 0; i--) {
-        const next = cards[i + 1];
-        const curr = cards[i];
-        const maxAllowed = next.x - gapX - curr.cardW;
-        if (curr.x > maxAllowed) {
-          curr.x = maxAllowed;
-        }
-        for (const zone of forbiddenZones) {
-          if (curr.x + curr.cardW > zone.minX && curr.x < zone.maxX) {
-            curr.x = zone.minX - curr.cardW - gapX;
-          }
+        const maxX = cards[i + 1].x - GAP - cards[i].w;
+        if (cards[i].x > maxX) {
+          cards[i].x = maxX;
         }
       }
     }
 
-    // 5. Final safety clamp
-    cards.forEach((card) => {
-      card.x = Math.max(minX, Math.min(maxX, card.x));
-    });
+    // Pass 3: Hard boundary clamp [MARGIN_X .. CANVAS_W - MARGIN_X - card.w]
+    for (let i = 0; i < cards.length; i++) {
+      cards[i].x = Math.max(MARGIN_X, Math.min(CANVAS_W - MARGIN_X - cards[i].w, cards[i].x));
+    }
   };
 
-  resolveCorridor(upperCards, upperLaneY, forbiddenZonesUpper, true);
-  resolveCorridor(lowerCards, lowerLaneY, forbiddenZonesLower, false);
+  const upperLaneY = Math.round((LANE_TOP_H - CARD_H) / 2); // 40px from top
+  const lowerLaneY = Math.round(LANE_TOP_H + MAP_H + (LANE_BOTTOM_H - CARD_H) / 2); // 1300px from top
+
+  layoutLane(upperCards, upperLaneY, true);
+  layoutLane(lowerCards, lowerLaneY, false);
 
   const allCards = [...upperCards, ...lowerCards];
 
-  // Apply User Drag Custom Positions (if any)
+  // Apply User Manual Drag-and-Drop Overrides (if any)
   allCards.forEach((card) => {
-    const custom = customPositions[card.line.id];
+    const custom = customPositions[card.id];
     if (custom && typeof custom.x === 'number' && typeof custom.y === 'number') {
-      card.x = custom.x * scale;
-      card.y = custom.y * scale;
+      card.x = Math.max(0, Math.min(CANVAS_W - card.w, Math.round(custom.x)));
+      card.y = Math.max(0, Math.min(CANVAS_H - card.h, Math.round(custom.y)));
       card.isManual = true;
-      card.isUpper = card.y + card.cardH / 2 <= card.targetY;
+      card.isUpper = card.y + card.h / 2 <= card.radarY;
     }
   });
 
-  // Calculate Staggered Orthogonal Elbow Coordinates
+  // Calculate Orthogonal Elbow Anchor Points and Staggered Belokan
   allCards.forEach((card, idx) => {
-    const startX = card.x + card.cardW / 2;
-    let startY = 0;
-    let elbowY = 0;
-    const staggerY = (idx % 3) * 9 * scale;
+    card.startX = Math.round(card.x + card.w / 2);
+    const stagger = (idx % 3) * 10;
 
     if (card.isUpper) {
-      startY = card.y + card.cardH;
-      const baseElbow = card.y + card.cardH + 16 * scale;
-      elbowY = Math.min(card.targetY - 14 * scale, baseElbow + staggerY);
-      if (elbowY <= startY) {
-        elbowY = startY + (card.targetY - startY) * 0.4;
+      card.startY = card.y + card.h;
+      // Stagger elbow Y between card bottom (180) and map top (220)
+      card.elbowY = Math.min(card.radarY - 14, 195 + stagger);
+      if (card.elbowY <= card.startY) {
+        card.elbowY = card.startY + (card.radarY - card.startY) * 0.4;
       }
     } else {
-      startY = card.y;
-      const baseElbow = card.y - 16 * scale;
-      elbowY = Math.max(card.targetY + 14 * scale, baseElbow - staggerY);
-      if (elbowY >= startY) {
-        elbowY = startY - (startY - card.targetY) * 0.4;
+      card.startY = card.y;
+      // Stagger elbow Y between map bottom (1260) and card top (1300)
+      card.elbowY = Math.max(card.radarY + 14, 1285 - stagger);
+      if (card.elbowY >= card.startY) {
+        card.elbowY = card.startY - (card.startY - card.radarY) * 0.4;
       }
     }
-
-    card.startX = startX;
-    card.startY = startY;
-    card.elbowY = elbowY;
   });
 
   return allCards;
@@ -280,28 +219,29 @@ export function computeCalloutLayout({
 
 /**
  * Generate smooth SVG path string for orthogonal (elbow) leader line
+ * on the 2400 x 1480 Virtual Canvas
  */
-export function getElbowSvgPath(card, scale = 1.0) {
-  const { startX, startY, elbowY, targetX, targetY, isUpper } = card;
-  const beaconRadius = 11 * scale;
-  const arrowEndY = isUpper ? targetY - beaconRadius : targetY + beaconRadius;
-  const r = Math.min(6 * scale, Math.abs(targetX - startX) / 2);
+export function getElbowSvgPath(card) {
+  const { startX, startY, elbowY, radarX, radarY, isUpper } = card;
+  const beaconRadius = 10;
+  const arrowEndY = isUpper ? radarY - beaconRadius : radarY + beaconRadius;
+  const r = Math.min(8, Math.abs(radarX - startX) / 2);
 
-  const dirX = targetX >= startX ? 1 : -1;
+  const dirX = radarX >= startX ? 1 : -1;
   const dirY1 = elbowY >= startY ? 1 : -1;
   const dirY2 = arrowEndY >= elbowY ? 1 : -1;
 
-  if (Math.abs(targetX - startX) <= 2) {
-    return `M ${startX} ${startY} L ${targetX} ${arrowEndY}`;
+  if (Math.abs(radarX - startX) <= 4) {
+    return `M ${startX} ${startY} L ${radarX} ${arrowEndY}`;
   }
 
   return [
     `M ${startX} ${startY}`,
     `L ${startX} ${elbowY - dirY1 * r}`,
     `Q ${startX} ${elbowY} ${startX + dirX * r} ${elbowY}`,
-    `L ${targetX - dirX * r} ${elbowY}`,
-    `Q ${targetX} ${elbowY} ${targetX} ${elbowY + dirY2 * r}`,
-    `L ${targetX} ${arrowEndY}`,
+    `L ${radarX - dirX * r} ${elbowY}`,
+    `Q ${radarX} ${elbowY} ${radarX} ${elbowY + dirY2 * r}`,
+    `L ${radarX} ${arrowEndY}`,
   ].join(' ');
 }
 
@@ -334,13 +274,19 @@ function truncateText(ctx, text, maxWidth) {
 }
 
 /**
- * Render Orthogonal Elbow Leader Line on Canvas
+ * Render Orthogonal Elbow Leader Line on Canvas (at given scale)
  */
 function drawOrthogonalElbow(ctx, card, scale) {
-  const { startX, startY, elbowY, targetX, targetY, isUpper } = card;
-  const beaconRadius = 11 * scale;
+  const startX = card.startX * scale;
+  const startY = card.startY * scale;
+  const elbowY = card.elbowY * scale;
+  const targetX = card.radarX * scale;
+  const targetY = card.radarY * scale;
+  const isUpper = card.isUpper;
+
+  const beaconRadius = 10 * scale;
   const arrowEndY = isUpper ? targetY - beaconRadius : targetY + beaconRadius;
-  const r = Math.min(6 * scale, Math.abs(targetX - startX) / 2);
+  const r = Math.min(8 * scale, Math.abs(targetX - startX) / 2);
 
   const dirX = targetX >= startX ? 1 : -1;
   const dirY1 = elbowY >= startY ? 1 : -1;
@@ -350,7 +296,7 @@ function drawOrthogonalElbow(ctx, card, scale) {
     context.beginPath();
     context.moveTo(startX, startY);
 
-    if (Math.abs(targetX - startX) > 2) {
+    if (Math.abs(targetX - startX) > 4 * scale) {
       context.lineTo(startX, elbowY - dirY1 * r);
       context.quadraticCurveTo(startX, elbowY, startX + dirX * r, elbowY);
 
@@ -365,28 +311,22 @@ function drawOrthogonalElbow(ctx, card, scale) {
 
   // Pass 1: Outer White Halo outline
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 4.2 * scale;
+  ctx.lineWidth = 5 * scale;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   constructPath(ctx);
   ctx.stroke();
 
-  // Pass 2: Soft Slate Shadow outline
-  ctx.strokeStyle = 'rgba(15, 23, 42, 0.18)';
-  ctx.lineWidth = 2.4 * scale;
-  constructPath(ctx);
-  ctx.stroke();
-
-  // Pass 3: Core Leader Line (#0f172a)
-  ctx.strokeStyle = '#0f172a';
-  ctx.lineWidth = 1.4 * scale;
+  // Pass 2: Bold Red Leader Line
+  ctx.strokeStyle = '#dc2626';
+  ctx.lineWidth = 2.5 * scale;
   constructPath(ctx);
   ctx.stroke();
 
   // Arrowhead pointing vertically into radar beacon
-  const headLen = 8 * scale;
-  const headW = 5 * scale;
-  ctx.fillStyle = '#0f172a';
+  const headLen = 9 * scale;
+  const headW = 5.5 * scale;
+  ctx.fillStyle = '#dc2626';
   ctx.beginPath();
   if (isUpper) {
     ctx.moveTo(targetX, arrowEndY);
@@ -403,35 +343,40 @@ function drawOrthogonalElbow(ctx, card, scale) {
   ctx.fill();
 
   // Card Base Anchor Pin
-  ctx.fillStyle = '#0f172a';
+  ctx.fillStyle = '#dc2626';
   ctx.beginPath();
-  ctx.arc(startX, startY, 2.8 * scale, 0, Math.PI * 2);
+  ctx.arc(startX, startY, 3.5 * scale, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(startX, startY, 1.2 * scale, 0, Math.PI * 2);
+  ctx.arc(startX, startY, 1.5 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 }
 
 /**
- * Render Compact Callout Box on Canvas
+ * Render Callout Box on Canvas (at given scale)
  */
-function drawCompactCalloutBox(ctx, card, scale) {
-  const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY, headerHeight, logItemHeight } = card;
+function drawCalloutBox(ctx, card, scale) {
+  const cardX = card.x * scale;
+  const cardY = card.y * scale;
+  const cardW = card.w * scale;
+  const cardH = card.h * scale;
+  const { line, logs, displayLogs } = card;
 
   ctx.save();
 
-  const cardRadius = 6 * scale;
+  const cardRadius = 8 * scale;
   const trackColor = line.color || '#334155';
+  const headerHeight = 34 * scale;
 
   // 1. Drop Shadow
   ctx.save();
-  ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
-  ctx.shadowBlur = 10 * scale;
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
+  ctx.shadowBlur = 12 * scale;
   ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 3 * scale;
+  ctx.shadowOffsetY = 4 * scale;
   ctx.fillStyle = '#ffffff';
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.fill();
@@ -446,19 +391,19 @@ function drawCompactCalloutBox(ctx, card, scale) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(cardX, cardY, cardW, cardH);
 
-  // Left Accent Strip in Track's authentic color
+  // Left Accent Strip in Track color
   ctx.fillStyle = trackColor;
-  ctx.fillRect(cardX, cardY, 3.5 * scale, cardH);
+  ctx.fillRect(cardX, cardY, 4.5 * scale, cardH);
 
-  // Header Background Banner (Subtle slate-50)
+  // Header Background Banner
   ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(cardX + 3.5 * scale, cardY, cardW - 3.5 * scale, headerHeight);
+  ctx.fillRect(cardX + 4.5 * scale, cardY, cardW - 4.5 * scale, headerHeight);
 
-  // Hairline Header Bottom Divider
+  // Header Divider Line
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1 * scale;
   ctx.beginPath();
-  ctx.moveTo(cardX + 3.5 * scale, cardY + headerHeight);
+  ctx.moveTo(cardX + 4.5 * scale, cardY + headerHeight);
   ctx.lineTo(cardX + cardW, cardY + headerHeight);
   ctx.stroke();
 
@@ -466,91 +411,92 @@ function drawCompactCalloutBox(ctx, card, scale) {
 
   // 3. Outer Border Frame
   ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1 * scale;
+  ctx.lineWidth = 1.2 * scale;
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.stroke();
 
   // ==========================================
   // Header Information & Badges
   // ==========================================
-  const headerDotX = cardX + 12 * scale;
+  const headerDotX = cardX + 16 * scale;
   const headerDotY = cardY + headerHeight / 2;
 
   // Track color circle
   ctx.fillStyle = trackColor;
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 3.8 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 5 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 1.4 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 1.8 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   // Track Title
   ctx.fillStyle = '#0f172a';
-  ctx.font = `bold ${8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `bold ${11 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  const maxTitleW = cardW - 82 * scale;
+  const maxTitleW = cardW - 110 * scale;
   const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-  ctx.fillText(titleText, cardX + 20 * scale, headerDotY - 3.5 * scale);
+  ctx.fillText(titleText, cardX + 26 * scale, headerDotY - 5 * scale);
 
   // KM Subtitle
   ctx.fillStyle = '#64748b';
-  ctx.font = `600 ${6 * scale}px "SF Mono", Menlo, Consolas, monospace`;
-  ctx.fillText(line.km || '', cardX + 20 * scale, headerDotY + 5 * scale);
+  ctx.font = `600 ${8.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+  ctx.fillText(line.km || '', cardX + 26 * scale, headerDotY + 7 * scale);
 
   // Job Count Badge Pill
-  const badgeW = 54 * scale;
-  const badgeH = 14 * scale;
-  const badgeX = cardX + cardW - badgeW - 6 * scale;
+  const badgeW = 68 * scale;
+  const badgeH = 18 * scale;
+  const badgeX = cardX + cardW - badgeW - 8 * scale;
   const badgeY = cardY + (headerHeight - badgeH) / 2;
 
   ctx.fillStyle = '#f1f5f9';
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
+  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
   ctx.fill();
   ctx.strokeStyle = '#cbd5e1';
   ctx.lineWidth = 0.8 * scale;
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
+  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
   ctx.stroke();
 
   ctx.fillStyle = '#2563eb';
   ctx.beginPath();
-  ctx.arc(badgeX + 6.5 * scale, badgeY + badgeH / 2, 1.8 * scale, 0, Math.PI * 2);
+  ctx.arc(badgeX + 8 * scale, badgeY + badgeH / 2, 2.5 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#1e293b';
-  ctx.font = `bold ${6.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 5 * scale) / 2, badgeY + badgeH / 2);
+  ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 7 * scale) / 2, badgeY + badgeH / 2);
 
   // ==========================================
   // Work Log Items Inside Callout
   // ==========================================
-  let currentLogY = cardY + headerHeight + 3 * scale;
-  const itemContentX = cardX + 11 * scale;
-  const itemContentW = cardW - 18 * scale;
+  let currentLogY = cardY + headerHeight + 6 * scale;
+  const itemContentX = cardX + 16 * scale;
+  const itemContentW = cardW - 28 * scale;
+  const logRowHeight = 44 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
       ctx.strokeStyle = '#f1f5f9';
       ctx.lineWidth = 0.8 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 8 * scale, currentLogY);
-      ctx.lineTo(cardX + cardW - 8 * scale, currentLogY);
+      ctx.moveTo(cardX + 12 * scale, currentLogY);
+      ctx.lineTo(cardX + cardW - 12 * scale, currentLogY);
       ctx.stroke();
-      currentLogY += 2 * scale;
+      currentLogY += 4 * scale;
     }
 
     const { dateStr, timeStr } = formatLogTimestamp(log.createdAt || log.timestamp);
-    const row1Y = currentLogY + 5 * scale;
+    const row1Y = currentLogY + 8 * scale;
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#64748b';
-    ctx.font = `600 ${5.8 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+    ctx.font = `600 ${8 * scale}px "SF Mono", Menlo, Consolas, monospace`;
     ctx.fillText(`${dateStr} • ${timeStr}`, itemContentX, row1Y);
 
     // Status Badge
@@ -562,15 +508,15 @@ function drawCompactCalloutBox(ctx, card, scale) {
     const statusBg = isCompleted ? '#dcfce7' : isInProgress ? '#fef3c7' : '#f1f5f9';
     const statusColor = isCompleted ? '#166534' : isInProgress ? '#92400e' : '#475569';
 
-    ctx.font = `bold ${5.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const sTextW = ctx.measureText(statusText).width;
-    const sPillW = sTextW + 8 * scale;
-    const sPillH = 10 * scale;
-    const sPillX = cardX + cardW - sPillW - 8 * scale;
+    const sPillW = sTextW + 10 * scale;
+    const sPillH = 14 * scale;
+    const sPillX = cardX + cardW - sPillW - 12 * scale;
     const sPillY = row1Y - sPillH / 2;
 
     ctx.fillStyle = statusBg;
-    roundRect(ctx, sPillX, sPillY, sPillW, sPillH, 3 * scale);
+    roundRect(ctx, sPillX, sPillY, sPillW, sPillH, 4 * scale);
     ctx.fill();
 
     ctx.fillStyle = statusColor;
@@ -578,70 +524,50 @@ function drawCompactCalloutBox(ctx, card, scale) {
     ctx.fillText(statusText, sPillX + sPillW / 2, row1Y);
 
     // Row 2: Action / Job Type
-    const row2Y = currentLogY + 13 * scale;
+    const row2Y = currentLogY + 20 * scale;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${7 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${9.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', itemContentW);
     ctx.fillText(actionTitle, itemContentX, row2Y);
 
     // Row 3: Executor / Technician
-    const row3Y = currentLogY + 19.5 * scale;
+    const row3Y = currentLogY + 31 * scale;
     const techStr = log.technician ? log.technician : 'UPT Resor 1.9';
     const descStr = log.description ? ` • ${log.description}` : '';
-    const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 8 * scale);
+    const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 10 * scale);
 
     ctx.fillStyle = '#94a3b8';
     ctx.beginPath();
-    ctx.arc(itemContentX + 1.5 * scale, row3Y, 1.4 * scale, 0, Math.PI * 2);
+    ctx.arc(itemContentX + 2 * scale, row3Y, 1.8 * scale, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = '#475569';
-    ctx.font = `500 ${5.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(infoFull, itemContentX + 5 * scale, row3Y);
+    ctx.font = `500 ${8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(infoFull, itemContentX + 7 * scale, row3Y);
 
-    currentLogY += logItemHeight;
+    currentLogY += logRowHeight;
   });
-
-  // Extra note if more than 2 logs
-  if (logs.length > 2) {
-    ctx.fillStyle = '#64748b';
-    ctx.font = `italic 600 ${5.8 * scale}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`+ ${logs.length - 2} pekerjaan lainnya`, cardX + cardW / 2, currentLogY + 3.5 * scale);
-  }
 
   ctx.restore();
 }
 
 /**
  * Generate Ultra HD Canvas from CAD base map + track glows + radar dots + callout cards
+ * Uses the Single Fixed Virtual Canvas (2400 x 1480 px) scaled by `scale` (e.g. 4.0 = 9600 x 5920 px)
  */
 export async function renderUltraHdCanvas({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = false,
-  scale = 3.0, // 3.0 scale gives 9825 x 4257 px (True 600 DPI Ultra HD)
+  scale = 4.0, // 4.0 scale gives 9600 x 5920 px (Ultra HD 600 DPI)
   customCardPositions = {},
-  expandCanvasForManyLogs = false,
 }) {
-  const baseWidth = 3275;
-  const baseHeight = 1419;
+  const { CANVAS_W, CANVAS_H, MAP_W, MAP_H, LANE_TOP_H, CAD_BASE_W, CAD_BASE_H } = VIRTUAL_CANVAS;
 
-  // Dedicated Callout White Margin expansion when > 10 locations
-  const autoExpand = expandCanvasForManyLogs || (showCallouts && linesWithLogs.length > 10);
-  const calloutExtraTop = autoExpand ? 140 : 0;
-  const calloutExtraBottom = autoExpand ? 140 : 0;
-
-  // Additional header/footer margin if official header enabled
-  const topMargin = (showOfficialHeader ? 140 : 0) + calloutExtraTop;
-  const bottomMargin = (showOfficialHeader ? 70 : 0) + calloutExtraBottom;
-
-  const totalWidth = Math.round(baseWidth * scale);
-  const totalHeight = Math.round((baseHeight + topMargin + bottomMargin) * scale);
+  const totalWidth = Math.round(CANVAS_W * scale);
+  const totalHeight = Math.round(CANVAS_H * scale);
 
   const canvas = document.createElement('canvas');
   canvas.width = totalWidth;
@@ -662,67 +588,23 @@ export async function renderUltraHdCanvas({
     img.src = '/peta-laa-cropped-hd.png';
   });
 
-  const mapYOffset = topMargin * scale;
-  const mapW = baseWidth * scale;
-  const mapH = baseHeight * scale;
+  const mapX = 0;
+  const mapY = LANE_TOP_H * scale;
+  const mapW = MAP_W * scale;
+  const mapH = MAP_H * scale;
 
-  // Draw CAD map
-  ctx.drawImage(img, 0, mapYOffset, mapW, mapH);
+  // Draw CAD map precisely in its designated area [0, LANE_TOP_H, MAP_W, MAP_H]
+  ctx.drawImage(img, mapX, mapY, mapW, mapH);
 
-  // 2. Draw Header Banner if enabled
-  if (showOfficialHeader) {
-    ctx.strokeStyle = '#0f172a';
-    ctx.lineWidth = 3 * scale;
-    ctx.strokeRect(10 * scale, 10 * scale, totalWidth - 20 * scale, totalHeight - 20 * scale);
+  // Outer blueprint border
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2 * scale;
+  ctx.strokeRect(0, 0, totalWidth, totalHeight);
 
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 1 * scale;
-    ctx.strokeRect(14 * scale, 14 * scale, totalWidth - 28 * scale, totalHeight - 28 * scale);
+  // 2. Draw Track Glows for active work lines
+  const cadScaleX = (MAP_W / CAD_BASE_W) * scale;
+  const cadScaleY = (MAP_H / CAD_BASE_H) * scale;
 
-    ctx.beginPath();
-    ctx.moveTo(14 * scale, mapYOffset);
-    ctx.lineTo(totalWidth - 14 * scale, mapYOffset);
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1.5 * scale;
-    ctx.stroke();
-
-    const footerY = mapYOffset + mapH;
-    ctx.beginPath();
-    ctx.moveTo(14 * scale, footerY);
-    ctx.lineTo(totalWidth - 14 * scale, footerY);
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1.5 * scale;
-    ctx.stroke();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${24 * scale}px sans-serif`;
-    ctx.fillText('PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA', totalWidth / 2, 45 * scale);
-
-    ctx.fillStyle = '#334155';
-    ctx.font = `600 ${14 * scale}px sans-serif`;
-    ctx.fillText('SISTEM MONITORING RIWAYAT PEKERJAAN & PEMELIHARAAN LINTAS JARINGAN LAA', totalWidth / 2, 75 * scale);
-
-    ctx.fillStyle = '#64748b';
-    ctx.font = `500 ${11 * scale}px sans-serif`;
-    const now = new Date();
-    const dateFormatted = now.toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-    ctx.fillText(`Lintas: Jatinegara — Bekasi  •  Tanggal Export: ${dateFormatted} pukul ${timeFormatted}`, totalWidth / 2, 102 * scale);
-
-    ctx.restore();
-  }
-
-  const toCanvasX = (cadX) => cadX * scale;
-  const toCanvasY = (cadY) => mapYOffset + cadY * scale;
-
-  // 3. Draw Track Glows for active work lines
   linesWithLogs.forEach(({ line }) => {
     if (!line.d) return;
     const color = line.color || '#ef4444';
@@ -733,13 +615,13 @@ export async function renderUltraHdCanvas({
 
     ctx.save();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 9 * scale;
+    ctx.lineWidth = 8 * scale;
     ctx.globalAlpha = 0.45;
     ctx.shadowColor = color;
     ctx.shadowBlur = 10 * scale;
 
-    ctx.translate(0, mapYOffset);
-    ctx.scale(scale, scale);
+    ctx.translate(0, mapY);
+    ctx.scale(cadScaleX, cadScaleY);
     const p = new Path2D(line.d);
     ctx.stroke(p);
     ctx.restore();
@@ -748,26 +630,30 @@ export async function renderUltraHdCanvas({
     ctx.strokeStyle = color;
     ctx.lineWidth = 3 * scale;
     ctx.globalAlpha = 0.95;
-    ctx.translate(0, mapYOffset);
-    ctx.scale(scale, scale);
+    ctx.translate(0, mapY);
+    ctx.scale(cadScaleX, cadScaleY);
     ctx.stroke(p);
     ctx.restore();
 
     ctx.restore();
   });
 
-  // 4. Draw Radar Glow Beacons
-  if (showRadar) {
-    linesWithLogs.forEach(({ center, logs }) => {
-      if (!center || center.x == null || center.y == null) return;
-      const cx = toCanvasX(center.x);
-      const cy = toCanvasY(center.y);
-      const count = logs.length;
+  // Calculate layout of callout cards
+  const preparedCards = computeCalloutLayout({
+    linesWithLogs,
+    customPositions: customCardPositions,
+  });
 
-      // Outer Red Glow Halo
+  // 3. Draw Radar Glow Beacons
+  if (showRadar) {
+    preparedCards.forEach((card) => {
+      const cx = card.radarX * scale;
+      const cy = card.radarY * scale;
+      const count = card.logs.length;
+
       ctx.save();
       const grad = ctx.createRadialGradient(cx, cy, 2 * scale, cx, cy, 22 * scale);
-      grad.addColorStop(0, 'rgba(239, 68, 68, 0.9)');
+      grad.addColorStop(0, 'rgba(239, 68, 68, 0.95)');
       grad.addColorStop(0.4, 'rgba(239, 68, 68, 0.45)');
       grad.addColorStop(0.8, 'rgba(239, 68, 68, 0.15)');
       grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
@@ -779,13 +665,13 @@ export async function renderUltraHdCanvas({
 
       // Ripple Rings
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
-      ctx.lineWidth = 1.4 * scale;
+      ctx.lineWidth = 1.6 * scale;
       ctx.beginPath();
       ctx.arc(cx, cy, 11 * scale, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.55)';
-      ctx.lineWidth = 1 * scale;
+      ctx.lineWidth = 1.2 * scale;
       ctx.beginPath();
       ctx.arc(cx, cy, 16 * scale, 0, Math.PI * 2);
       ctx.stroke();
@@ -798,7 +684,7 @@ export async function renderUltraHdCanvas({
 
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(cx, cy, 2 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 2.2 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Number of Jobs Badge
@@ -825,27 +711,16 @@ export async function renderUltraHdCanvas({
     });
   }
 
-  // 5. Draw Callout Boxes with Orthogonal (Elbow) Connectors
-  if (showCallouts && linesWithLogs.length > 0) {
-    const preparedCards = computeCalloutLayout({
-      linesWithLogs,
-      customPositions: customCardPositions,
-      baseWidth,
-      baseHeight,
-      mapYOffset,
-      scale,
-      expandCanvasForManyLogs: autoExpand,
-    });
-
-    // Step 5A: Render ALL Orthogonal Leader Lines FIRST
-    // Guarantees NO arrow can EVER be drawn on top of ANY callout card box!
+  // 4. Draw Orthogonal Elbow Leader Lines and Callout Boxes
+  if (showCallouts && preparedCards.length > 0) {
+    // Step 4A: Render ALL Leader Lines FIRST
     preparedCards.forEach((card) => {
       drawOrthogonalElbow(ctx, card, scale);
     });
 
-    // Step 5B: Render ALL Callout Card Boxes ON TOP
+    // Step 4B: Render ALL Callout Boxes ON TOP
     preparedCards.forEach((card) => {
-      drawCompactCalloutBox(ctx, card, scale);
+      drawCalloutBox(ctx, card, scale);
     });
   }
 
@@ -938,20 +813,16 @@ export async function downloadMapPdf({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = false,
   paperSize = 'NATIVE', // 'NATIVE' (Default CAD 600 DPI) | 'A3' | 'A4'
-  quality = 0.95,
+  quality = 0.96,
   customCardPositions = {},
-  expandCanvasForManyLogs = false,
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
     showCallouts,
     showRadar,
-    showOfficialHeader,
-    scale: 3.0, // 600 DPI Ultra HD Precision
+    scale: 4.0, // 4.0 gives 9600 x 5920 px (True 600 DPI Ultra HD)
     customCardPositions,
-    expandCanvasForManyLogs,
   });
 
   const jpegBlob = await new Promise((resolve) => {
@@ -991,18 +862,14 @@ export async function downloadMapPng({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = false,
   customCardPositions = {},
-  expandCanvasForManyLogs = false,
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
     showCallouts,
     showRadar,
-    showOfficialHeader,
-    scale: 3.0, // 600 DPI Ultra HD
+    scale: 4.0, // 9600 x 5920 px Ultra HD
     customCardPositions,
-    expandCanvasForManyLogs,
   });
 
   const pngBlob = await new Promise((resolve) => {
@@ -1025,18 +892,14 @@ export async function printMapWindow({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = false,
   customCardPositions = {},
-  expandCanvasForManyLogs = false,
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
     showCallouts,
     showRadar,
-    showOfficialHeader,
-    scale: 3.0, // 600 DPI Ultra HD
+    scale: 3.5,
     customCardPositions,
-    expandCanvasForManyLogs,
   });
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.96);

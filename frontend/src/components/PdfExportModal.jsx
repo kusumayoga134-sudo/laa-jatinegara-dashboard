@@ -15,13 +15,13 @@ import {
   GripVertical,
 } from 'lucide-react';
 import {
-  renderUltraHdCanvas,
+  VIRTUAL_CANVAS,
+  computeCalloutLayout,
+  getElbowSvgPath,
+  formatLogTimestamp,
   downloadMapPdf,
   downloadMapPng,
   printMapWindow,
-  formatLogTimestamp,
-  computeCalloutLayout,
-  getElbowSvgPath,
 } from '../utils/pdfExportEngine';
 
 export default function PdfExportModal({
@@ -29,13 +29,12 @@ export default function PdfExportModal({
   onClose,
   linesWithLogs = [],
 }) {
+  const { CANVAS_W, CANVAS_H, MAP_W, MAP_H, LANE_TOP_H, CAD_BASE_W, CAD_BASE_H } = VIRTUAL_CANVAS;
+
   const [paperSize, setPaperSize] = useState('NATIVE'); // 'NATIVE' (Default Rekomendasi CAD) | 'A3' | 'A4'
   const [showCallouts, setShowCallouts] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
-  const showOfficialHeader = false;
 
-  const [baseMapDataUrl, setBaseMapDataUrl] = useState(null);
-  const [isGeneratingPreview, setIsGeneratingPreview] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccessMsg, setExportSuccessMsg] = useState(null);
 
@@ -51,82 +50,45 @@ export default function PdfExportModal({
   const stageDragStartRef = useRef({ x: 0, y: 0 });
 
   const previewContainerRef = useRef(null);
-  const stageRef = useRef(null);
-  const [containerDim, setContainerDim] = useState({ width: 1200, height: 600 });
+  const [containerDim, setContainerDim] = useState({ width: 1400, height: 700 });
 
-  const autoExpand = linesWithLogs.length > 10;
-  const baseWidth = 3275;
-  const baseHeight = autoExpand ? 1699 : 1419;
-  const mapYOffset = autoExpand ? 140 : 0;
-
-  // Track parent container resize to calculate fitScale
+  // Measure container dimensions for responsive fit-to-width
   useEffect(() => {
-    if (!previewContainerRef.current) return;
+    if (!isOpen) return;
     const updateDim = () => {
       if (previewContainerRef.current) {
         const { clientWidth, clientHeight } = previewContainerRef.current;
-        setContainerDim({ width: clientWidth, height: clientHeight });
+        if (clientWidth > 100 && clientHeight > 100) {
+          setContainerDim({ width: clientWidth, height: clientHeight });
+        }
       }
     };
     updateDim();
+    const timer = setTimeout(updateDim, 50);
     window.addEventListener('resize', updateDim);
-    return () => window.removeEventListener('resize', updateDim);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateDim);
+    };
   }, [isOpen]);
 
+  // Fit scale: Fit virtual canvas (2400 x 1480) comfortably to ~92% width & height of the modal
   const fitScale = useMemo(() => {
-    const padX = 40;
-    const padY = 40;
-    const availW = Math.max(300, containerDim.width - padX);
-    const availH = Math.max(200, containerDim.height - padY);
-    return Math.min(availW / baseWidth, availH / baseHeight);
-  }, [containerDim, baseWidth, baseHeight]);
+    const padW = containerDim.width * 0.94;
+    const padH = containerDim.height * 0.94;
+    return Math.min(padW / CANVAS_W, padH / CANVAS_H);
+  }, [containerDim, CANVAS_W, CANVAS_H]);
 
-  // Compute Active Callout Cards and Orthogonal Elbow Layout
+  const currentScale = fitScale * previewZoom;
+
+  // Compute Active Callout Cards and Orthogonal Elbow Layout on the 2400 x 1480 Virtual Canvas
   const activeCards = useMemo(() => {
     if (!showCallouts || linesWithLogs.length === 0) return [];
     return computeCalloutLayout({
       linesWithLogs,
       customPositions,
-      baseWidth: 3275,
-      baseHeight: 1419,
-      mapYOffset,
-      scale: 1.0,
-      expandCanvasForManyLogs: autoExpand,
     });
-  }, [linesWithLogs, customPositions, showCallouts, autoExpand, mapYOffset]);
-
-  // Generate Base Map (CAD Blueprint + Glows + Radar Beacons)
-  useEffect(() => {
-    if (!isOpen) return;
-    let isCancelled = false;
-    setIsGeneratingPreview(true);
-
-    const generate = async () => {
-      try {
-        const canvas = await renderUltraHdCanvas({
-          linesWithLogs,
-          showCallouts: false, // Callout cards rendered interactively on top!
-          showRadar,
-          showOfficialHeader,
-          scale: 1.2, // Lightweight, super crisp 1.2x scale for instant preview
-          expandCanvasForManyLogs: autoExpand,
-        });
-
-        if (!isCancelled) {
-          setBaseMapDataUrl(canvas.toDataURL('image/jpeg', 0.88));
-          setIsGeneratingPreview(false);
-        }
-      } catch (err) {
-        console.error('Failed to generate base preview canvas:', err);
-        if (!isCancelled) setIsGeneratingPreview(false);
-      }
-    };
-
-    generate();
-    return () => {
-      isCancelled = true;
-    };
-  }, [isOpen, linesWithLogs, showRadar, showOfficialHeader, autoExpand]);
+  }, [linesWithLogs, customPositions, showCallouts]);
 
   // Mouse Wheel Zoom for preview stage
   useEffect(() => {
@@ -183,7 +145,7 @@ export default function PdfExportModal({
   // Card Mouse Down (Initiate Drag-and-Drop)
   const handleCardMouseDown = (e, card) => {
     e.preventDefault();
-    e.stopPropagation(); // Never trigger stage panning!
+    e.stopPropagation();
     setDraggingCardId(card.id);
     dragStartRef.current = {
       clientX: e.clientX,
@@ -206,16 +168,19 @@ export default function PdfExportModal({
   // Container Mouse Move (Dispatches to either card dragging or stage panning)
   const handleContainerMouseMove = (e) => {
     if (draggingCardId) {
-      const currentScale = fitScale * previewZoom;
       const dx = (e.clientX - dragStartRef.current.clientX) / currentScale;
       const dy = (e.clientY - dragStartRef.current.clientY) / currentScale;
 
+      const card = activeCards.find((c) => c.id === draggingCardId);
+      const cardW = card ? card.w : VIRTUAL_CANVAS.CARD_W;
+      const cardH = card ? card.h : VIRTUAL_CANVAS.CARD_H;
+
+      const newX = Math.max(0, Math.min(CANVAS_W - cardW, Math.round(dragStartRef.current.cardX + dx)));
+      const newY = Math.max(0, Math.min(CANVAS_H - cardH, Math.round(dragStartRef.current.cardY + dy)));
+
       setCustomPositions((prev) => ({
         ...prev,
-        [draggingCardId]: {
-          x: Math.round(dragStartRef.current.cardX + dx),
-          y: Math.round(dragStartRef.current.cardY + dy),
-        },
+        [draggingCardId]: { x: newX, y: newY },
       }));
       return;
     }
@@ -256,11 +221,9 @@ export default function PdfExportModal({
         linesWithLogs,
         showCallouts,
         showRadar,
-        showOfficialHeader,
         paperSize,
         quality: 0.96,
         customCardPositions: customPositions,
-        expandCanvasForManyLogs: autoExpand,
       });
       setExportSuccessMsg(`PDF berhasil diunduh: ${filename}`);
       setTimeout(() => setExportSuccessMsg(null), 4000);
@@ -278,9 +241,7 @@ export default function PdfExportModal({
         linesWithLogs,
         showCallouts,
         showRadar,
-        showOfficialHeader,
         customCardPositions: customPositions,
-        expandCanvasForManyLogs: autoExpand,
       });
     } catch (err) {
       alert('Gagal mencetak dokumen: ' + err.message);
@@ -296,9 +257,7 @@ export default function PdfExportModal({
         linesWithLogs,
         showCallouts,
         showRadar,
-        showOfficialHeader,
         customCardPositions: customPositions,
-        expandCanvasForManyLogs: autoExpand,
       });
       setExportSuccessMsg(`Gambar Ultra HD berhasil diunduh: ${filename}`);
       setTimeout(() => setExportSuccessMsg(null), 4000);
@@ -312,8 +271,8 @@ export default function PdfExportModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col w-full max-w-[1550px] h-[94vh] max-h-[960px] overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col w-full max-w-[1600px] h-[95vh] max-h-[980px] overflow-hidden text-slate-100">
 
         {/* ========================================================
             MODAL HEADER BAR
@@ -333,7 +292,7 @@ export default function PdfExportModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Format Cetak Resmi Standar Blueprint CAD • Lengkap dengan Titik Radar & Callout Riwayat Pekerjaan
+                Format Cetak Blueprint Standar CAD • Lengkap dengan Titik Radar & Callout Riwayat Pekerjaan
               </p>
             </div>
           </div>
@@ -459,7 +418,7 @@ export default function PdfExportModal({
                 onChange={(e) => setPaperSize(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer"
               >
-                <option value="NATIVE">Format Asli CAD - Ultra HD 600 DPI (9.825 x 4.257 px) (Rekomendasi)</option>
+                <option value="NATIVE">Format Asli CAD - Ultra HD 600 DPI (9.600 x 5.920 px) (Rekomendasi)</option>
                 <option value="A3">A3 Landscape (Standard Gambar Teknik)</option>
                 <option value="A4">A4 Landscape</option>
               </select>
@@ -498,7 +457,7 @@ export default function PdfExportModal({
         </div>
 
         {/* ========================================================
-            MAIN LIVE PREVIEW STAGE (DRAGGABLE & ORTHOGONAL CONNECTORS)
+            MAIN LIVE PREVIEW STAGE (2400 x 1480 FIXED VIRTUAL CANVAS)
             ======================================================== */}
         <div
           ref={previewContainerRef}
@@ -506,7 +465,7 @@ export default function PdfExportModal({
           onMouseMove={handleContainerMouseMove}
           onMouseUp={handleContainerMouseUp}
           onMouseLeave={handleContainerMouseUp}
-          className="flex-1 bg-slate-950 p-3 sm:p-6 overflow-hidden relative flex items-center justify-center select-none"
+          className="flex-1 bg-slate-950 p-4 overflow-hidden relative flex items-center justify-center select-none"
           style={{
             cursor: draggingCardId
               ? 'grabbing'
@@ -517,42 +476,134 @@ export default function PdfExportModal({
               : 'default',
           }}
         >
-          {isGeneratingPreview ? (
-            <div className="flex flex-col items-center justify-center space-y-3 text-slate-400">
-              <Loader2 className="w-10 h-10 animate-spin text-red-500" />
-              <p className="font-bold text-xs">Menyiapkan Preview Dokumen Ultra HD 600 DPI (9.825 × 4.257 px)...</p>
-            </div>
-          ) : baseMapDataUrl ? (
+          {/* Scaled Wrapper: perfectly matches the visually rendered dimensions */}
+          <div
+            style={{
+              width: `${CANVAS_W * currentScale}px`,
+              height: `${CANVAS_H * currentScale}px`,
+              transform: `translate(${previewPos.x}px, ${previewPos.y}px)`,
+              position: 'relative',
+            }}
+            className="transition-transform duration-75 ease-out shadow-2xl"
+          >
+            {/* 2400 x 1480 Fixed Virtual Canvas Paper Container */}
             <div
-              ref={stageRef}
-              className="relative shadow-2xl rounded-none border border-slate-700 bg-white"
               style={{
-                width: `${baseWidth}px`,
-                height: `${baseHeight}px`,
-                transform: `translate(${previewPos.x}px, ${previewPos.y}px) scale(${fitScale * previewZoom})`,
-                transformOrigin: 'center center',
+                width: `${CANVAS_W}px`,
+                height: `${CANVAS_H}px`,
+                transform: `scale(${currentScale})`,
+                transformOrigin: 'top left',
+                position: 'absolute',
+                top: 0,
+                left: 0,
               }}
+              className="bg-white border border-slate-700 relative overflow-hidden"
             >
-              {/* 1. Base CAD Map with Glows & Radar Beacons */}
+              {/* 1. CAD Blueprint Map Image at [top: 220px, left: 0, width: 2400px, height: 1040px] */}
               <img
-                src={baseMapDataUrl}
-                alt="Preview Dokumen Peta Monitoring LAA"
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                src="/peta-laa-cropped-hd.png"
+                alt="Peta Wilayah LAA UPT Resor 1.9 Jatinegara"
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: `${LANE_TOP_H}px`,
+                  width: `${MAP_W}px`,
+                  height: `${MAP_H}px`,
+                  objectFit: 'contain',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}
                 draggable={false}
               />
 
-              {/* 2. SVG Layer: Orthogonal (Elbow) Leader Lines & Arrowheads */}
+              {/* 2. Track Glows SVG Layer */}
+              <svg
+                viewBox={`0 0 ${CAD_BASE_W} ${CAD_BASE_H}`}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: `${LANE_TOP_H}px`,
+                  width: `${MAP_W}px`,
+                  height: `${MAP_H}px`,
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                }}
+              >
+                {linesWithLogs.map(({ line }) => {
+                  if (!line.d) return null;
+                  const color = line.color || '#ef4444';
+                  return (
+                    <g key={`glow-${line.id}`}>
+                      <path
+                        d={line.d}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="8"
+                        strokeOpacity="0.45"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d={line.d}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="3"
+                        strokeOpacity="0.95"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* 3. Radar Glow Beacons */}
+              {showRadar &&
+                activeCards.map((card) => {
+                  const cx = card.radarX;
+                  const cy = card.radarY;
+                  const count = card.logs.length;
+                  return (
+                    <div
+                      key={`radar-${card.id}`}
+                      style={{
+                        position: 'absolute',
+                        left: `${cx}px`,
+                        top: `${cy}px`,
+                        transform: 'translate(-50%, -50%)',
+                        pointerEvents: 'none',
+                        zIndex: 15,
+                      }}
+                      className="flex items-center justify-center"
+                    >
+                      {/* Outer Pulsing Halo */}
+                      <span className="absolute w-10 h-10 rounded-full bg-red-500/25 animate-ping opacity-75" />
+                      <span className="absolute w-7 h-7 rounded-full border-2 border-red-500/80" />
+                      {/* Center Pip */}
+                      <span className="w-3.5 h-3.5 rounded-full bg-red-600 border-2 border-white shadow-md" />
+                      {/* Count Badge */}
+                      {count > 1 && (
+                        <span className="absolute -top-3 -right-3 px-1.5 py-0.5 rounded-full bg-red-700 text-white font-extrabold text-[9px] shadow-sm leading-none border border-white">
+                          {count}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+
+              {/* 4. SVG Layer: Orthogonal (Elbow) Leader Lines & Arrowheads (viewBox 0 0 2400 1480) */}
               {showCallouts && activeCards.length > 0 && (
                 <svg
-                  viewBox={`0 0 ${baseWidth} ${baseHeight}`}
-                  className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+                  viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  style={{ zIndex: 20 }}
                 >
                   {activeCards.map((card) => {
-                    const svgPath = getElbowSvgPath(card, 1.0);
-                    const beaconRadius = 11;
-                    const arrowEndY = card.isUpper ? card.targetY - beaconRadius : card.targetY + beaconRadius;
-                    const headLen = 8;
-                    const headW = 5;
+                    const svgPath = getElbowSvgPath(card);
+                    const beaconRadius = 10;
+                    const arrowEndY = card.isUpper ? card.radarY - beaconRadius : card.radarY + beaconRadius;
+                    const headLen = 9;
+                    const headW = 5.5;
 
                     return (
                       <g key={`arrow-${card.id}`}>
@@ -561,49 +612,40 @@ export default function PdfExportModal({
                           d={svgPath}
                           fill="none"
                           stroke="#ffffff"
-                          strokeWidth="4.5"
+                          strokeWidth="5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
-                        {/* Soft Slate Shadow */}
+                        {/* Bold Red Leader Line */}
                         <path
                           d={svgPath}
                           fill="none"
-                          stroke="rgba(15, 23, 42, 0.20)"
+                          stroke="#dc2626"
                           strokeWidth="2.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
-                        {/* Sharp Core Leader Line */}
-                        <path
-                          d={svgPath}
-                          fill="none"
-                          stroke="#0f172a"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
 
-                        {/* Architectural Arrowhead pointing at radar target */}
+                        {/* Architectural Arrowhead */}
                         <polygon
                           points={
                             card.isUpper
-                              ? `${card.targetX},${arrowEndY} ${card.targetX - headW},${arrowEndY - headLen} ${card.targetX},${arrowEndY - headLen * 0.7} ${card.targetX + headW},${arrowEndY - headLen}`
-                              : `${card.targetX},${arrowEndY} ${card.targetX - headW},${arrowEndY + headLen} ${card.targetX},${arrowEndY + headLen * 0.7} ${card.targetX + headW},${arrowEndY + headLen}`
+                              ? `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY - headLen} ${card.radarX},${arrowEndY - headLen * 0.7} ${card.radarX + headW},${arrowEndY - headLen}`
+                              : `${card.radarX},${arrowEndY} ${card.radarX - headW},${arrowEndY + headLen} ${card.radarX},${arrowEndY + headLen * 0.7} ${card.radarX + headW},${arrowEndY + headLen}`
                           }
-                          fill="#0f172a"
+                          fill="#dc2626"
                         />
 
-                        {/* Base Anchor Pin */}
-                        <circle cx={card.startX} cy={card.startY} r="3" fill="#0f172a" />
-                        <circle cx={card.startX} cy={card.startY} r="1.3" fill="#ffffff" />
+                        {/* Base Anchor Dot */}
+                        <circle cx={card.startX} cy={card.startY} r="3.5" fill="#dc2626" />
+                        <circle cx={card.startX} cy={card.startY} r="1.5" fill="#ffffff" />
                       </g>
                     );
                   })}
                 </svg>
               )}
 
-              {/* 3. Interactive Draggable Callout Cards */}
+              {/* 5. Interactive Draggable Callout Cards */}
               {showCallouts &&
                 activeCards.map((card) => {
                   const isDraggingThis = draggingCardId === card.id;
@@ -617,49 +659,49 @@ export default function PdfExportModal({
                         position: 'absolute',
                         left: `${card.x}px`,
                         top: `${card.y}px`,
-                        width: `${card.cardW}px`,
-                        height: `${card.cardH}px`,
+                        width: `${card.w}px`,
+                        height: `${card.h}px`,
                         cursor: isDraggingThis ? 'grabbing' : 'grab',
-                        zIndex: isDraggingThis ? 60 : 30,
+                        zIndex: isDraggingThis ? 50 : 30,
                       }}
-                      className={`rounded-lg bg-white border ${
+                      className={`rounded-xl bg-white border ${
                         isDraggingThis
-                          ? 'ring-2 ring-blue-500 shadow-2xl scale-[1.02] border-blue-500'
-                          : 'border-slate-300 shadow-lg hover:shadow-xl hover:border-slate-400'
-                      } transition-shadow select-none overflow-hidden flex flex-col`}
+                          ? 'ring-4 ring-blue-500 shadow-2xl scale-[1.02] border-blue-500'
+                          : 'border-slate-300 shadow-xl hover:shadow-2xl hover:border-slate-400'
+                      } select-none overflow-hidden flex flex-col transition-shadow`}
                     >
                       {/* Left Accent Bar */}
                       <div
-                        className="absolute left-0 top-0 bottom-0 w-[3.5px]"
+                        className="absolute left-0 top-0 bottom-0 w-[4.5px]"
                         style={{ backgroundColor: trackColor }}
                       />
 
-                      {/* Header */}
-                      <div className="h-[22px] bg-slate-50 border-b border-slate-200/80 flex items-center justify-between px-2 pl-3 shrink-0">
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      {/* Header (34px) */}
+                      <div className="h-[34px] bg-slate-50 border-b border-slate-200 flex items-center justify-between px-3 pl-4 shrink-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <span
-                            className="w-2 h-2 rounded-full shrink-0 border border-white"
+                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-white shadow-xs"
                             style={{ backgroundColor: trackColor }}
                           />
-                          <span className="font-bold text-[8.5px] text-slate-900 truncate leading-none">
+                          <span className="font-bold text-[12px] text-slate-900 truncate leading-none">
                             {card.line.title || card.line.code}
                           </span>
-                          <span className="font-mono text-[6.5px] text-slate-500 shrink-0">
+                          <span className="font-mono text-[9.5px] text-slate-500 shrink-0 font-bold">
                             {card.line.km || ''}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0 ml-1">
-                          <span className="px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[6.5px] font-bold text-slate-700 flex items-center gap-0.5">
-                            <span className="w-1 h-1 rounded-full bg-blue-500" />
-                            {card.logs.length}
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[9.5px] font-bold text-slate-700 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                            {card.logs.length} Pekerjaan
                           </span>
-                          <GripVertical className="w-2.5 h-2.5 text-slate-400" />
+                          <GripVertical className="w-3.5 h-3.5 text-slate-400" />
                         </div>
                       </div>
 
-                      {/* Work log items */}
-                      <div className="p-1.5 pl-3 flex-1 flex flex-col justify-center space-y-1">
+                      {/* Body Work Log Items (106px) */}
+                      <div className="p-2.5 pl-4 flex-1 flex flex-col justify-center space-y-1.5 bg-white">
                         {card.displayLogs.map((log, idx) => {
                           const { dateStr, timeStr } = formatLogTimestamp(log.createdAt || log.timestamp);
                           const status = (log.status || 'DONE').toUpperCase();
@@ -667,29 +709,29 @@ export default function PdfExportModal({
                           const isInProgress = status === 'IN_PROGRESS' || status === 'PROGRESS';
 
                           return (
-                            <div key={idx} className="leading-tight">
-                              <div className="flex items-center justify-between text-[6px] font-mono text-slate-500">
+                            <div key={idx} className="leading-snug">
+                              <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 font-semibold">
                                 <span>
                                   {dateStr} • {timeStr}
                                 </span>
                                 <span
-                                  className={`px-1 py-0.2 rounded font-bold ${
+                                  className={`px-1.5 py-0.2 rounded-md font-extrabold text-[8px] uppercase tracking-wide ${
                                     isCompleted
-                                      ? 'bg-emerald-50 text-emerald-700'
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                       : isInProgress
-                                      ? 'bg-amber-50 text-amber-700'
-                                      : 'bg-slate-100 text-slate-700'
+                                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                      : 'bg-slate-100 text-slate-700 border border-slate-300'
                                   }`}
                                 >
                                   {isCompleted ? 'SELESAI' : isInProgress ? 'PROSES' : status}
                                 </span>
                               </div>
-                              <div className="font-bold text-[7px] text-slate-900 truncate">
+                              <div className="font-extrabold text-[11px] text-slate-900 truncate mt-0.5">
                                 {log.actionType || 'Pemeliharaan LAA'}
                               </div>
-                              <div className="text-[5.8px] text-slate-600 truncate flex items-center gap-1">
-                                <span className="w-1 h-1 rounded-full bg-slate-400" />
-                                <span>
+                              <div className="text-[9.5px] text-slate-600 truncate flex items-center gap-1.5 mt-0.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span className="font-medium">
                                   {log.technician || 'UPT Resor 1.9'}
                                   {log.description ? ` • ${log.description}` : ''}
                                 </span>
@@ -702,15 +744,13 @@ export default function PdfExportModal({
                   );
                 })}
             </div>
-          ) : (
-            <div className="text-slate-400 text-xs">Gagal memuat preview peta</div>
-          )}
+          </div>
 
           {/* Quick Helper Pill at Bottom */}
           <div className="absolute bottom-4 left-6 bg-slate-900/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-400 px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 pointer-events-none">
             <Info className="w-3.5 h-3.5 text-blue-400" />
             <span>
-              {linesWithLogs.length} lokasi berpenanda • Geser (drag) kotak callout bebas di layar preview • Panah siku otomatis mengikuti.
+              {linesWithLogs.length} lokasi berpenanda • Geser (drag) kotak callout bebas di layar preview • Panah siku merah otomatis mengikuti.
             </span>
           </div>
         </div>
@@ -721,9 +761,7 @@ export default function PdfExportModal({
         <div className="px-4 sm:px-6 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0 flex-wrap gap-2">
           <div className="flex items-center space-x-2">
             <span className="font-mono text-slate-300 font-bold">Dimensi:</span>
-            <span>
-              {baseWidth * 3} × {baseHeight * 3} px (Native AutoCAD 600 DPI)
-            </span>
+            <span>9.600 × 5.920 px (Ultra HD 600 DPI)</span>
             <span>•</span>
             <span className="text-emerald-400 font-bold">Kualitas Cetak: 600 DPI Ultra HD</span>
             {Object.keys(customPositions).length > 0 && (
