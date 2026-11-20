@@ -80,6 +80,45 @@ export default function PdfExportModal({
 
   if (!isOpen) return null;
 
+  // Mouse Wheel Zoom for preview stage (Smooth Zoom In & Out with mouse scroll)
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    if (!container || !isOpen) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const zoomDelta = e.deltaY < 0 ? 0.2 : -0.2;
+
+      setPreviewZoom((prevZoom) => {
+        const nextZoom = Math.min(Math.max(prevZoom + zoomDelta, 0.5), 5.0);
+        const roundedZoom = parseFloat(nextZoom.toFixed(2));
+
+        if (roundedZoom <= 1.0) {
+          setPreviewPos({ x: 0, y: 0 });
+        } else if (roundedZoom !== prevZoom) {
+          const rect = container.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left - rect.width / 2;
+          const mouseY = e.clientY - rect.top - rect.height / 2;
+          const scaleRatio = roundedZoom / prevZoom;
+
+          setPreviewPos((prevPos) => ({
+            x: mouseX - (mouseX - prevPos.x) * scaleRatio,
+            y: mouseY - (mouseY - prevPos.y) * scaleRatio,
+          }));
+        }
+
+        return roundedZoom;
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [isOpen]);
+
   // Zoom handlers for preview
   const handleZoomIn = () => setPreviewZoom((z) => Math.min(z + 0.25, 4));
   const handleZoomOut = () => setPreviewZoom((z) => Math.max(z - 0.25, 0.5));

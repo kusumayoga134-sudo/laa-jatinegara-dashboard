@@ -228,10 +228,11 @@ export async function renderUltraHdCanvas({
     const minX = 25 * scale;
     const maxX = totalWidth - cardW - 25 * scale;
 
-    // Step 1: Pre-calculate card properties and safe non-track gutter zones
-    // Zone 1 (Top Gutter): Above Upper Tracks (CAD Y < 340, Canvas Y: mapYOffset + 140 to mapYOffset + 320)
-    // Zone 2 (Middle Gutter): Between Tracks (CAD Y 760 - 940, Canvas Y: mapYOffset + 760 to mapYOffset + 940)
-    // Zone 3 (Bottom Gutter): Below Lower Tracks (CAD Y > 1180, Canvas Y: mapYOffset + 1180 to mapYOffset + 1380)
+    // Absolute safety boundary: NO card can EVER enter the official header banner or footer banner!
+    const absoluteMinY = mapYOffset + 14 * scale;
+    const absoluteMaxY = (mapYOffset + mapH) - (headerHeight + logItemHeight + 6 * scale) - 14 * scale;
+
+    // Step 1: Pre-calculate card properties with natural proximity to target beacons
     const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
       const targetX = toCanvasX(center.x);
       const targetY = toCanvasY(center.y);
@@ -243,46 +244,27 @@ export async function renderUltraHdCanvas({
       const code = (line.code || '').toLowerCase();
       const title = (line.title || '').toLowerCase();
 
-      let zone;
+      // Proximity side selection: Hilir/upper tracks go above, Hulu/lower tracks go below
       let side;
-      let baseY;
-      let minY;
-      let maxY;
-
       if (cadY < 850) {
-        // Upper corridor (Jatinegara - Klender - Buaran)
         const isHi = /\b(hi|hilir)\b/i.test(code) || /\b(hi|hilir)\b/i.test(title) || cadY <= 675;
-        if (isHi) {
-          zone = 'top';
-          side = 'above';
-          baseY = mapYOffset + 240 * scale - cardH;
-          minY = mapYOffset + 20 * scale;
-          maxY = mapYOffset + 320 * scale - cardH;
-        } else {
-          zone = 'middle';
-          side = 'below';
-          baseY = mapYOffset + 775 * scale;
-          minY = mapYOffset + 760 * scale;
-          maxY = mapYOffset + 930 * scale - cardH;
-        }
+        side = isHi ? 'above' : 'below';
       } else {
-        // Lower corridor (Cakung - Kranji - Bekasi)
         const isHu = /\b(hu|hulu)\b/i.test(code) || /\b(hu|hulu)\b/i.test(title) || cadY <= 1085;
-        if (isHu) {
-          zone = 'middle';
-          side = 'above';
-          baseY = mapYOffset + 925 * scale - cardH;
-          minY = mapYOffset + 760 * scale;
-          maxY = mapYOffset + 930 * scale - cardH;
-        } else {
-          zone = 'bottom';
-          side = 'below';
-          baseY = mapYOffset + 1180 * scale;
-          minY = mapYOffset + 1175 * scale;
-          maxY = mapYOffset + 1380 * scale - cardH;
-        }
+        side = isHu ? 'above' : 'below';
       }
 
+      // Natural, elegant offset: ~48px from the track beacon (NOT hundreds of pixels away!)
+      const naturalOffset = 48 * scale;
+      let baseY;
+      if (side === 'above') {
+        baseY = targetY - cardH - naturalOffset;
+      } else {
+        baseY = targetY + naturalOffset;
+      }
+
+      // Hard clamp within map boundaries so cards NEVER touch or cover the top header banner
+      const initialY = Math.max(absoluteMinY, Math.min(absoluteMaxY, baseY));
       const initialX = Math.max(minX, Math.min(maxX, targetX - cardW / 2));
 
       return {
@@ -297,13 +279,10 @@ export async function renderUltraHdCanvas({
         headerHeight,
         logItemHeight,
         footerExtra,
-        zone,
         side,
         baseY,
-        minY,
-        maxY,
         x: initialX,
-        y: baseY,
+        y: initialY,
       };
     });
 
@@ -317,48 +296,43 @@ export async function renderUltraHdCanvas({
       );
     };
 
-    // Step 2: Resolve collisions within each safe gutter zone
-    const zones = { top: [], middle: [], bottom: [] };
-    preparedCards.forEach((c) => {
-      if (zones[c.zone]) zones[c.zone].push(c);
-    });
+    // Step 2: Sort cards by horizontal position (targetX) and resolve collisions
+    preparedCards.sort((a, b) => a.targetX - b.targetX);
 
-    Object.values(zones).forEach((group) => {
-      if (!group || group.length === 0) return;
-      group.sort((a, b) => a.targetX - b.targetX);
+    for (let i = 0; i < preparedCards.length; i++) {
+      const curr = preparedCards[i];
+      for (let j = 0; j < i; j++) {
+        const prev = preparedCards[j];
+        if (checkOverlap(curr, prev)) {
+          // Option A: Horizontal shift (staggering) if shift is modest
+          const shiftX = (prev.x + prev.cardW + gapX) - curr.x;
+          const targetCenter = curr.targetX - cardW / 2;
+          const distFromTarget = Math.abs((curr.x + shiftX) - targetCenter);
 
-      for (let i = 0; i < group.length; i++) {
-        const curr = group[i];
-        for (let j = 0; j < i; j++) {
-          const prev = group[j];
-          if (checkOverlap(curr, prev)) {
-            const shiftX = (prev.x + prev.cardW + gapX) - curr.x;
-            const targetCenter = curr.targetX - cardW / 2;
-            const distFromTarget = Math.abs((curr.x + shiftX) - targetCenter);
-
-            if (curr.x + shiftX + curr.cardW <= maxX && distFromTarget <= 160 * scale) {
-              curr.x += shiftX;
-            } else {
-              if (curr.side === 'above') {
-                const newY = prev.y - curr.cardH - gapY;
-                if (newY >= curr.minY) {
-                  curr.y = newY;
-                } else {
-                  curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
-                }
+          if (curr.x + shiftX + curr.cardW <= maxX && distFromTarget <= 110 * scale) {
+            curr.x += shiftX;
+          } else {
+            // Option B: Vertical tiering (close, compact tiering!)
+            if (curr.side === 'above') {
+              const newY = prev.y - curr.cardH - gapY;
+              // Strict check: NEVER allow newY to go above absoluteMinY (top banner)
+              if (newY >= absoluteMinY) {
+                curr.y = newY;
               } else {
-                const newY = prev.y + prev.cardH + gapY;
-                if (newY <= curr.maxY) {
-                  curr.y = newY;
-                } else {
-                  curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
-                }
+                curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
+              }
+            } else {
+              const newY = prev.y + prev.cardH + gapY;
+              if (newY <= absoluteMaxY) {
+                curr.y = newY;
+              } else {
+                curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
               }
             }
           }
         }
       }
-    });
+    }
 
     // Step 3: Global relaxation pass across ALL cards to guarantee 100% zero overlap
     for (let pass = 0; pass < 4; pass++) {
@@ -392,9 +366,10 @@ export async function renderUltraHdCanvas({
       if (!hasOverlap) break;
     }
 
-    // Step 4: Final boundary clamping
+    // Step 4: Final boundary clamping (strict guarantee: NEVER touches the banner)
     preparedCards.forEach((c) => {
       c.x = Math.max(minX, Math.min(maxX, c.x));
+      c.y = Math.max(absoluteMinY, Math.min(absoluteMaxY, c.y));
     });
 
     // Step 5: Render Callout Cards and Leader Arrows (Unified, Elegant CAD Styling)
