@@ -59,17 +59,31 @@ function lineIntersectsCard(x1, y1, x2, y2, card, padding = 4) {
  * Protected CAD Drawing Zones
  * Callout boxes MUST NEVER cover these areas:
  * - Native CAD Header Banner (Danantara & KAI logos, Document title)
- * - Upper Corridor Naspan Row (NASPAN 1 through 8, DS 8)
- * - St. Cakung Naspan 9 Emplasemen & DS 11/13
- * - Lower Corridor Petak Naspan Row (NASPAN 10 through 13)
  * - Native CAD Legend Table (Top Right)
+ * - Station Titles (Exact CAD text positions: Klender, Buaran, Cakung, Kranji, Bekasi, etc.)
+ * - Track Corridors & Printed Naspan Rows
+ * - Bottom Border Frame
  */
 const PROTECTED_CAD_ZONES = [
-  { name: 'CAD Header Banner', x1: 0, y1: 0, x2: 3275, y2: 215 },
-  { name: 'CAD Legend Table', x1: 2880, y1: 200, x2: 3250, y2: 470 },
-  { name: 'Upper Naspan Row', x1: 1350, y1: 710, x2: 3150, y2: 830 },
-  { name: 'Cakung Naspan 9 & DS', x1: 2280, y1: 1130, x2: 2940, y2: 1250 },
-  { name: 'Lower Naspan Row', x1: 1600, y1: 1130, x2: 2280, y2: 1240 },
+  // 1. Native CAD Header Banner (Danantara & KAI logos, Document title)
+  { name: 'CAD Header Banner', x1: 0, y1: 0, x2: 3275, y2: 220 },
+  // 2. Native CAD Legend Table (Top Right)
+  { name: 'CAD Legend Table', x1: 2870, y1: 200, x2: 3255, y2: 475 },
+  // 3. Station Titles (Exact CAD text positions)
+  { name: 'ST. JATINEGARA', x1: 1350, y1: 250, x2: 1680, y2: 335 },
+  { name: 'ST. PONDOK JATI', x1: 150, y1: 450, x2: 420, y2: 540 },
+  { name: 'ST. KLENDER', x1: 2080, y1: 460, x2: 2420, y2: 540 },
+  { name: 'ST. BUARAN', x1: 2600, y1: 460, x2: 2870, y2: 540 },
+  { name: 'ST. CAKUNG', x1: 2420, y1: 885, x2: 2720, y2: 960 },
+  { name: 'ST. KRANJI', x1: 1820, y1: 885, x2: 2120, y2: 960 },
+  { name: 'ST. BEKASI', x1: 1150, y1: 865, x2: 1460, y2: 945 },
+  { name: 'ST. KLENDER BARU', x1: 2730, y1: 1170, x2: 3020, y2: 1245 },
+  // 4. Track Corridors & Printed Naspan Rows
+  { name: 'Upper Tracks & Naspans', x1: 1350, y1: 635, x2: 3180, y2: 835 },
+  { name: 'Cakung Emplasemen & DS', x1: 2280, y1: 1045, x2: 2950, y2: 1250 },
+  { name: 'Lower Tracks & Naspans', x1: 1580, y1: 1045, x2: 2280, y2: 1245 },
+  { name: 'Bekasi Emplasemen', x1: 980, y1: 960, x2: 1560, y2: 1230 },
+  // 5. Bottom CAD Border Frame
   { name: 'Bottom Border Frame', x1: 0, y1: 1385, x2: 3275, y2: 1419 },
 ];
 
@@ -81,7 +95,7 @@ export async function renderUltraHdCanvas({
   showCallouts = true,
   showRadar = true,
   showOfficialHeader = false,
-  scale = 2.0, // 2.0 scale gives 6550 x 2838 px (True 300 DPI Ultra HD)
+  scale = 3.0, // 3.0 scale gives 9825 x 4257 px (True 600 DPI Ultra HD)
 }) {
   const baseWidth = 3275;
   const baseHeight = 1419;
@@ -282,70 +296,8 @@ export async function renderUltraHdCanvas({
     // Absolute safety boundary: NO card can EVER enter the official header banner or footer banner!
     const absoluteMinY = showOfficialHeader
       ? mapYOffset + 14 * scale
-      : Math.max(mapYOffset + 14 * scale, 215 * scale);
+      : Math.max(mapYOffset + 14 * scale, 220 * scale);
     const absoluteMaxY = (mapYOffset + mapH) - (headerHeight + logItemHeight + 6 * scale) - 18 * scale;
-
-    // Step 1: Pre-calculate card properties with natural proximity to target beacons
-    const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
-      const targetX = toCanvasX(center.x);
-      const targetY = toCanvasY(center.y);
-      const displayLogs = logs.slice(0, 2);
-      const footerExtra = logs.length > 2 ? 14 * scale : 0;
-      const cardH = headerHeight + displayLogs.length * logItemHeight + 6 * scale + footerExtra;
-
-      const cadY = center.y;
-      const code = (line.code || '').toLowerCase();
-      const title = (line.title || '').toLowerCase();
-
-      // Proximity side selection:
-      // Upper corridor tracks (cadY < 850):
-      // The petak naspan labels (NASPAN 1 through 8) and switches are densely printed BELOW the tracks (Y=715–830).
-      // Placing cards ABOVE the tracks (Y < 650) keeps them in clear open space and 100% free of naspan text!
-      // St. Cakung (cadY >= 850 && cx >= 2250 && cx <= 2920):
-      // (NASPAN 9 EMPL CUK) and DS 11/13 are printed BELOW the tracks (Y=1135–1250).
-      // Placing Cakung cards ABOVE (Y < 1050) keeps them in clear open space and 100% free of (NASPAN 9 EMPL CUK)!
-      let side;
-      if (cadY < 850) {
-        side = 'above';
-      } else if (center.x >= 2250 && center.x <= 2920) {
-        side = 'above';
-      } else if (cadY <= 1085) {
-        side = 'above';
-      } else {
-        side = 'below';
-      }
-
-      // Natural, elegant offset: ~48px from the track beacon (NOT hundreds of pixels away!)
-      const naturalOffset = 48 * scale;
-      let baseY;
-      if (side === 'above') {
-        baseY = targetY - cardH - naturalOffset;
-      } else {
-        baseY = targetY + naturalOffset;
-      }
-
-      // Hard clamp within map boundaries so cards NEVER touch or cover the top header banner
-      const initialY = Math.max(absoluteMinY, Math.min(absoluteMaxY, baseY));
-      const initialX = Math.max(minX, Math.min(maxX, targetX - cardW / 2));
-
-      return {
-        line,
-        logs,
-        displayLogs,
-        center,
-        targetX,
-        targetY,
-        cardW,
-        cardH,
-        headerHeight,
-        logItemHeight,
-        footerExtra,
-        side,
-        baseY,
-        x: initialX,
-        y: initialY,
-      };
-    });
 
     // Helper: 2D Bounding Box Overlap Checker with safety gap
     const checkOverlap = (a, b) => {
@@ -357,59 +309,97 @@ export async function renderUltraHdCanvas({
       );
     };
 
-    // Step 2: Sort cards by horizontal position (targetX) and resolve collisions with generous staggering
-    preparedCards.sort((a, b) => a.targetX - b.targetX);
+    // Helper: Check if card overlaps any protected CAD zone
+    const checkZoneOverlap = (card) => {
+      const x1 = card.x / scale;
+      const y1 = (card.y - mapYOffset) / scale;
+      const x2 = (card.x + card.cardW) / scale;
+      const y2 = (card.y + card.cardH - mapYOffset) / scale;
 
-    for (let i = 0; i < preparedCards.length; i++) {
-      const curr = preparedCards[i];
-      for (let j = 0; j < i; j++) {
-        const prev = preparedCards[j];
-        if (checkOverlap(curr, prev)) {
-          // Option A: Horizontal shift (staggering)
-          const shiftRightX = (prev.x + prev.cardW + gapX) - curr.x;
-          const targetCenter = curr.targetX - cardW / 2;
-          const distRight = Math.abs((curr.x + shiftRightX) - targetCenter);
-          const shiftLeftX = (prev.x - curr.cardW - gapX) - curr.x;
-          const distLeft = Math.abs((curr.x + shiftLeftX) - targetCenter);
-          const maxStagger = cardW * 1.8;
+      for (const z of PROTECTED_CAD_ZONES) {
+        if (x1 < z.x2 && x2 > z.x1 && y1 < z.y2 && y2 > z.y1) {
+          return z;
+        }
+      }
+      return null;
+    };
 
-          let shifted = false;
-          const canRight = curr.x + shiftRightX + curr.cardW <= maxX && distRight <= maxStagger;
-          const canLeft = curr.x + shiftLeftX >= minX && distLeft <= maxStagger;
+    // Step 1: Pre-calculate cards and partition into Upper and Lower corridors
+    // Sorted by targetX along the railway tracks
+    const sortedItems = [...linesWithLogs].sort((a, b) => a.center.x - b.center.x);
 
-          if (canRight && (!canLeft || distRight <= distLeft)) {
-            curr.x += shiftRightX;
-            shifted = true;
-          } else if (canLeft) {
-            curr.x += shiftLeftX;
-            shifted = true;
-          }
+    const upperCards = [];
+    const lowerCards = [];
 
-          if (!shifted) {
-            // Option B: Vertical tiering only if leader line doesn't cross prev card
-            if (curr.side === 'above') {
-              const newY = prev.y - curr.cardH - gapY;
-              if (newY >= absoluteMinY && curr.targetY <= prev.y + gapY) {
-                curr.y = newY;
-              } else if (curr.x + shiftRightX + curr.cardW <= maxX) {
-                curr.x += shiftRightX;
-              } else if (curr.x + shiftLeftX >= minX) {
-                curr.x += shiftLeftX;
-              }
-            } else {
-              const newY = prev.y + prev.cardH + gapY;
-              if (newY <= absoluteMaxY && curr.targetY >= prev.y + prev.cardH - gapY) {
-                curr.y = newY;
-              } else if (curr.x + shiftRightX + curr.cardW <= maxX) {
-                curr.x += shiftRightX;
-              } else if (curr.x + shiftLeftX >= minX) {
-                curr.x += shiftLeftX;
-              }
-            }
+    sortedItems.forEach(({ line, logs, center }) => {
+      const targetX = toCanvasX(center.x);
+      const targetY = toCanvasY(center.y);
+      const displayLogs = logs.slice(0, 2);
+      const footerExtra = logs.length > 2 ? 14 * scale : 0;
+      const cardH = headerHeight + displayLogs.length * logItemHeight + 6 * scale + footerExtra;
+      const initialX = Math.max(minX, Math.min(maxX, targetX - cardW / 2));
+
+      const cardObj = {
+        line,
+        logs,
+        displayLogs,
+        center,
+        targetX,
+        targetY,
+        cardW,
+        cardH,
+        headerHeight,
+        logItemHeight,
+        footerExtra,
+        x: initialX,
+        y: 0,
+      };
+
+      if (center.y < 850) {
+        upperCards.push(cardObj);
+      } else {
+        lowerCards.push(cardObj);
+      }
+    });
+
+    // Step 2A: Upper Corridor Placement (Dedicated Upper Shelf: Y = 230 to 420)
+    // Completely BELOW CAD Header Banner (Y < 220)
+    // Completely ABOVE Station Titles: ST. KLENDER, ST. BUARAN (Y = 460-540)
+    // Completely ABOVE Upper Tracks (Y = 640-710)
+    // Uses 2 alternating vertical rows so adjacent cards NEVER touch!
+    upperCards.forEach((card, idx) => {
+      const row = idx % 2;
+      card.y = mapYOffset + (row === 0 ? 230 : 345) * scale;
+    });
+
+    // Horizontal relaxation for row 0 and row 1
+    const relaxCards = (cardList) => {
+      cardList.sort((a, b) => a.x - b.x);
+      for (let i = 0; i < cardList.length; i++) {
+        for (let j = 0; j < i; j++) {
+          const prev = cardList[j];
+          const curr = cardList[i];
+          if (checkOverlap(curr, prev)) {
+            curr.x = prev.x + prev.cardW + gapX;
           }
         }
       }
-    }
+    };
+
+    relaxCards(upperCards.filter((_, i) => i % 2 === 0));
+    relaxCards(upperCards.filter((_, i) => i % 2 === 1));
+
+    // Step 2B: Lower Corridor Placement (Dedicated Lower Shelf: Y = 1265)
+    // Completely BELOW Cakung Emplasemen, DS 11/13, and (NASPAN 9 EMPL CUK) (Y = 1140-1250)
+    // Completely BELOW Lower Corridor Tracks (Y = 1050-1120)
+    // Completely ABOVE Bottom CAD Border Frame (Y = 1385)
+    lowerCards.forEach((card, idx) => {
+      card.y = mapYOffset + 1265 * scale;
+    });
+
+    relaxCards(lowerCards);
+
+    const preparedCards = [...upperCards, ...lowerCards];
 
     // Step 3: Global relaxation pass across ALL cards to guarantee 100% zero overlap
     for (let pass = 0; pass < 4; pass++) {
@@ -443,25 +433,17 @@ export async function renderUltraHdCanvas({
       if (!hasOverlap) break;
     }
 
-    // Step 4: Protected CAD Zones Avoidance & Final Boundary Clamping
+    // Step 4: Strict Protection Zone Clearance & Boundary Clamping
     preparedCards.forEach((c) => {
-      const cadX1 = c.x / scale;
-      const cadY1 = (c.y - mapYOffset) / scale;
-      const cadX2 = (c.x + c.cardW) / scale;
-      const cadY2 = (c.y + c.cardH - mapYOffset) / scale;
-
-      for (const zone of PROTECTED_CAD_ZONES) {
-        const overlaps = cadX1 < zone.x2 && cadX2 > zone.x1 && cadY1 < zone.y2 && cadY2 > zone.y1;
-        if (overlaps) {
-          if (zone.name === 'CAD Header Banner') {
-            c.y = mapYOffset + (zone.y2 + 8) * scale;
-          } else if (zone.name === 'Upper Naspan Row' || zone.name === 'Cakung Naspan 9 & DS' || zone.name === 'Lower Naspan Row') {
-            if (c.side === 'above') {
-              c.y = mapYOffset + (zone.y1 - 8) * scale - c.cardH;
-            } else {
-              c.y = mapYOffset + (zone.y2 + 8) * scale;
-            }
+      const zone = checkZoneOverlap(c);
+      if (zone) {
+        if (c.center.y < 850) {
+          c.y = mapYOffset + (zone.y1 - 10) * scale - c.cardH;
+          if (c.y < mapYOffset + 225 * scale) {
+            c.y = mapYOffset + 230 * scale;
           }
+        } else {
+          c.y = mapYOffset + (zone.y2 + 10) * scale;
         }
       }
 

@@ -53,17 +53,17 @@ export default function PdfExportModal({
 
     const generate = async () => {
       try {
-        // Use 1.2x scale for fast, crisp preview in modal
+        // True Ultra HD 600 DPI (9.825 x 4.257 px) for ultra-sharp zoom & preview
         const canvas = await renderUltraHdCanvas({
           linesWithLogs,
           showCallouts,
           showRadar,
           showOfficialHeader,
-          scale: 1.25,
+          scale: 3.0,
         });
 
         if (!isCancelled) {
-          setPreviewDataUrl(canvas.toDataURL('image/jpeg', 0.88));
+          setPreviewDataUrl(canvas.toDataURL('image/jpeg', 0.94));
           setIsGeneratingPreview(false);
         }
       } catch (err) {
@@ -331,7 +331,7 @@ export default function PdfExportModal({
                 onChange={(e) => setPaperSize(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer"
               >
-                <option value="NATIVE">Format Asli CAD (3275 x 1419) (Rekomendasi)</option>
+                <option value="NATIVE">Format Asli CAD - Ultra HD 600 DPI (9.825 x 4.257 px) (Rekomendasi)</option>
                 <option value="A3">A3 Landscape (Standard Gambar Teknik)</option>
                 <option value="A4">A4 Landscape</option>
               </select>
@@ -384,11 +384,11 @@ export default function PdfExportModal({
           {isGeneratingPreview ? (
             <div className="flex flex-col items-center justify-center space-y-3 text-slate-400">
               <Loader2 className="w-10 h-10 animate-spin text-red-500" />
-              <p className="font-bold text-xs">Menyiapkan Preview Dokumen Ultra HD...</p>
+              <p className="font-bold text-xs">Menyiapkan Preview Dokumen Ultra HD 600 DPI (9.825 × 4.257 px)...</p>
             </div>
           ) : previewDataUrl ? (
             <div
-              className="transition-transform duration-75 ease-out shadow-2xl rounded-xl overflow-hidden border border-slate-700/60 bg-white"
+              className="transition-transform duration-75 ease-out shadow-2xl rounded-none overflow-visible border border-slate-700 bg-white"
               style={{
                 transform: `translate(${previewPos.x}px, ${previewPos.y}px) scale(${previewZoom})`,
                 transformOrigin: 'center center',
@@ -398,8 +398,8 @@ export default function PdfExportModal({
             >
               <img
                 src={previewDataUrl}
-                alt="Preview Dokumen PDF Peta Monitoring LAA"
-                className="block max-h-[75vh] w-auto object-contain select-none pointer-events-none"
+                alt="Preview Dokumen PDF Peta Monitoring LAA - Ultra HD 600 DPI"
+                className="block max-h-[75vh] w-auto object-contain select-none pointer-events-none rounded-none"
                 draggable={false}
               />
             </div>
@@ -422,9 +422,9 @@ export default function PdfExportModal({
         <div className="px-4 sm:px-6 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0 flex-wrap gap-2">
           <div className="flex items-center space-x-2">
             <span className="font-mono text-slate-300 font-bold">Dimensi:</span>
-            <span>3275 × 1419 px (Native AutoCAD)</span>
+            <span>9.825 × 4.257 px (Native AutoCAD)</span>
             <span>•</span>
-            <span className="text-emerald-400 font-bold">Kualitas Cetak: 300 DPI Ultra HD</span>
+            <span className="text-emerald-400 font-bold">Kualitas Cetak: 600 DPI Ultra HD</span>
           </div>
 
           <div className="flex items-center space-x-2">
