@@ -196,7 +196,6 @@ export default function App() {
           onSelectLocation={(loc) => setSelectedLocation(loc)}
           isAdmin={isAdmin}
           onOpenAddLog={handleOpenAddLog}
-          onOpenExportPdf={() => setIsExportPdfOpen(true)}
         />
       </main>
 

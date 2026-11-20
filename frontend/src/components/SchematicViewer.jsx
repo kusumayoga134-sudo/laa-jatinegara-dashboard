@@ -15,7 +15,6 @@ import {
   GitCommit,
   X,
   ClipboardList,
-  FileText,
 } from 'lucide-react';
 
 // =========================================================================
@@ -2727,7 +2726,6 @@ export default function SchematicViewer({
   onSelectLocation,
   isAdmin = false,
   onOpenAddLog,
-  onOpenExportPdf,
 }) {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -2991,19 +2989,6 @@ export default function SchematicViewer({
 
         {/* Right Tools: Resolution & Zoom */}
         <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
-          
-          {onOpenExportPdf && (
-            <button
-              onClick={onOpenExportPdf}
-              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 transition cursor-pointer text-xs font-bold shadow-2xs active:scale-95 shrink-0"
-              title="Export Peta ke PDF Ultra HD (Lengkap dengan Radar & Riwayat Pekerjaan)"
-            >
-              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600" />
-              <span className="hidden sm:inline">Export PDF</span>
-              <span className="sm:hidden">PDF</span>
-            </button>
-          )}
-
           <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl p-0.5 sm:p-1 border border-slate-200">
             <button
               onClick={handleZoomOut}
