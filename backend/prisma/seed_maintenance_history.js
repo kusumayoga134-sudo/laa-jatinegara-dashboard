@@ -107,7 +107,7 @@ async function main() {
     },
     {
       targetType: 'NASPAN',
-      targetCode: 'NASPAN 9 EMPL CUK',
+      targetCode: 'ST. CAKUNG (Emplasemen Jalur 1 Hulu)',
       actionType: 'PERAWATAN_WESEL_LAA',
       technician: 'Regu LAA Cakung (Lukman & Fajar)',
       description: 'Penyesuaian persilangan kawat kontak (crossing wire) wesel dwiganda (DDT) Stasiun Cakung agar pantograf tidak tersangkut.',
@@ -244,7 +244,7 @@ async function main() {
     },
     {
       targetType: 'STATION',
-      targetCode: 'ST. BEKASI',
+      targetCode: 'ST. BEKASI (Jalur 1 Peron Utama Hulu)',
       actionType: 'THERMOVISION_EMPLASEMEN',
       technician: 'Tim UPT Resor LAA 1.9 (Thermovision Squad)',
       description: 'Scanning thermovision seluruh 6 unit sakelar DS 15-20 emplasemen Stasiun Bekasi. Suhu kontak 34°C - 39°C aman.',

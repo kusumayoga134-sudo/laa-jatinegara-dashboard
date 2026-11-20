@@ -26,7 +26,7 @@ import {
 export const ALL_TRACK_LINES = [
     {
       id: 'kpb_jng_hi_aj',
-      code: 'NASPAN 9 KPB-JNG HI',
+      code: 'NASPAN 9 KPB-JNG HI (AJ)',
       title: 'NASPAN 9 KPB-JNG HI (Jalur Hilir Arah Kramat)',
       km: 'KM 9+800 - KM 10+000',
       category: 'PERCABANGAN KRAMAT',
@@ -40,7 +40,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hi_naspan9',
-      code: 'NASPAN 9 KPB-JNG HI',
+      code: 'NASPAN 9 KPB-JNG HI (JNG)',
       title: 'NASPAN 9 KPB-JNG HI (JNG-POK Jalur Hilir)',
       km: 'KM 9+890 - KM 11+227',
       category: 'PERCABANGAN KRAMAT',
@@ -54,7 +54,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hu_aj',
-      code: 'NASPAN 9 JNG-KPB HU',
+      code: 'NASPAN 9 JNG-KPB HU (AJ)',
       title: 'NASPAN 9 JNG-KPB HU (Jalur Hulu Arah Kramat)',
       km: 'KM 9+800 - KM 10+000',
       category: 'NASPAN 9 JNG-KPB',
@@ -68,7 +68,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hu_naspan',
-      code: 'NASPAN 9 JNG-KPB HU',
+      code: 'NASPAN 9 JNG-KPB HU (POK)',
       title: 'NASPAN 9 JNG-KPB HU (POK-JNG Jalur Hulu)',
       km: 'KM 9+890 - KM 11+227',
       category: 'NASPAN 9 JNG-KPB',
@@ -216,7 +216,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'jng_jalur_3_ext',
-      code: 'JALUR 3 JNG',
+      code: 'JALUR 3 JNG EXT',
       title: 'Jalur 3 Lanjutan Emplasemen Timur JNG / Wesel 13',
       km: 'KM 11+900 - KM 12+384',
       category: 'ST. JATINEGARA',
@@ -491,7 +491,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'cuk_jalur_1_empl',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 CUK JL 1 HU',
       title: 'ST. CAKUNG (Emplasemen Jalur 1 Hulu)',
       km: 'KM 20+150 - KM 21+400',
       category: 'ST. CAKUNG',
@@ -502,7 +502,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'cuk_jalur_1_peron',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 CUK JL 1 PERON',
       title: 'ST. CAKUNG (Jalur 1)',
       km: 'KM 20+900 - KM 21+000',
       category: 'ST. CAKUNG',
@@ -513,7 +513,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'cuk_jalur_4_empl',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 CUK JL 4 HI',
       title: 'ST. CAKUNG (Emplasemen Jalur 4 Hilir)',
       km: 'KM 20+150 - KM 21+400',
       category: 'ST. CAKUNG',
@@ -524,7 +524,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'cuk_jalur_4_peron',
-      code: 'NASPAN 9 EMPL CUK',
+      code: 'NASPAN 9 CUK JL 4 PERON',
       title: 'ST. CAKUNG (Jalur 4)',
       km: 'KM 20+900 - KM 21+000',
       category: 'ST. CAKUNG',
@@ -634,7 +634,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_jalur_simpan_960',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI JL 8',
       title: 'ST. BEKASI (Jalur 8)',
       km: 'KM 26+200 - KM 26+500',
       category: 'ST. BEKASI (STABLING)',
@@ -645,7 +645,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_jalur_simpan_1012',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI JL 4 LANGSIR',
       title: 'ST. BEKASI (Jalur 4 Langsir & Stabling)',
       km: 'KM 26+150 - KM 26+500',
       category: 'ST. BEKASI (STABLING)',
@@ -667,7 +667,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_jalur_1_platform',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI JL 1 HU',
       title: 'ST. BEKASI (Jalur 1 Peron Utama Hulu)',
       km: 'KM 25+750 - KM 26+900',
       category: 'ST. BEKASI',
@@ -689,7 +689,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_jalur_2_platform',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI JL 2 HI',
       title: 'ST. BEKASI (Jalur 2 Peron Utama Hilir)',
       km: 'KM 25+750 - KM 26+900',
       category: 'ST. BEKASI',
@@ -700,7 +700,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_jalur_3_platform',
-      code: 'ST. BEKASI',
+      code: 'ST. BEKASI JL 3',
       title: 'ST. BEKASI (Jalur 3 Peron)',
       km: 'KM 26+150 - KM 26+600',
       category: 'ST. BEKASI',
@@ -711,7 +711,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_timur_1228_grn',
-      code: 'BEKASI TIMUR',
+      code: 'BEKASI TIMUR 1',
       title: 'Emplasemen Percabangan Bekasi Timur 1',
       km: 'KM 27+000 - KM 27+300',
       category: 'BEKASI TIMUR',
@@ -722,7 +722,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_timur_1228_red',
-      code: 'BEKASI TIMUR',
+      code: 'BEKASI TIMUR 2',
       title: 'Emplasemen Percabangan Bekasi Timur 2',
       km: 'KM 26+900 - KM 27+000',
       category: 'BEKASI TIMUR',
@@ -733,7 +733,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'bks_timur_1277_red',
-      code: 'BEKASI TIMUR',
+      code: 'BEKASI TIMUR 3 (HI)',
       title: 'Emplasemen Percabangan Bekasi Timur 3 (Hilir)',
       km: 'KM 26+900 - KM 27+300',
       category: 'BEKASI TIMUR',
@@ -843,7 +843,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w11a_677',
-      code: 'WESEL W11A',
+      code: 'WESEL W11A (JNG)',
       title: 'Wesel Crossover W11A ke FRP-JNG-02-11A (KM 11+500)',
       km: 'KM 11+500',
       category: 'ST. JATINEGARA (EMPLASEMEN BARAT)',
@@ -853,7 +853,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w11a_655',
-      code: 'WESEL W11A',
+      code: 'WESEL W11A/W31A2 (JNG)',
       title: 'Wesel Crossover W11A / W31A2 ke Jalur 2 Barat (KM 11+500)',
       km: 'KM 11+500',
       category: 'ST. JATINEGARA (EMPLASEMEN BARAT)',
@@ -873,7 +873,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w51a_571',
-      code: 'WESEL W51A',
+      code: 'WESEL W51A (JNG)',
       title: 'Wesel Crossover W51A ke Jalur 1 Barat (KM 11+300)',
       km: 'KM 11+300',
       category: 'ST. JATINEGARA (EMPLASEMEN BARAT)',
@@ -883,8 +883,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w51a',
-      code: 'Wesel W51A',
-      title: 'Wesel W51A',
+      code: 'Wesel W51A (JNG)',
+      title: 'Wesel W51A (Jatinegara)',
       km: 'KM 1+935',
       category: 'TITIK WESEL',
       cx: 552.8,
@@ -934,8 +934,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w11a_mri',
-      code: 'Wesel W11A',
-      title: 'Wesel W11A',
+      code: 'Wesel W11A (MRI)',
+      title: 'Wesel W11A (Manggarai / Jatinegara)',
       km: 'KM 2+095',
       category: 'TITIK WESEL',
       cx: 677.4,
@@ -1342,8 +1342,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w33a',
-      code: 'Wesel W33A',
-      title: 'Wesel W33A',
+      code: 'Wesel W33A (JNG)',
+      title: 'Wesel W33A (Jatinegara)',
       km: 'KM 12+045',
       category: 'TITIK WESEL',
       cx: 1560.5,
@@ -1563,8 +1563,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w11a_cuk',
-      code: 'Wesel W11A',
-      title: 'Wesel W11A',
+      code: 'Wesel W11A (CUK)',
+      title: 'Wesel W11A (Cakung)',
       km: 'KM 20+740',
       category: 'TITIK WESEL',
       cx: 2628.6,
@@ -1648,8 +1648,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w13b_cuk',
-      code: 'Wesel W13B',
-      title: 'Wesel W13B',
+      code: 'Wesel W13B (CUK)',
+      title: 'Wesel W13B (Cakung)',
       km: 'KM 21+387',
       category: 'TITIK WESEL',
       cx: 2407.1,
@@ -1682,8 +1682,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w51a_bks',
-      code: 'Wesel W51A',
-      title: 'Wesel W51A',
+      code: 'Wesel W51A (BKS)',
+      title: 'Wesel W51A (Bekasi)',
       km: 'KM 25+946',
       category: 'TITIK WESEL',
       cx: 1547.1,
@@ -1852,8 +1852,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'titik_wesel_w33a_bks',
-      code: 'Wesel W33A',
-      title: 'Wesel W33A',
+      code: 'Wesel W33A (BKS)',
+      title: 'Wesel W33A (Bekasi)',
       km: 'KM 26+658',
       category: 'TITIK WESEL',
       cx: 826.9,
@@ -1959,7 +1959,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w13b_1600',
-      code: 'WESEL W13B',
+      code: 'WESEL W13B (JNG)',
       title: 'Wesel W13B (Crossover Jalur 3 ke Jalur 2 Barat, KM 11+900)',
       km: 'KM 11+900',
       category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
@@ -1969,7 +1969,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w13c_1667',
-      code: 'WESEL W13C',
+      code: 'WESEL W13C (JNG)',
       title: 'Wesel W13C1 / W13C2 (Crossover Jalur 3 ke Jalur 2, KM 12+000)',
       km: 'KM 12+000',
       category: 'ST. JATINEGARA (EMPLASEMEN TIMUR)',
@@ -2049,7 +2049,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w13b_cuk',
-      code: 'WESEL W13B',
+      code: 'WESEL W13B (CUK)',
       title: 'Wesel W13B St. Cakung (KM 21+387)',
       km: 'KM 21+387',
       category: 'ST. CAKUNG',
@@ -2059,7 +2059,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w11a_cuk',
-      code: 'WESEL W11A',
+      code: 'WESEL W11A (CUK)',
       title: 'Wesel W11A Timur Cakung (KM 20+740)',
       km: 'KM 20+740',
       category: 'ST. CAKUNG',
@@ -2099,7 +2099,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w33a_bks_797',
-      code: 'WESEL W33A',
+      code: 'WESEL W33A (BKS 1)',
       title: 'Wesel W33A ke Jalur 2 Barat Bekasi (KM 26+600)',
       km: 'KM 26+600',
       category: 'ST. BEKASI (EMPLASEMEN BARAT)',
@@ -2109,7 +2109,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w33a_bks_826',
-      code: 'WESEL W33A',
+      code: 'WESEL W33A (BKS 2)',
       title: 'Wesel W33A ke Jalur 3 Barat Bekasi (KM 26+580)',
       km: 'KM 26+580',
       category: 'ST. BEKASI (EMPLASEMEN BARAT)',
@@ -2149,7 +2149,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w51a_1547',
-      code: 'WESEL W51A',
+      code: 'WESEL W51A (BKS)',
       title: 'Wesel W51A Masuk Jalur 2 Bekasi (KM 25+950)',
       km: 'KM 25+950',
       category: 'ST. BEKASI (EMPLASEMEN TIMUR)',
@@ -2209,7 +2209,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'wesel_w13c_bkt_432',
-      code: 'WESEL W13C',
+      code: 'WESEL W13C (BKT)',
       title: 'Wesel W13C / W23B Bekasi Timur (KM 26+950)',
       km: 'KM 26+950',
       category: 'BEKASI TIMUR',
@@ -2224,8 +2224,8 @@ export const ALL_TRACK_LINES = [
     // ========================================================
     {
       id: 'overlap_aj_10000_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 10+000',
+      code: 'AJ KM 10+000 HI',
+      title: 'Overlap Air Joint (AJ) KM 10+000 (Hilir)',
       km: 'KM 10+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 206.1 360.9 L 218.7 380.7 M 218.7 360.9 L 206.1 380.7',
@@ -2237,8 +2237,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_10000_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 10+000',
+      code: 'AJ KM 10+000 HU',
+      title: 'Overlap Air Joint (AJ) KM 10+000 (Hulu)',
       km: 'KM 10+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 206.1 408.7 L 218.7 428.5 M 218.7 408.7 L 206.1 428.5',
@@ -2250,8 +2250,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_11200_j7',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 11+200',
+      code: 'AS KM 11+200 J7',
+      title: 'Overlap Air Section (AS) KM 11+200 (Jalur 7)',
       km: 'KM 11+200',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 589.5 369.6 L 596.5 380.6 M 596.5 361.0 L 603.5 372.0',
@@ -2263,8 +2263,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_11200_j6',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 11+200',
+      code: 'AS KM 11+200 J6',
+      title: 'Overlap Air Section (AS) KM 11+200 (Jalur 6)',
       km: 'KM 11+200',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 584.5 417.4 L 591.5 428.4 M 591.5 408.8 L 598.5 419.8',
@@ -2276,8 +2276,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_1880_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 1+880',
+      code: 'AS KM 1+880 HI',
+      title: 'Overlap Air Section (AS) KM 1+880 (Hilir)',
       km: 'KM 1+880',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 473.6 655.3 L 480.6 666.3 M 480.6 646.7 L 487.6 657.7',
@@ -2289,8 +2289,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_1880_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 1+880',
+      code: 'AS KM 1+880 HU',
+      title: 'Overlap Air Section (AS) KM 1+880 (Hulu)',
       km: 'KM 1+880',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 473.6 703.2 L 480.6 714.2 M 480.6 694.6 L 487.6 705.6',
@@ -2302,8 +2302,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_2000_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 2+000',
+      code: 'AS KM 2+000 HI',
+      title: 'Overlap Air Section (AS) KM 2+000 (Hilir)',
       km: 'KM 2+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 727.8 655.3 L 734.8 666.3 M 734.8 646.7 L 741.8 657.7',
@@ -2315,8 +2315,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_2000_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 2+000',
+      code: 'AS KM 2+000 HU',
+      title: 'Overlap Air Section (AS) KM 2+000 (Hulu)',
       km: 'KM 2+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 727.8 702.9 L 734.8 713.9 M 734.8 694.3 L 741.8 705.3',
@@ -2328,8 +2328,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_11900_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 11+900',
+      code: 'AS KM 11+900 HI',
+      title: 'Overlap Air Section (AS) KM 11+900 (Hilir)',
       km: 'KM 11+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1474.7 655.3 L 1481.7 666.3 M 1481.7 646.7 L 1488.7 657.7',
@@ -2341,8 +2341,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_11900_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 11+900',
+      code: 'AS KM 11+900 HU',
+      title: 'Overlap Air Section (AS) KM 11+900 (Hulu)',
       km: 'KM 11+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1474.8 702.8 L 1481.8 713.8 M 1481.8 694.2 L 1488.8 705.2',
@@ -2354,7 +2354,7 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_11900_j3',
-      code: 'AIR SECTION (AS)',
+      code: 'AS KM 11+900 J3',
       title: 'Overlap Air Section (AS) KM 11+900 (Jalur 3)',
       km: 'KM 11+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
@@ -2367,8 +2367,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_12500_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 12+500',
+      code: 'AS KM 12+500 HI',
+      title: 'Overlap Air Section (AS) KM 12+500 (Hilir)',
       km: 'KM 12+500',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1941.6 655.2 L 1948.6 666.2 M 1948.6 646.6 L 1955.6 657.6',
@@ -2380,8 +2380,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_12500_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 12+500',
+      code: 'AS KM 12+500 HU',
+      title: 'Overlap Air Section (AS) KM 12+500 (Hulu)',
       km: 'KM 12+500',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1941.6 703.5 L 1948.6 714.5 M 1948.6 694.9 L 1955.6 705.9',
@@ -2393,8 +2393,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_13300_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 13+300',
+      code: 'AJ KM 13+300 HI',
+      title: 'Overlap Air Joint (AJ) KM 13+300 (Hilir)',
       km: 'KM 13+300',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2078.8 646.6 L 2091.4 666.4 M 2091.4 646.6 L 2078.8 666.4',
@@ -2406,8 +2406,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_13300_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 13+300',
+      code: 'AJ KM 13+300 HU',
+      title: 'Overlap Air Joint (AJ) KM 13+300 (Hulu)',
       km: 'KM 13+300',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2077.2 694.5 L 2089.8 714.3 M 2089.8 694.5 L 2077.2 714.3',
@@ -2419,8 +2419,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_14100_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 14+100',
+      code: 'AJ KM 14+100 HI',
+      title: 'Overlap Air Joint (AJ) KM 14+100 (Hilir)',
       km: 'KM 14+100',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2159.1 646.2 L 2171.7 666.0 M 2171.7 646.2 L 2159.1 666.0',
@@ -2432,8 +2432,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_14100_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 14+100',
+      code: 'AJ KM 14+100 HU',
+      title: 'Overlap Air Joint (AJ) KM 14+100 (Hulu)',
       km: 'KM 14+100',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2157.1 693.2 L 2169.7 713.0 M 2169.7 693.2 L 2157.1 713.0',
@@ -2445,8 +2445,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_14700_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 14+700',
+      code: 'AJ KM 14+700 HI',
+      title: 'Overlap Air Joint (AJ) KM 14+700 (Hilir)',
       km: 'KM 14+700',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2245.5 646.1 L 2258.1 665.9 M 2258.1 646.1 L 2245.5 665.9',
@@ -2458,8 +2458,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_14700_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 14+700',
+      code: 'AJ KM 14+700 HU',
+      title: 'Overlap Air Joint (AJ) KM 14+700 (Hulu)',
       km: 'KM 14+700',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2243.9 693.8 L 2256.5 713.6 M 2256.5 693.8 L 2243.9 713.6',
@@ -2471,8 +2471,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_15450_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 15+450',
+      code: 'AS KM 15+450 HI',
+      title: 'Overlap Air Section (AS) KM 15+450 (Hilir)',
       km: 'KM 15+450',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2511.5 655.3 L 2518.5 666.3 M 2518.5 646.7 L 2525.5 657.7',
@@ -2484,8 +2484,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_15450_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 15+450',
+      code: 'AS KM 15+450 HU',
+      title: 'Overlap Air Section (AS) KM 15+450 (Hulu)',
       km: 'KM 15+450',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2510.7 703.3 L 2517.7 714.3 M 2517.7 694.7 L 2524.7 705.7',
@@ -2497,8 +2497,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_16500_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 16+500',
+      code: 'AJ KM 16+500 HI',
+      title: 'Overlap Air Joint (AJ) KM 16+500 (Hilir)',
       km: 'KM 16+500',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2631.0 647.0 L 2643.6 666.8 M 2643.6 647.0 L 2631.0 666.8',
@@ -2510,8 +2510,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_16500_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 16+500',
+      code: 'AJ KM 16+500 HU',
+      title: 'Overlap Air Joint (AJ) KM 16+500 (Hulu)',
       km: 'KM 16+500',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2629.5 694.7 L 2642.1 714.5 M 2642.1 694.7 L 2629.5 714.5',
@@ -2523,8 +2523,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_17239_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 17+239',
+      code: 'AS KM 17+239 HI',
+      title: 'Overlap Air Section (AS) KM 17+239 (Hilir)',
       km: 'KM 17+239',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2736.3 655.1 L 2743.3 666.1 M 2743.3 646.5 L 2750.3 657.5',
@@ -2536,8 +2536,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_17239_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 17+239',
+      code: 'AS KM 17+239 HU',
+      title: 'Overlap Air Section (AS) KM 17+239 (Hulu)',
       km: 'KM 17+239',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2736.3 702.8 L 2743.3 713.8 M 2743.3 694.2 L 2750.3 705.2',
@@ -2549,8 +2549,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_17900_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 17+900',
+      code: 'AS KM 17+900 HI',
+      title: 'Overlap Air Section (AS) KM 17+900 (Hilir)',
       km: 'KM 17+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2980.3 655.2 L 2987.3 666.2 M 2987.3 646.6 L 2994.3 657.6',
@@ -2562,8 +2562,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_17900_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 17+900',
+      code: 'AS KM 17+900 HU',
+      title: 'Overlap Air Section (AS) KM 17+900 (Hulu)',
       km: 'KM 17+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2979.4 702.9 L 2986.4 713.9 M 2986.4 694.3 L 2993.4 705.3',
@@ -2575,8 +2575,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_18800_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 18+800',
+      code: 'AJ KM 18+800 HI',
+      title: 'Overlap Air Joint (AJ) KM 18+800 (Hilir)',
       km: 'KM 18+800',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3090.5 646.1 L 3103.1 665.9 M 3103.1 646.1 L 3090.5 665.9',
@@ -2588,8 +2588,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_18800_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 18+800',
+      code: 'AJ KM 18+800 HU',
+      title: 'Overlap Air Joint (AJ) KM 18+800 (Hulu)',
       km: 'KM 18+800',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3090.5 693.9 L 3103.1 713.7 M 3103.1 693.9 L 3090.5 713.7',
@@ -2601,8 +2601,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_19300_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 19+300',
+      code: 'AJ KM 19+300 HI',
+      title: 'Overlap Air Joint (AJ) KM 19+300 (Hilir)',
       km: 'KM 19+300',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3035.6 1103.4 L 3048.2 1123.2 M 3048.2 1103.4 L 3035.6 1123.2',
@@ -2614,8 +2614,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_19300_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 19+300',
+      code: 'AJ KM 19+300 HU',
+      title: 'Overlap Air Joint (AJ) KM 19+300 (Hulu)',
       km: 'KM 19+300',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 3035.6 1055.7 L 3048.2 1075.5 M 3048.2 1055.7 L 3035.6 1075.5',
@@ -2627,8 +2627,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_20150_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 20+150',
+      code: 'AS KM 20+150 HI',
+      title: 'Overlap Air Section (AS) KM 20+150 (Hilir)',
       km: 'KM 20+150',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2807.0 1112.6 L 2814.0 1123.6 M 2814.0 1104.0 L 2821.0 1115.0',
@@ -2640,8 +2640,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_20150_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 20+150',
+      code: 'AS KM 20+150 HU',
+      title: 'Overlap Air Section (AS) KM 20+150 (Hulu)',
       km: 'KM 20+150',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2807.0 1062.6 L 2814.0 1073.6 M 2814.0 1054.0 L 2821.0 1065.0',
@@ -2653,8 +2653,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_21400_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 21+400',
+      code: 'AS KM 21+400 HI',
+      title: 'Overlap Air Section (AS) KM 21+400 (Hilir)',
       km: 'KM 21+400',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2330.0 1112.6 L 2337.0 1123.6 M 2337.0 1104.0 L 2344.0 1115.0',
@@ -2666,8 +2666,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_21400_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 21+400',
+      code: 'AS KM 21+400 HU',
+      title: 'Overlap Air Section (AS) KM 21+400 (Hulu)',
       km: 'KM 21+400',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2330.0 1062.6 L 2337.0 1073.6 M 2337.0 1054.0 L 2344.0 1065.0',
@@ -2679,8 +2679,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_22700_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 22+700',
+      code: 'AJ KM 22+700 HI',
+      title: 'Overlap Air Joint (AJ) KM 22+700 (Hilir)',
       km: 'KM 22+700',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2208.2 1103.3 L 2220.8 1123.1 M 2220.8 1103.3 L 2208.2 1123.1',
@@ -2692,8 +2692,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_22700_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 22+700',
+      code: 'AJ KM 22+700 HU',
+      title: 'Overlap Air Joint (AJ) KM 22+700 (Hulu)',
       km: 'KM 22+700',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2205.9 1053.3 L 2218.5 1073.1 M 2218.5 1053.3 L 2205.9 1073.1',
@@ -2705,8 +2705,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_23750_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 23+750',
+      code: 'AS KM 23+750 HI',
+      title: 'Overlap Air Section (AS) KM 23+750 (Hilir)',
       km: 'KM 23+750',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2052.1 1111.7 L 2059.1 1122.7 M 2059.1 1103.1 L 2066.1 1114.1',
@@ -2718,8 +2718,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_23750_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 23+750',
+      code: 'AS KM 23+750 HU',
+      title: 'Overlap Air Section (AS) KM 23+750 (Hulu)',
       km: 'KM 23+750',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 2060.0 1062.3 L 2067.0 1073.3 M 2067.0 1053.7 L 2074.0 1064.7',
@@ -2731,8 +2731,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_24400_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 24+400',
+      code: 'AJ KM 24+400 HU',
+      title: 'Overlap Air Joint (AJ) KM 24+400 (Hulu)',
       km: 'KM 24+400',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1810.3 1054.3 L 1822.9 1074.1 M 1822.9 1054.3 L 1810.3 1074.1',
@@ -2744,8 +2744,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_25000_hu',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 25+000',
+      code: 'AJ KM 25+000 HU',
+      title: 'Overlap Air Joint (AJ) KM 25+000 (Hulu)',
       km: 'KM 25+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1739.7 1053.8 L 1752.3 1073.6 M 1752.3 1053.8 L 1739.7 1073.6',
@@ -2757,8 +2757,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_aj_25000_hi',
-      code: 'AIR JOINT (AJ)',
-      title: 'Overlap Air Joint (AJ) KM 25+000',
+      code: 'AJ KM 25+000 HI',
+      title: 'Overlap Air Joint (AJ) KM 25+000 (Hilir)',
       km: 'KM 25+000',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1739.7 1103.7 L 1752.3 1123.5 M 1752.3 1103.7 L 1739.7 1123.5',
@@ -2770,8 +2770,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_25750_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 25+750',
+      code: 'AS KM 25+750 HI',
+      title: 'Overlap Air Section (AS) KM 25+750 (Hilir)',
       km: 'KM 25+750',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1625.7 1112.6 L 1632.7 1123.6 M 1632.7 1104.0 L 1639.7 1115.0',
@@ -2783,8 +2783,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_25750_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 25+750',
+      code: 'AS KM 25+750 HU',
+      title: 'Overlap Air Section (AS) KM 25+750 (Hulu)',
       km: 'KM 25+750',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 1627.2 1062.5 L 1634.2 1073.5 M 1634.2 1053.9 L 1641.2 1064.9',
@@ -2796,8 +2796,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_26900_hi',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 26+900',
+      code: 'AS KM 26+900 HI',
+      title: 'Overlap Air Section (AS) KM 26+900 (Hilir)',
       km: 'KM 26+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 589.3 1112.2 L 596.3 1123.2 M 596.3 1103.6 L 603.3 1114.6',
@@ -2809,8 +2809,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'overlap_as_26900_hu',
-      code: 'AIR SECTION (AS)',
-      title: 'Overlap Air Section (AS) KM 26+900',
+      code: 'AS KM 26+900 HU',
+      title: 'Overlap Air Section (AS) KM 26+900 (Hulu)',
       km: 'KM 26+900',
       category: 'PEMISAH SEKSI (AS/AJ)',
       d: 'M 589.3 1062.2 L 596.3 1073.2 M 596.3 1053.6 L 603.3 1064.6',
@@ -3417,7 +3417,7 @@ export const ALL_TRACK_LINES = [
 
 export const allTrackLines = ALL_TRACK_LINES;
 
-// Smart line-to-log matching function (Strict isolation, Direction Guard & Auxiliary Device Protection)
+// Smart line-to-log matching function (Strict 1-to-1 Isolation, Direction Guard, Track Number Guard & Device Isolation)
 export const matchLineLogs = (lineOrCode, logs = []) => {
   if (!lineOrCode || !logs || !Array.isArray(logs) || logs.length === 0) return [];
   const lineObj = typeof lineOrCode === 'object' ? lineOrCode : null;
@@ -3425,11 +3425,12 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
   const lineTitle = (lineObj?.title || '').trim();
   const lineId = (lineObj?.id || '').trim();
   const lineCat = (lineObj?.category || '').toUpperCase();
+  const combinedLine = `${lineTitle} ${lineCode} ${lineId}`.toLowerCase();
 
   const isSwitchLine = lineCat.includes('DISCONNECTING SWITCH') || lineCat.includes('(DS)') || lineId.startsWith('ds_');
   const isInsulatorLine = lineCat.includes('SECTION INSULATOR') || lineCat.includes('(FRP)') || lineId.startsWith('frp_');
-  const isAirJointLine = lineCat.includes('AIR JOINT') || lineCat.includes('(AJ)') || lineId.startsWith('aj_');
-  const isAirSectionLine = lineCat.includes('AIR SECTION') || lineCat.includes('(AS)') || lineId.startsWith('as_');
+  const isAirJointLine = lineCat.includes('AIR JOINT') || lineCat.includes('(AJ)') || lineId.startsWith('aj_') || lineId.startsWith('overlap_aj_');
+  const isAirSectionLine = lineCat.includes('AIR SECTION') || lineCat.includes('(AS)') || lineId.startsWith('as_') || lineId.startsWith('overlap_as_');
   const isTurnoutLine = lineCat.includes('WESEL') || lineId.startsWith('wesel_') || lineId.startsWith('titik_wesel_');
   const isAuxiliaryDevice = isSwitchLine || isInsulatorLine || isAirJointLine || isAirSectionLine || isTurnoutLine;
 
@@ -3448,24 +3449,20 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
     const normLineTitle = lineTitle.toLowerCase();
     const normLineId = lineId.toLowerCase();
 
-    // 2. Direct exact string match
+    // 2. Direct exact string match (case-insensitive)
     if (normLineCode && (normTc === normLineCode || normTc === normLineTitle || normTc === normLineId)) {
       return true;
     }
 
-    // 3. Strict Direction Guard (HI/Hilir vs HU/Hulu)
-    // Prevents cross-contamination between Hilir and Hulu lines
-    const logIsHi = /\b(hi|hilir)\b/i.test(tc);
-    const logIsHu = /\b(hu|hulu)\b/i.test(tc);
-    const lineIsHi = /\b(hi|hilir)\b/i.test(lineCode) || /\b(hi|hilir)\b/i.test(lineTitle) || /_hi$/i.test(lineId);
-    const lineIsHu = /\b(hu|hulu)\b/i.test(lineCode) || /\b(hu|hulu)\b/i.test(lineTitle) || /_hu$/i.test(lineId);
-
-    if (logIsHi && lineIsHu && !lineIsHi) return false;
-    if (logIsHu && lineIsHi && !lineIsHu) return false;
+    // 3. Legacy compatibility mappings (prevent multi-track flare-up from historical generic logs)
+    if (normTc === 'naspan 9 empl cuk') {
+      return lineId === 'cuk_jalur_1_empl';
+    }
+    if (normTc === 'st. bekasi') {
+      return lineId === 'bks_jalur_1_platform';
+    }
 
     // 4. Auxiliary Device Guard (DS, FRP, AJ, AS, Wesel)
-    // If the log is for a track (e.g. "NASPAN 2 JNG-KLD HI (DS 7 s/d AJ KM 13+300)"),
-    // do NOT let the boundary notation "(DS 7...)" match the actual switch DS 7!
     const logIsTrack = /^(naspan|jalur|petak|st\.|stasiun)/i.test(tc);
     if (logIsTrack && isAuxiliaryDevice) {
       return false;
@@ -3495,54 +3492,74 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
         const wCode = wMatch[0].toLowerCase();
         const regex = new RegExp(`(^|\\b|wesel\\s*)${wCode}\\b`, 'i');
         if (regex.test(normTc)) {
-          if (lineObj?.km) {
-            const logKmMatch = tc.match(/KM\s*(\d+\+?\d*)/i);
-            const lineKmMatch = lineObj.km.match(/KM\s*(\d+\+?\d*)/i);
-            if (logKmMatch && lineKmMatch && logKmMatch[1] !== lineKmMatch[1]) {
-              return false;
-            }
-          }
+          if (normTc.includes('cakung') && !combinedLine.includes('cakung') && !lineId.includes('cuk')) return false;
+          if (normTc.includes('bekasi') && !combinedLine.includes('bekasi') && !lineId.includes('bks') && !lineId.includes('bkt')) return false;
+          if (normTc.includes('jatinegara') && !combinedLine.includes('jatinegara') && !lineId.includes('jng')) return false;
           return true;
         }
       }
       return false;
     }
 
-    // 5. Track-to-Track matching (stripping boundary parentheses)
-    const baseTc = tc.replace(/\(.*?\)/g, '').trim().toLowerCase();
-    const baseLineCode = lineCode.replace(/\(.*?\)/g, '').trim().toLowerCase();
-    const baseLineTitle = lineTitle.replace(/\(.*?\)/g, '').trim().toLowerCase();
-
-    if (baseTc && (baseTc === baseLineCode || baseTc === baseLineTitle)) {
-      return true;
-    }
-
-    const alphaTc = baseTc.replace(/[^a-z0-9]/g, '');
-    const alphaLineCode = baseLineCode.replace(/[^a-z0-9]/g, '');
-    const alphaLineTitle = baseLineTitle.replace(/[^a-z0-9]/g, '');
-
-    if (alphaTc && alphaLineCode && (alphaTc === alphaLineCode || alphaTc === alphaLineTitle)) {
-      return true;
-    }
-
-    if (alphaTc && alphaLineCode) {
-      if (alphaTc.includes(alphaLineCode) || alphaLineCode.includes(alphaTc)) {
-        const tcNums = baseTc.match(/\d+/g) || [];
-        const lineNums = baseLineCode.match(/\d+/g) || [];
-        if (tcNums.length > 0 && lineNums.length > 0 && tcNums[0] !== lineNums[0]) {
-          return false;
-        }
-        return true;
+    if (isAirJointLine || isAirSectionLine) {
+      const logKmMatch = tc.match(/KM\s*(\d+\+?\d*)/i);
+      const lineKmMatch = (lineObj?.km || lineTitle).match(/KM\s*(\d+\+?\d*)/i);
+      if (logKmMatch && lineKmMatch && logKmMatch[1] !== lineKmMatch[1]) {
+        return false;
       }
+    }
+
+    // 5. Strict Track Number Guard (Jalur 1 vs Jalur 2 vs Jalur 3 vs Jalur 4 vs Jalur 8 etc.)
+    const logJalurMatch = tc.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
+    const lineJalurMatch = `${lineTitle} ${lineCode}`.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
+    if (logJalurMatch && lineJalurMatch && logJalurMatch[1] !== lineJalurMatch[1]) {
+      return false;
+    }
+
+    // 6. Strict Direction Guard (HI/Hilir vs HU/Hulu)
+    const logIsHi = /\b(hi|hilir)\b/i.test(tc);
+    const logIsHu = /\b(hu|hulu)\b/i.test(tc);
+    const lineIsHi = /\b(hi|hilir)\b/i.test(`${lineTitle} ${lineCode}`) || lineId.endsWith('_hi');
+    const lineIsHu = /\b(hu|hulu)\b/i.test(`${lineTitle} ${lineCode}`) || lineId.endsWith('_hu');
+    if (logIsHi && lineIsHu && !lineIsHi) return false;
+    if (logIsHu && lineIsHi && !lineIsHu) return false;
+
+    // 7. Strict Station Guard (Cakung, Bekasi, Jatinegara, etc.)
+    const stations = ['cakung', 'bekasi', 'jatinegara', 'kranji', 'klender baru', 'buaran', 'pondok jati', 'klender'];
+    for (const st of stations) {
+      if (normTc.includes(st) && !combinedLine.includes(st)) {
+        return false;
+      }
+    }
+
+    // 8. Specific Peron vs Emplasemen / Stabling Guard
+    if (normTc.includes('peron') && combinedLine.includes('emplasemen') && !combinedLine.includes('peron')) {
+      return false;
+    }
+    if (normTc.includes('emplasemen') && combinedLine.includes('peron') && !combinedLine.includes('emplasemen')) {
+      return false;
+    }
+    if (normTc.includes('stabling') && !combinedLine.includes('stabling') && !combinedLine.includes('langsir')) {
+      return false;
+    }
+
+    // 9. Exact Alphanumeric Match (NO loose substring matching!)
+    const alphaTc = normTc.replace(/[^a-z0-9]/g, '');
+    const alphaLineTitle = normLineTitle.replace(/[^a-z0-9]/g, '');
+    const alphaLineCode = normLineCode.replace(/[^a-z0-9]/g, '');
+
+    if (alphaTc && (alphaTc === alphaLineTitle || alphaTc === alphaLineCode)) {
+      return true;
     }
 
     return false;
   });
 };
 
-// Calculate center coordinate (X, Y) accurately parsing SVG commands (including Arc 'A')
+// Calculate center coordinate (X, Y) accurately lying directly on the track line (50% distance along SVG path)
 export const getLineCenter = (line) => {
   if (!line) return null;
+  if (line.center) return line.center;
   if (line.cx !== undefined && line.cy !== undefined) {
     return { x: line.cx, y: line.cy };
   }
@@ -3554,68 +3571,98 @@ export const getLineCenter = (line) => {
 
   const commandRegex = /([a-df-z])([^a-df-z]*)/gi;
   let match;
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  const points = [];
   let currX = 0, currY = 0;
-
-  const updateBounds = (x, y) => {
-    if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
-    }
-  };
 
   while ((match = commandRegex.exec(d)) !== null) {
     const cmd = match[1];
-    const args = match[2].trim().match(/[-+]?[0-9]*\.?[0-9]+/g);
-    const nums = args ? args.map(Number) : [];
+    const rawNums = match[2].trim().match(/[-+]?[0-9]*\.?[0-9]+/g);
+    const nums = rawNums ? rawNums.map(Number) : [];
 
     if (cmd === 'M' || cmd === 'L') {
       for (let i = 0; i < nums.length - 1; i += 2) {
         currX = nums[i];
         currY = nums[i + 1];
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
       }
     } else if (cmd === 'm' || cmd === 'l') {
       for (let i = 0; i < nums.length - 1; i += 2) {
         currX += nums[i];
         currY += nums[i + 1];
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
       }
     } else if (cmd === 'H') {
       for (const x of nums) {
         currX = x;
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
+      }
+    } else if (cmd === 'h') {
+      for (const dx of nums) {
+        currX += dx;
+        points.push({ x: currX, y: currY });
       }
     } else if (cmd === 'V') {
       for (const y of nums) {
         currY = y;
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
+      }
+    } else if (cmd === 'v') {
+      for (const dy of nums) {
+        currY += dy;
+        points.push({ x: currX, y: currY });
       }
     } else if (cmd === 'A') {
-      // Arc: rx ry x-rot large sweep x y (parameters 6 & 7 are coordinates)
       for (let i = 0; i < nums.length - 6; i += 7) {
         currX = nums[i + 5];
         currY = nums[i + 6];
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
       }
     } else if (cmd === 'a') {
       for (let i = 0; i < nums.length - 6; i += 7) {
         currX += nums[i + 5];
         currY += nums[i + 6];
-        updateBounds(currX, currY);
+        points.push({ x: currX, y: currY });
       }
     }
   }
 
-  if (minX === Infinity || minY === Infinity) {
+  if (points.length === 0) {
     const rawNums = d.match(/[-+]?[0-9]*\.?[0-9]+/g);
     if (!rawNums || rawNums.length < 2) return null;
     return { x: parseFloat(rawNums[0]), y: parseFloat(rawNums[1]) };
   }
+  if (points.length === 1) {
+    return points[0];
+  }
 
-  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+  // Calculate cumulative distance along path
+  let totalLength = 0;
+  const segLengths = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const dx = points[i + 1].x - points[i].x;
+    const dy = points[i + 1].y - points[i].y;
+    const dist = Math.hypot(dx, dy);
+    segLengths.push(dist);
+    totalLength += dist;
+  }
+
+  if (totalLength === 0) return points[0];
+
+  const halfLength = totalLength / 2;
+  let accumulated = 0;
+  for (let i = 0; i < segLengths.length; i++) {
+    const dist = segLengths[i];
+    if (accumulated + dist >= halfLength) {
+      const remaining = halfLength - accumulated;
+      const ratio = dist > 0 ? remaining / dist : 0;
+      const x = points[i].x + (points[i + 1].x - points[i].x) * ratio;
+      const y = points[i].y + (points[i + 1].y - points[i].y) * ratio;
+      return { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) };
+    }
+    accumulated += dist;
+  }
+
+  return points[points.length - 1];
 };
 
 // Pre-calculate all lines that have active maintenance work logs

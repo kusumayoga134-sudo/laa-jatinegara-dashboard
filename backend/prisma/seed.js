@@ -539,7 +539,7 @@ async function main() {
     },
     {
       targetType: 'STATION',
-      targetCode: 'ST. BEKASI',
+      targetCode: 'ST. BEKASI (Jalur 1 Peron Utama Hulu)',
       actionType: 'INSPECTION',
       technician: 'Tim UPT Resor LAA 1.9',
       description: 'Thermovision scanning pada seluruh DS 15-20 emplasemen Stasiun Bekasi, tidak ada hotspot anomali.',

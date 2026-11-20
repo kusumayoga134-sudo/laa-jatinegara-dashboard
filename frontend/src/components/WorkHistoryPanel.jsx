@@ -268,6 +268,7 @@ export default function WorkHistoryPanel({
 
   const [formData, setFormData] = useState({
     targetCode: '',
+    targetId: '',
     actionType: '',
     technician: '',
     description: '',
@@ -275,25 +276,36 @@ export default function WorkHistoryPanel({
     timestamp: new Date().toISOString().slice(0, 16),
   });
 
-  // Custom Elegant Auto-Suggest States for all 208 map locations
+  // Custom Elegant Auto-Suggest States for all map locations
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [suggestCategory, setSuggestCategory] = useState('ALL');
+  const [suggestSearchQuery, setSuggestSearchQuery] = useState('');
   const suggestWrapperRef = useRef(null);
 
-  // Close auto-suggest when clicked outside
+  // Close auto-suggest when clicked outside (safe check against detached DOM nodes)
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (suggestWrapperRef.current && !suggestWrapperRef.current.contains(e.target)) {
-        setIsSuggestOpen(false);
+      if (!suggestWrapperRef.current) return;
+      const path = e.composedPath ? e.composedPath() : [];
+      if (path.includes(suggestWrapperRef.current) || suggestWrapperRef.current.contains(e.target)) {
+        return;
       }
+      setIsSuggestOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Auto-open Add Form when triggered with autoOpenForm flag
+  useEffect(() => {
+    if (locationData?.autoOpenForm && isAdmin) {
+      handleOpenAdd();
+    }
+  }, [locationData, isAdmin]);
+
   // Filtered suggestion list based on category & input search
   const filteredSuggestions = useMemo(() => {
-    const q = (formData.targetCode || '').trim().toLowerCase();
+    const q = (suggestSearchQuery || '').trim().toLowerCase();
     return ALL_MAP_LOCATIONS.filter((item) => {
       // Category tab filter
       if (suggestCategory === 'JALUR' && !item.title.includes('Jalur') && !item.title.includes('ST.')) return false;
@@ -311,7 +323,7 @@ export default function WorkHistoryPanel({
       const cat = (item.category || '').toLowerCase();
       return t.includes(q) || c.includes(q) || km.includes(q) || cat.includes(q);
     });
-  }, [formData.targetCode, suggestCategory]);
+  }, [suggestSearchQuery, suggestCategory]);
 
   if (!locationData) return null;
 
@@ -374,17 +386,20 @@ export default function WorkHistoryPanel({
     return action.replace(/_/g, ' ');
   };
 
-  // Open Form to Add New Work Log (Custom empty required inputs)
+  // Open Form to Add New Work Log (Prefilled with exact unique track/apparatus name)
   const handleOpenAdd = () => {
     setEditingLogId(null);
+    const initialTarget = locationTitle || locationCode || 'ST. JATINEGARA (Jalur 1)';
     setFormData({
-      targetCode: locationCode || 'NASPAN 1 JNG-KLD (HU)',
+      targetCode: initialTarget,
+      targetId: locationData?.id || '',
       actionType: '',
       technician: '',
       description: '',
       status: 'COMPLETED',
       timestamp: new Date().toISOString().slice(0, 16),
     });
+    setSuggestSearchQuery('');
     setIsFormOpen(true);
   };
 
@@ -394,12 +409,14 @@ export default function WorkHistoryPanel({
     const dateStr = log.timestamp ? new Date(log.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
     setFormData({
       targetCode: log.targetCode || '',
+      targetId: log.targetId || '',
       actionType: log.actionType || '',
       technician: log.technician || '',
       description: log.description || '',
       status: log.status || 'COMPLETED',
       timestamp: dateStr,
     });
+    setSuggestSearchQuery('');
     setIsFormOpen(true);
   };
 
@@ -833,7 +850,8 @@ export default function WorkHistoryPanel({
                       value={formData.targetCode}
                       onFocus={() => setIsSuggestOpen(true)}
                       onChange={(e) => {
-                        setFormData({ ...formData, targetCode: e.target.value });
+                        setFormData({ ...formData, targetCode: e.target.value, targetId: '' });
+                        setSuggestSearchQuery(e.target.value);
                         setIsSuggestOpen(true);
                       }}
                       placeholder="Ketik atau pilih line, naspan, wesel, DS, FRP..."
@@ -851,7 +869,10 @@ export default function WorkHistoryPanel({
                       )}
                       <button
                         type="button"
-                        onClick={() => setIsSuggestOpen((prev) => !prev)}
+                        onClick={() => {
+                          setSuggestSearchQuery('');
+                          setIsSuggestOpen((prev) => !prev);
+                        }}
                         className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition cursor-pointer"
                         title="Buka / Tutup Daftar Saran Lokasi"
                       >
@@ -862,23 +883,33 @@ export default function WorkHistoryPanel({
 
                   {/* CUSTOM ELEGANT AUTO-SUGGEST DROPDOWN */}
                   {isSuggestOpen && (
-                    <div className="absolute left-0 right-0 top-full mt-1.5 z-70 bg-white/98 border border-slate-200 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
-                      
+                    <div
+                      data-suggest-dropdown="true"
+                      className="absolute left-0 right-0 top-full mt-1.5 z-70 bg-white/98 border border-slate-200 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+                    >
                       {/* Category Filter Tabs */}
                       <div className="bg-slate-50/90 border-b border-slate-200/90 p-1.5 flex items-center space-x-1 overflow-x-auto text-[10.5px] font-bold scrollbar-none">
                         {[
-                          { id: 'ALL', label: 'Semua (208)' },
+                          { id: 'ALL', label: `Semua (${ALL_MAP_LOCATIONS.length})` },
                           { id: 'JALUR', label: 'Jalur / Stasiun' },
                           { id: 'NASPAN', label: 'Naspan' },
                           { id: 'WESEL', label: 'Wesel' },
                           { id: 'DS', label: 'DS (20)' },
                           { id: 'FRP', label: 'FRP (25)' },
-                          { id: 'AS_AJ', label: 'AS / AJ (24)' },
+                          { id: 'AS_AJ', label: 'AS / AJ (46)' },
                         ].map((tab) => (
                           <button
                             key={tab.id}
                             type="button"
-                            onClick={() => setSuggestCategory(tab.id)}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSuggestCategory(tab.id);
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSuggestCategory(tab.id);
+                            }}
                             className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer ${
                               suggestCategory === tab.id
                                 ? 'bg-blue-600 text-white shadow-2xs font-extrabold'
@@ -888,6 +919,33 @@ export default function WorkHistoryPanel({
                             {tab.label}
                           </button>
                         ))}
+                      </div>
+
+                      {/* Search Filter Header */}
+                      <div className="px-3 py-1.5 bg-slate-100/70 border-b border-slate-200/60 flex items-center justify-between text-[11px]">
+                        <div className="flex items-center space-x-1.5 text-slate-500 font-semibold flex-1">
+                          <Search className="w-3 h-3 text-slate-400 shrink-0" />
+                          <input
+                            type="text"
+                            value={suggestSearchQuery}
+                            onChange={(e) => setSuggestSearchQuery(e.target.value)}
+                            placeholder="Cari jalur, stasiun, seksi, wesel..."
+                            className="w-full bg-transparent text-slate-800 text-[11px] font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
+                          />
+                        </div>
+                        {suggestSearchQuery && (
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSuggestSearchQuery('');
+                            }}
+                            className="text-[10px] text-slate-400 hover:text-slate-700 px-1 py-0.5 rounded bg-slate-200/80 font-bold ml-2 shrink-0 cursor-pointer"
+                          >
+                            Reset
+                          </button>
+                        )}
                       </div>
 
                       {/* Suggestion Items List */}
@@ -901,8 +959,23 @@ export default function WorkHistoryPanel({
                             <button
                               key={`${item.id}-${item.title}`}
                               type="button"
-                              onClick={() => {
-                                setFormData({ ...formData, targetCode: item.code || item.title });
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  targetCode: item.title,
+                                  targetId: item.id,
+                                }));
+                                setIsSuggestOpen(false);
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  targetCode: item.title,
+                                  targetId: item.id,
+                                }));
                                 setIsSuggestOpen(false);
                               }}
                               className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50/80 transition flex items-center justify-between gap-2.5 group cursor-pointer"

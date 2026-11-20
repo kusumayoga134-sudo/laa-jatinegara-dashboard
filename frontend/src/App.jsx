@@ -133,10 +133,13 @@ export default function App() {
     }
   };
 
-  // Quick Open Add Log from Header or Line
+  // Quick Open Add Log from Header or Line (Directly opens the input modal prefilled)
   const handleOpenAddLog = (lineTarget) => {
     if (lineTarget) {
-      setSelectedLocation(lineTarget);
+      setSelectedLocation({
+        ...lineTarget,
+        autoOpenForm: true,
+      });
     } else {
       setSelectedLocation({
         code: 'NASPAN 1 JNG-KLD (HU)',
@@ -144,6 +147,7 @@ export default function App() {
         km: 'Lintas LAA 1.9',
         category: 'INPUT PEKERJAAN',
         isAllLogs: true,
+        autoOpenForm: true,
       });
     }
   };
