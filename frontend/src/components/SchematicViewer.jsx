@@ -902,7 +902,7 @@ export const ALL_TRACK_LINES = [
       color: '#ff00ff',
       isCrossing: true,
     },
-{
+    {
       id: 'titik_wesel_w51a',
       code: 'Wesel W51A',
       title: 'Wesel W51A',
@@ -915,7 +915,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 547.3 703.5 A 5.5 5.5 0 1 0 558.3 703.5 A 5.5 5.5 0 1 0 547.3 703.5',
-      hitD: 'M 534.8 703.5 A 18 18 0 1 0 570.8 703.5 A 18 18 0 1 0 534.8 703.5',
+      hitD: 'M 532.8 703.5 A 20 20 0 1 0 572.8 703.5 A 20 20 0 1 0 532.8 703.5',
       startDivider: { type: 'WESEL', label: 'Wesel W51A', km: 'KM 1+935' },
       endDivider: { type: 'JALUR', label: 'Jalur 1 Track LAA', km: 'KM 1+935' },
     },
@@ -932,7 +932,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 587.9 656.1 A 5.5 5.5 0 1 0 598.9 656.1 A 5.5 5.5 0 1 0 587.9 656.1',
-      hitD: 'M 575.4 656.1 A 18 18 0 1 0 611.4 656.1 A 18 18 0 1 0 575.4 656.1',
+      hitD: 'M 573.4 656.1 A 20 20 0 1 0 613.4 656.1 A 20 20 0 1 0 573.4 656.1',
       startDivider: { type: 'WESEL', label: 'Wesel W31A1', km: 'KM 1+995' },
       endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 1+995' },
     },
@@ -949,7 +949,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 628.9 656.1 A 5.5 5.5 0 1 0 639.9 656.1 A 5.5 5.5 0 1 0 628.9 656.1',
-      hitD: 'M 616.4 656.1 A 18 18 0 1 0 652.4 656.1 A 18 18 0 1 0 616.4 656.1',
+      hitD: 'M 614.4 656.1 A 20 20 0 1 0 654.4 656.1 A 20 20 0 1 0 614.4 656.1',
       startDivider: { type: 'WESEL', label: 'Wesel W31A2', km: 'KM 2+015' },
       endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 2+015' },
     },
@@ -966,7 +966,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 671.9 605.6 A 5.5 5.5 0 1 0 682.9 605.6 A 5.5 5.5 0 1 0 671.9 605.6',
-      hitD: 'M 659.4 605.6 A 18 18 0 1 0 695.4 605.6 A 18 18 0 1 0 659.4 605.6',
+      hitD: 'M 657.4 605.6 A 20 20 0 1 0 697.4 605.6 A 20 20 0 1 0 657.4 605.6',
       startDivider: { type: 'WESEL', label: 'Wesel W11A', km: 'KM 2+095' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 2+095' },
     },
@@ -983,7 +983,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 714.9 605.6 A 5.5 5.5 0 1 0 725.9 605.6 A 5.5 5.5 0 1 0 714.9 605.6',
-      hitD: 'M 702.4 605.6 A 18 18 0 1 0 738.4 605.6 A 18 18 0 1 0 702.4 605.6',
+      hitD: 'M 700.4 605.6 A 20 20 0 1 0 740.4 605.6 A 20 20 0 1 0 700.4 605.6',
       startDivider: { type: 'WESEL', label: 'Wesel W11B1', km: 'KM 2+100' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 2+100' },
     },
@@ -1000,7 +1000,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 746.8 559.6 A 5.5 5.5 0 1 0 757.8 559.6 A 5.5 5.5 0 1 0 746.8 559.6',
-      hitD: 'M 734.3 559.6 A 18 18 0 1 0 770.3 559.6 A 18 18 0 1 0 734.3 559.6',
+      hitD: 'M 732.3 559.6 A 20 20 0 1 0 772.3 559.6 A 20 20 0 1 0 732.3 559.6',
       startDivider: { type: 'WESEL', label: 'Wesel W21A2', km: 'KM 2+157' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 2+157' },
     },
@@ -1017,7 +1017,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 927.1 656.1 A 5.5 5.5 0 1 0 938.1 656.1 A 5.5 5.5 0 1 0 927.1 656.1',
-      hitD: 'M 914.6 656.1 A 18 18 0 1 0 950.6 656.1 A 18 18 0 1 0 914.6 656.1',
+      hitD: 'M 912.6 656.1 A 20 20 0 1 0 952.6 656.1 A 20 20 0 1 0 912.6 656.1',
       startDivider: { type: 'WESEL', label: 'Wesel W31C1', km: 'KM 2+435' },
       endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 2+435' },
     },
@@ -1034,7 +1034,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 927.1 703.5 A 5.5 5.5 0 1 0 938.1 703.5 A 5.5 5.5 0 1 0 927.1 703.5',
-      hitD: 'M 914.6 703.5 A 18 18 0 1 0 950.6 703.5 A 18 18 0 1 0 914.6 703.5',
+      hitD: 'M 912.6 703.5 A 20 20 0 1 0 952.6 703.5 A 20 20 0 1 0 912.6 703.5',
       startDivider: { type: 'WESEL', label: 'Wesel W51D1', km: 'KM 2+435' },
       endDivider: { type: 'JALUR', label: 'Jalur 1 Track LAA', km: 'KM 2+435' },
     },
@@ -1051,7 +1051,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 986.5 656.1 A 5.5 5.5 0 1 0 997.5 656.1 A 5.5 5.5 0 1 0 986.5 656.1',
-      hitD: 'M 974.0 656.1 A 18 18 0 1 0 1010.0 656.1 A 18 18 0 1 0 974.0 656.1',
+      hitD: 'M 972.0 656.1 A 20 20 0 1 0 1012.0 656.1 A 20 20 0 1 0 972.0 656.1',
       startDivider: { type: 'WESEL', label: 'Wesel W31C2', km: 'KM 2+498' },
       endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 2+498' },
     },
@@ -1068,7 +1068,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 986.5 703.5 A 5.5 5.5 0 1 0 997.5 703.5 A 5.5 5.5 0 1 0 986.5 703.5',
-      hitD: 'M 974.0 703.5 A 18 18 0 1 0 1010.0 703.5 A 18 18 0 1 0 974.0 703.5',
+      hitD: 'M 972.0 703.5 A 20 20 0 1 0 1012.0 703.5 A 20 20 0 1 0 972.0 703.5',
       startDivider: { type: 'WESEL', label: 'Wesel W51D2', km: 'KM 2+498' },
       endDivider: { type: 'JALUR', label: 'Jalur 1 Track LAA', km: 'KM 2+498' },
     },
@@ -1085,7 +1085,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 648.8 370.4 A 5.5 5.5 0 1 0 659.8 370.4 A 5.5 5.5 0 1 0 648.8 370.4',
-      hitD: 'M 636.3 370.4 A 18 18 0 1 0 672.3 370.4 A 18 18 0 1 0 636.3 370.4',
+      hitD: 'M 634.3 370.4 A 20 20 0 1 0 674.3 370.4 A 20 20 0 1 0 634.3 370.4',
       startDivider: { type: 'WESEL', label: 'Wesel W81A1', km: 'KM 11+202' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 11+202' },
     },
@@ -1102,7 +1102,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 648.8 417.8 A 5.5 5.5 0 1 0 659.8 417.8 A 5.5 5.5 0 1 0 648.8 417.8',
-      hitD: 'M 636.3 417.8 A 18 18 0 1 0 672.3 417.8 A 18 18 0 1 0 636.3 417.8',
+      hitD: 'M 634.3 417.8 A 20 20 0 1 0 674.3 417.8 A 20 20 0 1 0 634.3 417.8',
       startDivider: { type: 'WESEL', label: 'Wesel W61A1', km: 'KM 11+202' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 11+202' },
     },
@@ -1119,7 +1119,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 708.2 370.4 A 5.5 5.5 0 1 0 719.2 370.4 A 5.5 5.5 0 1 0 708.2 370.4',
-      hitD: 'M 695.7 370.4 A 18 18 0 1 0 731.7 370.4 A 18 18 0 1 0 695.7 370.4',
+      hitD: 'M 693.7 370.4 A 20 20 0 1 0 733.7 370.4 A 20 20 0 1 0 693.7 370.4',
       startDivider: { type: 'WESEL', label: 'Wesel W81A2', km: 'KM 11+259' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 11+259' },
     },
@@ -1136,7 +1136,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 708.2 417.8 A 5.5 5.5 0 1 0 719.2 417.8 A 5.5 5.5 0 1 0 708.2 417.8',
-      hitD: 'M 695.7 417.8 A 18 18 0 1 0 731.7 417.8 A 18 18 0 1 0 695.7 417.8',
+      hitD: 'M 693.7 417.8 A 20 20 0 1 0 733.7 417.8 A 20 20 0 1 0 693.7 417.8',
       startDivider: { type: 'WESEL', label: 'Wesel W61A2', km: 'KM 11+259' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 11+259' },
     },
@@ -1153,7 +1153,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 766.5 417.8 A 5.5 5.5 0 1 0 777.5 417.8 A 5.5 5.5 0 1 0 766.5 417.8',
-      hitD: 'M 754.0 417.8 A 18 18 0 1 0 790.0 417.8 A 18 18 0 1 0 754.0 417.8',
+      hitD: 'M 752.0 417.8 A 20 20 0 1 0 792.0 417.8 A 20 20 0 1 0 752.0 417.8',
       startDivider: { type: 'WESEL', label: 'Wesel W61B', km: 'KM 11+264' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 11+264' },
     },
@@ -1163,23 +1163,6 @@ export const ALL_TRACK_LINES = [
       title: 'Wesel W21C1',
       km: 'KM 11+521',
       category: 'TITIK WESEL',
-      cx: 821.9,
-      cy: 469.2,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 816.4 469.2 A 5.5 5.5 0 1 0 827.4 469.2 A 5.5 5.5 0 1 0 816.4 469.2',
-      hitD: 'M 803.9 469.2 A 18 18 0 1 0 839.9 469.2 A 18 18 0 1 0 803.9 469.2',
-      startDivider: { type: 'WESEL', label: 'Wesel W21C1', km: 'KM 11+521' },
-      endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 11+521' },
-    },
-    {
-      id: 'titik_wesel_w21c2',
-      code: 'Wesel W21C2',
-      title: 'Wesel W21C2',
-      km: 'KM 11+526',
-      category: 'TITIK WESEL',
       cx: 864.3,
       cy: 512.7,
       r: 5.5,
@@ -1187,7 +1170,24 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 858.8 512.7 A 5.5 5.5 0 1 0 869.8 512.7 A 5.5 5.5 0 1 0 858.8 512.7',
-      hitD: 'M 846.3 512.7 A 18 18 0 1 0 882.3 512.7 A 18 18 0 1 0 846.3 512.7',
+      hitD: 'M 844.3 512.7 A 20 20 0 1 0 884.3 512.7 A 20 20 0 1 0 844.3 512.7',
+      startDivider: { type: 'WESEL', label: 'Wesel W21C1', km: 'KM 11+521' },
+      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 11+521' },
+    },
+    {
+      id: 'titik_wesel_w21c2',
+      code: 'Wesel W21C2',
+      title: 'Wesel W21C2',
+      km: 'KM 11+526',
+      category: 'TITIK WESEL',
+      cx: 997.6,
+      cy: 513.0,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 992.1 513.0 A 5.5 5.5 0 1 0 1003.1 513.0 A 5.5 5.5 0 1 0 992.1 513.0',
+      hitD: 'M 977.6 513.0 A 20 20 0 1 0 1017.6 513.0 A 20 20 0 1 0 977.6 513.0',
       startDivider: { type: 'WESEL', label: 'Wesel W21C2', km: 'KM 11+526' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 11+526' },
     },
@@ -1204,7 +1204,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 955.7 417.8 A 5.5 5.5 0 1 0 966.7 417.8 A 5.5 5.5 0 1 0 955.7 417.8',
-      hitD: 'M 943.2 417.8 A 18 18 0 1 0 979.2 417.8 A 18 18 0 1 0 943.2 417.8',
+      hitD: 'M 941.2 417.8 A 20 20 0 1 0 981.2 417.8 A 20 20 0 1 0 941.2 417.8',
       startDivider: { type: 'WESEL', label: 'Wesel W61C', km: 'KM 11+542' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 11+542' },
     },
@@ -1221,7 +1221,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 954.3 370.3 A 5.5 5.5 0 1 0 965.3 370.3 A 5.5 5.5 0 1 0 954.3 370.3',
-      hitD: 'M 941.8 370.3 A 18 18 0 1 0 977.8 370.3 A 18 18 0 1 0 941.8 370.3',
+      hitD: 'M 939.8 370.3 A 20 20 0 1 0 979.8 370.3 A 20 20 0 1 0 939.8 370.3',
       startDivider: { type: 'WESEL', label: 'Wesel W81C', km: 'KM 11+542' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 11+542' },
     },
@@ -1231,16 +1231,16 @@ export const ALL_TRACK_LINES = [
       title: 'Wesel W41B',
       km: 'KM 11+630',
       category: 'TITIK WESEL',
-      cx: 997.6,
-      cy: 513.0,
+      cx: 1038.3,
+      cy: 465.4,
       r: 5.5,
       isDot: true,
       isCrossing: true,
       color: '#000000',
-      d: 'M 992.1 513.0 A 5.5 5.5 0 1 0 1003.1 513.0 A 5.5 5.5 0 1 0 992.1 513.0',
-      hitD: 'M 979.6 513.0 A 18 18 0 1 0 1015.6 513.0 A 18 18 0 1 0 979.6 513.0',
+      d: 'M 1032.8 465.4 A 5.5 5.5 0 1 0 1043.8 465.4 A 5.5 5.5 0 1 0 1032.8 465.4',
+      hitD: 'M 1018.3 465.4 A 20 20 0 1 0 1058.3 465.4 A 20 20 0 1 0 1018.3 465.4',
       startDivider: { type: 'WESEL', label: 'Wesel W41B', km: 'KM 11+630' },
-      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 11+630' },
+      endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 11+630' },
     },
     {
       id: 'titik_wesel_w63a',
@@ -1248,22 +1248,39 @@ export const ALL_TRACK_LINES = [
       title: 'Wesel W63A',
       km: 'KM 12+012',
       category: 'TITIK WESEL',
-      cx: 1420.0,
-      cy: 418.0,
+      cx: 1483.8,
+      cy: 465.6,
       r: 5.5,
       isDot: true,
       isCrossing: true,
       color: '#000000',
-      d: 'M 1414.5 418.0 A 5.5 5.5 0 1 0 1425.5 418.0 A 5.5 5.5 0 1 0 1414.5 418.0',
-      hitD: 'M 1402.0 418.0 A 18 18 0 1 0 1438.0 418.0 A 18 18 0 1 0 1402.0 418.0',
+      d: 'M 1478.3 465.6 A 5.5 5.5 0 1 0 1489.3 465.6 A 5.5 5.5 0 1 0 1478.3 465.6',
+      hitD: 'M 1463.8 465.6 A 20 20 0 1 0 1503.8 465.6 A 20 20 0 1 0 1463.8 465.6',
       startDivider: { type: 'WESEL', label: 'Wesel W63A', km: 'KM 12+012' },
-      endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 12+012' },
+      endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 12+012' },
     },
     {
-      id: 'titik_wesel_w33a',
-      code: 'Wesel W33A',
-      title: 'Wesel W33A',
-      km: 'KM 12+045',
+      id: 'titik_wesel_w83a1',
+      code: 'Wesel W83A1',
+      title: 'Wesel W83A1',
+      km: 'KM 12+057',
+      category: 'TITIK WESEL',
+      cx: 1452.8,
+      cy: 370.5,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 1447.3 370.5 A 5.5 5.5 0 1 0 1458.3 370.5 A 5.5 5.5 0 1 0 1447.3 370.5',
+      hitD: 'M 1432.8 370.5 A 20 20 0 1 0 1472.8 370.5 A 20 20 0 1 0 1432.8 370.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W83A1', km: 'KM 12+057' },
+      endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 12+057' },
+    },
+    {
+      id: 'titik_wesel_w23b1',
+      code: 'Wesel W23B1',
+      title: 'Wesel W23B1',
+      km: 'KM 12+086',
       category: 'TITIK WESEL',
       cx: 1546.0,
       cy: 560.5,
@@ -1272,26 +1289,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1540.5 560.5 A 5.5 5.5 0 1 0 1551.5 560.5 A 5.5 5.5 0 1 0 1540.5 560.5',
-      hitD: 'M 1528.0 560.5 A 18 18 0 1 0 1564.0 560.5 A 18 18 0 1 0 1528.0 560.5',
-      startDivider: { type: 'WESEL', label: 'Wesel W33A', km: 'KM 12+045' },
-      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 12+045' },
-    },
-    {
-      id: 'titik_wesel_w83a1',
-      code: 'Wesel W83A1',
-      title: 'Wesel W83A1',
-      km: 'KM 12+057',
-      category: 'TITIK WESEL',
-      cx: 1477.3,
-      cy: 370.5,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 1471.8 370.5 A 5.5 5.5 0 1 0 1482.8 370.5 A 5.5 5.5 0 1 0 1471.8 370.5',
-      hitD: 'M 1459.3 370.5 A 18 18 0 1 0 1495.3 370.5 A 18 18 0 1 0 1459.3 370.5',
-      startDivider: { type: 'WESEL', label: 'Wesel W83A1', km: 'KM 12+057' },
-      endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 12+057' },
+      hitD: 'M 1526.0 560.5 A 20 20 0 1 0 1566.0 560.5 A 20 20 0 1 0 1526.0 560.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W23B1', km: 'KM 12+086' },
+      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 12+086' },
     },
     {
       id: 'titik_wesel_w83a2',
@@ -1306,26 +1306,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1622.6 512.7 A 5.5 5.5 0 1 0 1633.6 512.7 A 5.5 5.5 0 1 0 1622.6 512.7',
-      hitD: 'M 1610.1 512.7 A 18 18 0 1 0 1646.1 512.7 A 18 18 0 1 0 1610.1 512.7',
+      hitD: 'M 1608.1 512.7 A 20 20 0 1 0 1648.1 512.7 A 20 20 0 1 0 1608.1 512.7',
       startDivider: { type: 'WESEL', label: 'Wesel W83A2', km: 'KM 12+057' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 12+057' },
-    },
-    {
-      id: 'titik_wesel_w23b1',
-      code: 'Wesel W23B1',
-      title: 'Wesel W23B1',
-      km: 'KM 12+086',
-      category: 'TITIK WESEL',
-      cx: 1596.8,
-      cy: 560.5,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 1591.3 560.5 A 5.5 5.5 0 1 0 1602.3 560.5 A 5.5 5.5 0 1 0 1591.3 560.5',
-      hitD: 'M 1578.8 560.5 A 18 18 0 1 0 1614.8 560.5 A 18 18 0 1 0 1578.8 560.5',
-      startDivider: { type: 'WESEL', label: 'Wesel W23B1', km: 'KM 12+086' },
-      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 12+086' },
     },
     {
       id: 'titik_wesel_w23b2',
@@ -1340,15 +1323,49 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1632.9 608.0 A 5.5 5.5 0 1 0 1643.9 608.0 A 5.5 5.5 0 1 0 1632.9 608.0',
-      hitD: 'M 1620.4 608.0 A 18 18 0 1 0 1656.4 608.0 A 18 18 0 1 0 1620.4 608.0',
+      hitD: 'M 1618.4 608.0 A 20 20 0 1 0 1658.4 608.0 A 20 20 0 1 0 1618.4 608.0',
       startDivider: { type: 'WESEL', label: 'Wesel W23B2', km: 'KM 12+102' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+102' },
     },
     {
-      id: 'titik_wesel_w13b_jng',
-      code: 'Wesel W13B',
-      title: 'Wesel W13B',
-      km: 'KM 12+110',
+      id: 'titik_wesel_w23c1',
+      code: 'Wesel W23C1',
+      title: 'Wesel W23C1',
+      km: 'KM 12+156',
+      category: 'TITIK WESEL',
+      cx: 1667.3,
+      cy: 560.5,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 1661.8 560.5 A 5.5 5.5 0 1 0 1672.8 560.5 A 5.5 5.5 0 1 0 1661.8 560.5',
+      hitD: 'M 1647.3 560.5 A 20 20 0 1 0 1687.3 560.5 A 20 20 0 1 0 1647.3 560.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W23C1', km: 'KM 12+156' },
+      endDivider: { type: 'JALUR', label: 'Jalur W23C Track LAA', km: 'KM 12+156' },
+    },
+    {
+      id: 'titik_wesel_w23c2',
+      code: 'Wesel W23C2',
+      title: 'Wesel W23C2',
+      km: 'KM 12+181',
+      category: 'TITIK WESEL',
+      cx: 1713.8,
+      cy: 560.5,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 1708.3 560.5 A 5.5 5.5 0 1 0 1719.3 560.5 A 5.5 5.5 0 1 0 1708.3 560.5',
+      hitD: 'M 1693.8 560.5 A 20 20 0 1 0 1733.8 560.5 A 20 20 0 1 0 1693.8 560.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W23C2', km: 'KM 12+181' },
+      endDivider: { type: 'JALUR', label: 'Jalur W23C Track LAA', km: 'KM 12+181' },
+    },
+    {
+      id: 'titik_wesel_w33a',
+      code: 'Wesel W33A',
+      title: 'Wesel W33A',
+      km: 'KM 12+045',
       category: 'TITIK WESEL',
       cx: 1560.5,
       cy: 655.9,
@@ -1357,26 +1374,26 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1555.0 655.9 A 5.5 5.5 0 1 0 1566.0 655.9 A 5.5 5.5 0 1 0 1555.0 655.9',
-      hitD: 'M 1542.5 655.9 A 18 18 0 1 0 1578.5 655.9 A 18 18 0 1 0 1542.5 655.9',
-      startDivider: { type: 'WESEL', label: 'Wesel W13B', km: 'KM 12+110' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+110' },
+      hitD: 'M 1540.5 655.9 A 20 20 0 1 0 1580.5 655.9 A 20 20 0 1 0 1540.5 655.9',
+      startDivider: { type: 'WESEL', label: 'Wesel W33A', km: 'KM 12+045' },
+      endDivider: { type: 'JALUR', label: 'NASPAN 1 ARAH KLD HI', km: 'KM 12+045' },
     },
     {
-      id: 'titik_wesel_w23c1',
-      code: 'Wesel W23C1',
-      title: 'Wesel W23C1',
-      km: 'KM 12+156',
+      id: 'titik_wesel_w13b_jng',
+      code: 'Wesel W13B',
+      title: 'Wesel W13B',
+      km: 'KM 12+110',
       category: 'TITIK WESEL',
-      cx: 1692.9,
-      cy: 560.5,
+      cx: 1600.7,
+      cy: 607.9,
       r: 5.5,
       isDot: true,
       isCrossing: true,
       color: '#000000',
-      d: 'M 1687.4 560.5 A 5.5 5.5 0 1 0 1698.4 560.5 A 5.5 5.5 0 1 0 1687.4 560.5',
-      hitD: 'M 1674.9 560.5 A 18 18 0 1 0 1710.9 560.5 A 18 18 0 1 0 1674.9 560.5',
-      startDivider: { type: 'WESEL', label: 'Wesel W23C1', km: 'KM 12+156' },
-      endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 12+156' },
+      d: 'M 1595.2 607.9 A 5.5 5.5 0 1 0 1606.2 607.9 A 5.5 5.5 0 1 0 1595.2 607.9',
+      hitD: 'M 1580.7 607.9 A 20 20 0 1 0 1620.7 607.9 A 20 20 0 1 0 1580.7 607.9',
+      startDivider: { type: 'WESEL', label: 'Wesel W13B', km: 'KM 12+110' },
+      endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+110' },
     },
     {
       id: 'titik_wesel_w13c1',
@@ -1391,15 +1408,15 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1661.5 608.0 A 5.5 5.5 0 1 0 1672.5 608.0 A 5.5 5.5 0 1 0 1661.5 608.0',
-      hitD: 'M 1649.0 608.0 A 18 18 0 1 0 1685.0 608.0 A 18 18 0 1 0 1649.0 608.0',
+      hitD: 'M 1647.0 608.0 A 20 20 0 1 0 1687.0 608.0 A 20 20 0 1 0 1647.0 608.0',
       startDivider: { type: 'WESEL', label: 'Wesel W13C1', km: 'KM 12+159' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+159' },
     },
     {
-      id: 'titik_wesel_w13c2',
-      code: 'Wesel W13C2',
-      title: 'Wesel W13C2',
-      km: 'KM 12+170',
+      id: 'titik_wesel_w33b1',
+      code: 'Wesel W33B1',
+      title: 'Wesel W33B1',
+      km: 'KM 12+245',
       category: 'TITIK WESEL',
       cx: 1708.7,
       cy: 655.8,
@@ -1408,15 +1425,15 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1703.2 655.8 A 5.5 5.5 0 1 0 1714.2 655.8 A 5.5 5.5 0 1 0 1703.2 655.8',
-      hitD: 'M 1690.7 655.8 A 18 18 0 1 0 1726.7 655.8 A 18 18 0 1 0 1690.7 655.8',
-      startDivider: { type: 'WESEL', label: 'Wesel W13C2', km: 'KM 12+170' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+170' },
+      hitD: 'M 1688.7 655.8 A 20 20 0 1 0 1728.7 655.8 A 20 20 0 1 0 1688.7 655.8',
+      startDivider: { type: 'WESEL', label: 'Wesel W33B1', km: 'KM 12+245' },
+      endDivider: { type: 'JALUR', label: 'NASPAN 1 ARAH KLD HI', km: 'KM 12+245' },
     },
     {
-      id: 'titik_wesel_w23c2',
-      code: 'Wesel W23C2',
-      title: 'Wesel W23C2',
-      km: 'KM 12+181',
+      id: 'titik_wesel_w13c2',
+      code: 'Wesel W13C2',
+      title: 'Wesel W13C2',
+      km: 'KM 12+170',
       category: 'TITIK WESEL',
       cx: 1734.8,
       cy: 608.1,
@@ -1425,26 +1442,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1729.3 608.1 A 5.5 5.5 0 1 0 1740.3 608.1 A 5.5 5.5 0 1 0 1729.3 608.1',
-      hitD: 'M 1716.8 608.1 A 18 18 0 1 0 1752.8 608.1 A 18 18 0 1 0 1716.8 608.1',
-      startDivider: { type: 'WESEL', label: 'Wesel W23C2', km: 'KM 12+181' },
-      endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+181' },
-    },
-    {
-      id: 'titik_wesel_w33b1',
-      code: 'Wesel W33B1',
-      title: 'Wesel W33B1',
-      km: 'KM 12+245',
-      category: 'TITIK WESEL',
-      cx: 1750.1,
-      cy: 656.2,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 1744.6 656.2 A 5.5 5.5 0 1 0 1755.6 656.2 A 5.5 5.5 0 1 0 1744.6 656.2',
-      hitD: 'M 1732.1 656.2 A 18 18 0 1 0 1768.1 656.2 A 18 18 0 1 0 1732.1 656.2',
-      startDivider: { type: 'WESEL', label: 'Wesel W33B1', km: 'KM 12+245' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+245' },
+      hitD: 'M 1714.8 608.1 A 20 20 0 1 0 1754.8 608.1 A 20 20 0 1 0 1714.8 608.1',
+      startDivider: { type: 'WESEL', label: 'Wesel W13C2', km: 'KM 12+170' },
+      endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+170' },
     },
     {
       id: 'titik_wesel_w13d1',
@@ -1459,9 +1459,43 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1744.6 608.1 A 5.5 5.5 0 1 0 1755.6 608.1 A 5.5 5.5 0 1 0 1744.6 608.1',
-      hitD: 'M 1732.1 608.1 A 18 18 0 1 0 1768.1 608.1 A 18 18 0 1 0 1732.1 608.1',
+      hitD: 'M 1730.1 608.1 A 20 20 0 1 0 1770.1 608.1 A 20 20 0 1 0 1730.1 608.1',
       startDivider: { type: 'WESEL', label: 'Wesel W13D1', km: 'KM 12+250' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+250' },
+    },
+    {
+      id: 'titik_wesel_w13d2',
+      code: 'Wesel W13D2',
+      title: 'Wesel W13D2',
+      km: 'KM 12+278',
+      category: 'TITIK WESEL',
+      cx: 1767.3,
+      cy: 608.1,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 1761.8 608.1 A 5.5 5.5 0 1 0 1772.8 608.1 A 5.5 5.5 0 1 0 1761.8 608.1',
+      hitD: 'M 1747.3 608.1 A 20 20 0 1 0 1787.3 608.1 A 20 20 0 1 0 1747.3 608.1',
+      startDivider: { type: 'WESEL', label: 'Wesel W13D2', km: 'KM 12+278' },
+      endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 12+278' },
+    },
+    {
+      id: 'titik_wesel_w33c1',
+      code: 'Wesel W33C1',
+      title: 'Wesel W33C1',
+      km: 'KM 12+346',
+      category: 'TITIK WESEL',
+      cx: 1791.9,
+      cy: 655.8,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 1786.4 655.8 A 5.5 5.5 0 1 0 1797.4 655.8 A 5.5 5.5 0 1 0 1786.4 655.8',
+      hitD: 'M 1771.9 655.8 A 20 20 0 1 0 1811.9 655.8 A 20 20 0 1 0 1771.9 655.8',
+      startDivider: { type: 'WESEL', label: 'Wesel W33C1', km: 'KM 12+346' },
+      endDivider: { type: 'JALUR', label: 'NASPAN 1 ARAH KLD HI', km: 'KM 12+346' },
     },
     {
       id: 'titik_wesel_w33b2',
@@ -1476,26 +1510,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1761.8 675.9 A 5.5 5.5 0 1 0 1772.8 675.9 A 5.5 5.5 0 1 0 1761.8 675.9',
-      hitD: 'M 1749.3 675.9 A 18 18 0 1 0 1785.3 675.9 A 18 18 0 1 0 1749.3 675.9',
+      hitD: 'M 1747.3 675.9 A 20 20 0 1 0 1787.3 675.9 A 20 20 0 1 0 1747.3 675.9',
       startDivider: { type: 'WESEL', label: 'Wesel W33B2', km: 'KM 12+250' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+250' },
-    },
-    {
-      id: 'titik_wesel_w13d2',
-      code: 'Wesel W13D2',
-      title: 'Wesel W13D2',
-      km: 'KM 12+278',
-      category: 'TITIK WESEL',
-      cx: 1791.9,
-      cy: 655.8,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 1786.4 655.8 A 5.5 5.5 0 1 0 1797.4 655.8 A 5.5 5.5 0 1 0 1786.4 655.8',
-      hitD: 'M 1773.9 655.8 A 18 18 0 1 0 1809.9 655.8 A 18 18 0 1 0 1773.9 655.8',
-      startDivider: { type: 'WESEL', label: 'Wesel W13D2', km: 'KM 12+278' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+278' },
+      endDivider: { type: 'JALUR', label: 'Jalur Crossover HI-HU', km: 'KM 12+250' },
     },
     {
       id: 'titik_wesel_w53b',
@@ -1510,26 +1527,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1786.4 703.9 A 5.5 5.5 0 1 0 1797.4 703.9 A 5.5 5.5 0 1 0 1786.4 703.9',
-      hitD: 'M 1773.9 703.9 A 18 18 0 1 0 1809.9 703.9 A 18 18 0 1 0 1773.9 703.9',
+      hitD: 'M 1771.9 703.9 A 20 20 0 1 0 1811.9 703.9 A 20 20 0 1 0 1771.9 703.9',
       startDivider: { type: 'WESEL', label: 'Wesel W53B', km: 'KM 12+335' },
-      endDivider: { type: 'JALUR', label: 'Jalur 1 Track LAA', km: 'KM 12+335' },
-    },
-    {
-      id: 'titik_wesel_w33c1',
-      code: 'Wesel W33C1',
-      title: 'Wesel W33C1',
-      km: 'KM 12+346',
-      category: 'TITIK WESEL',
-      cx: 1834.1,
-      cy: 655.8,
-      r: 5.5,
-      isDot: true,
-      isCrossing: true,
-      color: '#000000',
-      d: 'M 1828.6 655.8 A 5.5 5.5 0 1 0 1839.6 655.8 A 5.5 5.5 0 1 0 1828.6 655.8',
-      hitD: 'M 1816.1 655.8 A 18 18 0 1 0 1852.1 655.8 A 18 18 0 1 0 1816.1 655.8',
-      startDivider: { type: 'WESEL', label: 'Wesel W33C1', km: 'KM 12+346' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+346' },
+      endDivider: { type: 'JALUR', label: 'NASPAN 1 ARAH KLD HU', km: 'KM 12+335' },
     },
     {
       id: 'titik_wesel_w33c2',
@@ -1544,9 +1544,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1846.1 675.9 A 5.5 5.5 0 1 0 1857.1 675.9 A 5.5 5.5 0 1 0 1846.1 675.9',
-      hitD: 'M 1833.6 675.9 A 18 18 0 1 0 1869.6 675.9 A 18 18 0 1 0 1833.6 675.9',
+      hitD: 'M 1831.6 675.9 A 20 20 0 1 0 1871.6 675.9 A 20 20 0 1 0 1831.6 675.9',
       startDivider: { type: 'WESEL', label: 'Wesel W33C2', km: 'KM 12+415' },
-      endDivider: { type: 'JALUR', label: 'Jalur 2 Track LAA', km: 'KM 12+415' },
+      endDivider: { type: 'JALUR', label: 'Jalur Crossover HI-HU', km: 'KM 12+415' },
     },
     {
       id: 'titik_wesel_w53c',
@@ -1561,9 +1561,9 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1870.9 703.9 A 5.5 5.5 0 1 0 1881.9 703.9 A 5.5 5.5 0 1 0 1870.9 703.9',
-      hitD: 'M 1858.4 703.9 A 18 18 0 1 0 1894.4 703.9 A 18 18 0 1 0 1858.4 703.9',
+      hitD: 'M 1856.4 703.9 A 20 20 0 1 0 1896.4 703.9 A 20 20 0 1 0 1856.4 703.9',
       startDivider: { type: 'WESEL', label: 'Wesel W53C', km: 'KM 12+473' },
-      endDivider: { type: 'JALUR', label: 'Jalur 1 Track LAA', km: 'KM 12+473' },
+      endDivider: { type: 'JALUR', label: 'NASPAN 1 ARAH KLD HU', km: 'KM 12+473' },
     },
     {
       id: 'titik_wesel_w21a_cuk',
@@ -1578,7 +1578,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2661.2 1112.1 A 5.5 5.5 0 1 0 2672.2 1112.1 A 5.5 5.5 0 1 0 2661.2 1112.1',
-      hitD: 'M 2648.7 1112.1 A 18 18 0 1 0 2684.7 1112.1 A 18 18 0 1 0 2648.7 1112.1',
+      hitD: 'M 2646.7 1112.1 A 20 20 0 1 0 2686.7 1112.1 A 20 20 0 1 0 2646.7 1112.1',
       startDivider: { type: 'WESEL', label: 'Wesel W21A', km: 'KM 20+687' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 20+687' },
     },
@@ -1595,7 +1595,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2622.3 1064.2 A 5.5 5.5 0 1 0 2633.3 1064.2 A 5.5 5.5 0 1 0 2622.3 1064.2',
-      hitD: 'M 2609.8 1064.2 A 18 18 0 1 0 2645.8 1064.2 A 18 18 0 1 0 2609.8 1064.2',
+      hitD: 'M 2607.8 1064.2 A 20 20 0 1 0 2647.8 1064.2 A 20 20 0 1 0 2607.8 1064.2',
       startDivider: { type: 'WESEL', label: 'Wesel W11A', km: 'KM 20+740' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 20+740' },
     },
@@ -1612,7 +1612,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2642.9 1089.3 A 5.5 5.5 0 1 0 2653.9 1089.3 A 5.5 5.5 0 1 0 2642.9 1089.3',
-      hitD: 'M 2630.4 1089.3 A 18 18 0 1 0 2666.4 1089.3 A 18 18 0 1 0 2630.4 1089.3',
+      hitD: 'M 2628.4 1089.3 A 20 20 0 1 0 2668.4 1089.3 A 20 20 0 1 0 2628.4 1089.3',
       startDivider: { type: 'WESEL', label: 'Wesel W21B', km: 'KM 20+762' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 20+762' },
     },
@@ -1629,7 +1629,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2638.7 1084.6 A 5.5 5.5 0 1 0 2649.7 1084.6 A 5.5 5.5 0 1 0 2638.7 1084.6',
-      hitD: 'M 2626.2 1084.6 A 18 18 0 1 0 2662.2 1084.6 A 18 18 0 1 0 2626.2 1084.6',
+      hitD: 'M 2624.2 1084.6 A 20 20 0 1 0 2664.2 1084.6 A 20 20 0 1 0 2624.2 1084.6',
       startDivider: { type: 'WESEL', label: 'Wesel W11B', km: 'KM 20+762' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 20+762' },
     },
@@ -1646,7 +1646,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2360.6 1112.0 A 5.5 5.5 0 1 0 2371.6 1112.0 A 5.5 5.5 0 1 0 2360.6 1112.0',
-      hitD: 'M 2348.1 1112.0 A 18 18 0 1 0 2384.1 1112.0 A 18 18 0 1 0 2348.1 1112.0',
+      hitD: 'M 2346.1 1112.0 A 20 20 0 1 0 2386.1 1112.0 A 20 20 0 1 0 2346.1 1112.0',
       startDivider: { type: 'WESEL', label: 'Wesel W23A', km: 'KM 21+360' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 21+360' },
     },
@@ -1663,7 +1663,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2400.9 1063.9 A 5.5 5.5 0 1 0 2411.9 1063.9 A 5.5 5.5 0 1 0 2400.9 1063.9',
-      hitD: 'M 2388.4 1063.9 A 18 18 0 1 0 2424.4 1063.9 A 18 18 0 1 0 2388.4 1063.9',
+      hitD: 'M 2386.4 1063.9 A 20 20 0 1 0 2426.4 1063.9 A 20 20 0 1 0 2386.4 1063.9',
       startDivider: { type: 'WESEL', label: 'Wesel W13A', km: 'KM 21+360' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 21+360' },
     },
@@ -1680,7 +1680,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2383.7 1084.2 A 5.5 5.5 0 1 0 2394.7 1084.2 A 5.5 5.5 0 1 0 2383.7 1084.2',
-      hitD: 'M 2371.2 1084.2 A 18 18 0 1 0 2407.2 1084.2 A 18 18 0 1 0 2371.2 1084.2',
+      hitD: 'M 2369.2 1084.2 A 20 20 0 1 0 2409.2 1084.2 A 20 20 0 1 0 2369.2 1084.2',
       startDivider: { type: 'WESEL', label: 'Wesel W13B', km: 'KM 21+387' },
       endDivider: { type: 'JALUR', label: 'Jalur 3 Track LAA', km: 'KM 21+387' },
     },
@@ -1697,7 +1697,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 2379.9 1089.2 A 5.5 5.5 0 1 0 2390.9 1089.2 A 5.5 5.5 0 1 0 2379.9 1089.2',
-      hitD: 'M 2367.4 1089.2 A 18 18 0 1 0 2403.4 1089.2 A 18 18 0 1 0 2367.4 1089.2',
+      hitD: 'M 2365.4 1089.2 A 20 20 0 1 0 2405.4 1089.2 A 20 20 0 1 0 2365.4 1089.2',
       startDivider: { type: 'WESEL', label: 'Wesel W23B', km: 'KM 21+445' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 21+445' },
     },
@@ -1714,7 +1714,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1541.6 1112.8 A 5.5 5.5 0 1 0 1552.6 1112.8 A 5.5 5.5 0 1 0 1541.6 1112.8',
-      hitD: 'M 1529.1 1112.8 A 18 18 0 1 0 1565.1 1112.8 A 18 18 0 1 0 1529.1 1112.8',
+      hitD: 'M 1527.1 1112.8 A 20 20 0 1 0 1567.1 1112.8 A 20 20 0 1 0 1527.1 1112.8',
       startDivider: { type: 'WESEL', label: 'Wesel W51A', km: 'KM 25+946' },
       endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 25+946' },
     },
@@ -1731,7 +1731,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1499.6 1063.0 A 5.5 5.5 0 1 0 1510.6 1063.0 A 5.5 5.5 0 1 0 1499.6 1063.0',
-      hitD: 'M 1487.1 1063.0 A 18 18 0 1 0 1523.1 1063.0 A 18 18 0 1 0 1487.1 1063.0',
+      hitD: 'M 1485.1 1063.0 A 20 20 0 1 0 1525.1 1063.0 A 20 20 0 1 0 1485.1 1063.0',
       startDivider: { type: 'WESEL', label: 'Wesel W71A', km: 'KM 26+007' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 26+007' },
     },
@@ -1748,7 +1748,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1469.2 1063.3 A 5.5 5.5 0 1 0 1480.2 1063.3 A 5.5 5.5 0 1 0 1469.2 1063.3',
-      hitD: 'M 1456.7 1063.3 A 18 18 0 1 0 1492.7 1063.3 A 18 18 0 1 0 1456.7 1063.3',
+      hitD: 'M 1454.7 1063.3 A 20 20 0 1 0 1494.7 1063.3 A 20 20 0 1 0 1454.7 1063.3',
       startDivider: { type: 'WESEL', label: 'Wesel W71B', km: 'KM 26+101' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 26+101' },
     },
@@ -1765,7 +1765,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1425.7 1113.0 A 5.5 5.5 0 1 0 1436.7 1113.0 A 5.5 5.5 0 1 0 1425.7 1113.0',
-      hitD: 'M 1413.2 1113.0 A 18 18 0 1 0 1449.2 1113.0 A 18 18 0 1 0 1413.2 1113.0',
+      hitD: 'M 1411.2 1113.0 A 20 20 0 1 0 1451.2 1113.0 A 20 20 0 1 0 1411.2 1113.0',
       startDivider: { type: 'WESEL', label: 'Wesel W51B', km: 'KM 26+165' },
       endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 26+165' },
     },
@@ -1782,7 +1782,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1336.3 1112.6 A 5.5 5.5 0 1 0 1347.3 1112.6 A 5.5 5.5 0 1 0 1336.3 1112.6',
-      hitD: 'M 1323.8 1112.6 A 18 18 0 1 0 1359.8 1112.6 A 18 18 0 1 0 1323.8 1112.6',
+      hitD: 'M 1321.8 1112.6 A 20 20 0 1 0 1361.8 1112.6 A 20 20 0 1 0 1321.8 1112.6',
       startDivider: { type: 'WESEL', label: 'Wesel W51C', km: 'KM 26+182' },
       endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 26+182' },
     },
@@ -1799,7 +1799,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1336.3 1063.0 A 5.5 5.5 0 1 0 1347.3 1063.0 A 5.5 5.5 0 1 0 1336.3 1063.0',
-      hitD: 'M 1323.8 1063.0 A 18 18 0 1 0 1359.8 1063.0 A 18 18 0 1 0 1323.8 1063.0',
+      hitD: 'M 1321.8 1063.0 A 20 20 0 1 0 1361.8 1063.0 A 20 20 0 1 0 1321.8 1063.0',
       startDivider: { type: 'WESEL', label: 'Wesel W71C1', km: 'KM 26+189' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 26+189' },
     },
@@ -1816,7 +1816,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1291.3 1174.0 A 5.5 5.5 0 1 0 1302.3 1174.0 A 5.5 5.5 0 1 0 1291.3 1174.0',
-      hitD: 'M 1278.8 1174.0 A 18 18 0 1 0 1314.8 1174.0 A 18 18 0 1 0 1278.8 1174.0',
+      hitD: 'M 1276.8 1174.0 A 20 20 0 1 0 1316.8 1174.0 A 20 20 0 1 0 1276.8 1174.0',
       startDivider: { type: 'WESEL', label: 'Wesel W31B', km: 'KM 26+253' },
       endDivider: { type: 'JALUR', label: 'Jalur 4 Track LAA', km: 'KM 26+253' },
     },
@@ -1833,7 +1833,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 1317.2 1040.0 A 5.5 5.5 0 1 0 1328.2 1040.0 A 5.5 5.5 0 1 0 1317.2 1040.0',
-      hitD: 'M 1304.7 1040.0 A 18 18 0 1 0 1340.7 1040.0 A 18 18 0 1 0 1304.7 1040.0',
+      hitD: 'M 1302.7 1040.0 A 20 20 0 1 0 1342.7 1040.0 A 20 20 0 1 0 1302.7 1040.0',
       startDivider: { type: 'WESEL', label: 'Wesel W71C2', km: 'KM 26+270' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 26+270' },
     },
@@ -1850,7 +1850,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 770.1 1112.6 A 5.5 5.5 0 1 0 781.1 1112.6 A 5.5 5.5 0 1 0 770.1 1112.6',
-      hitD: 'M 757.6 1112.6 A 18 18 0 1 0 793.6 1112.6 A 18 18 0 1 0 757.6 1112.6',
+      hitD: 'M 755.6 1112.6 A 20 20 0 1 0 795.6 1112.6 A 20 20 0 1 0 755.6 1112.6',
       startDivider: { type: 'WESEL', label: 'Wesel W33A', km: 'KM 26+658' },
       endDivider: { type: 'JALUR', label: 'Jalur 5 Track LAA', km: 'KM 26+658' },
     },
@@ -1867,7 +1867,7 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 771.4 1062.7 A 5.5 5.5 0 1 0 782.4 1062.7 A 5.5 5.5 0 1 0 771.4 1062.7',
-      hitD: 'M 758.9 1062.7 A 18 18 0 1 0 794.9 1062.7 A 18 18 0 1 0 758.9 1062.7',
+      hitD: 'M 756.9 1062.7 A 20 20 0 1 0 796.9 1062.7 A 20 20 0 1 0 756.9 1062.7',
       startDivider: { type: 'WESEL', label: 'Wesel W53', km: 'KM 26+723' },
       endDivider: { type: 'JALUR', label: 'Jalur 6 Track LAA', km: 'KM 26+723' },
     },
@@ -1884,11 +1884,11 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
       color: '#000000',
       d: 'M 802.1 1037.1 A 5.5 5.5 0 1 0 813.1 1037.1 A 5.5 5.5 0 1 0 802.1 1037.1',
-      hitD: 'M 789.6 1037.1 A 18 18 0 1 0 825.6 1037.1 A 18 18 0 1 0 789.6 1037.1',
+      hitD: 'M 787.6 1037.1 A 20 20 0 1 0 827.6 1037.1 A 20 20 0 1 0 787.6 1037.1',
       startDivider: { type: 'WESEL', label: 'Wesel W73', km: 'KM 26+723' },
       endDivider: { type: 'JALUR', label: 'Jalur 7 Track LAA', km: 'KM 26+723' },
     },
-    {
+{
       id: 'wesel_w31c1_932',
       code: 'WESEL W31C1',
       title: 'Wesel W31C1 / W51D1 (Jalur 2 ke Jalur 1, KM 11+650)',
@@ -4201,157 +4201,186 @@ export default function SchematicViewer({
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ width: '100%', height: '100%' }}
             >
-              {allTrackLines.map((line) => {
-                const isHovered = hoveredLine?.id === line.id;
-                // CRITICAL FIX: Only match strictly by unique line.id so clicking 1 line NEVER highlights 3 lines!
-                const isActive = selectedLocation?.id === line.id;
-                const lineLogs = getLineLogs(line);
-                const hasWork = lineLogs.length > 0;
+              {/* ========================================================
+                  LAYER 1: REGULAR TRACK & AUXILIARY LINES
+                  - All lines (tracks, wesels, FRP, DS, AS, AJ)
+                  - Rendered first so dots always sit on top
+                  ======================================================== */}
+              {allTrackLines
+                .filter((line) => !line.isDot)
+                .map((line) => {
+                  const isHovered = hoveredLine?.id === line.id;
+                  const isActive = selectedLocation?.id === line.id;
 
-                return (
-                  <g
-                    key={line.id}
-                    className="pointer-events-auto cursor-pointer"
-                    onMouseEnter={() => setHoveredLine(line)}
-                    onMouseLeave={() => setHoveredLine(null)}
-                    onClick={() => {
-                      setHoveredLine(line);
-                      if (onSelectLocation) onSelectLocation(line);
-                    }}
-                  >
-                    {line.isDot ? (
-                      <>
-                        {/* 1. Generous 36px hit-area circle for effortless cursor detection */}
-                        <circle
-                          cx={line.cx}
-                          cy={line.cy}
-                          r="18"
-                          fill="transparent"
-                          stroke="transparent"
-                        />
+                  return (
+                    <g
+                      key={line.id}
+                      className="pointer-events-auto cursor-pointer"
+                      onMouseEnter={() => setHoveredLine(line)}
+                      onMouseLeave={() => setHoveredLine(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHoveredLine(line);
+                        if (onSelectLocation) onSelectLocation(line);
+                      }}
+                    >
+                      {/* Generous hit-area for effortless cursor detection */}
+                      <path
+                        d={line.hitD || line.d}
+                        stroke="transparent"
+                        strokeWidth={line.isCrossing ? 42 : 34}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
 
-                        {/* 2. Default visible black junction circle */}
-                        <circle
-                          cx={line.cx}
-                          cy={line.cy}
-                          r={line.r || 5.5}
-                          fill="#000000"
-                          stroke="#ffffff"
-                          strokeWidth="0.8"
-                        />
+                      {/* On Hover or Active (1 line only): Glowing Line in authentic color */}
+                      {(isHovered || isActive) && (() => {
+                        const isAirSection = line.code === 'AIR SECTION (AS)' || line.id.startsWith('overlap_as_');
+                        const isMechanicalApparatus = line.category === 'DISCONNECTING SWITCH (DS)' ||
+                                                      line.category === 'SECTION INSULATOR (FRP)' ||
+                                                      line.id.startsWith('ds_') ||
+                                                      line.id.startsWith('frp_');
+                        const isBlackApparatusOrDivider = isMechanicalApparatus || isAirSection || line.color === '#000000';
+                        
+                        const strokeCol = isBlackApparatusOrDivider ? '#000000' : line.color;
+                        const outerStrokeCol = isBlackApparatusOrDivider ? '#ffffff' : line.color;
+                        const outerWidth = isAirSection ? '8' : (line.id.startsWith('ds_') ? '8' : '10');
+                        const coreWidth = isAirSection ? '3.5' : (line.id.startsWith('ds_') ? '4' : '6');
+                        const glowFilter = isBlackApparatusOrDivider
+                          ? 'drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 12px rgba(56,189,248,0.95)) drop-shadow(0 0 20px rgba(56,189,248,0.7))'
+                          : `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`;
 
-                        {/* 3. On Hover or Active: Cyan Aura / Glowing Halo */}
-                        {(isHovered || isActive) && (
+                        return (
                           <>
-                            <circle
-                              cx={line.cx}
-                              cy={line.cy}
-                              r="14"
+                            {/* Outer Glow / Halo */}
+                            <path
+                              d={line.d}
+                              stroke={outerStrokeCol}
+                              strokeWidth={outerWidth}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
                               fill="none"
-                              stroke="#38bdf8"
-                              strokeWidth="3.5"
                               style={{
-                                filter: 'drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.8))',
+                                opacity: isBlackApparatusOrDivider ? 0.95 : 0.85,
+                                filter: isBlackApparatusOrDivider ? undefined : glowFilter,
                               }}
                             />
-                            <circle
-                              cx={line.cx}
-                              cy={line.cy}
-                              r="7.5"
-                              fill="#000000"
-                              stroke="#ffffff"
-                              strokeWidth="1.5"
+
+                            {/* Core Solid Line */}
+                            <path
+                              d={line.d}
+                              stroke={strokeCol}
+                              strokeWidth={coreWidth}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              fill="none"
+                              style={{
+                                filter: isBlackApparatusOrDivider ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                              }}
                             />
-                            <circle
-                              cx={line.cx}
-                              cy={line.cy}
-                              r="2.5"
-                              fill="#ffffff"
-                            />
+
+                            {/* 3D Embossed White Laser Centerline */}
+                            {!isBlackApparatusOrDivider && (
+                              <path
+                                d={line.d}
+                                stroke="#ffffff"
+                                strokeWidth="2.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                fill="none"
+                                style={{
+                                  opacity: 0.95,
+                                  filter: 'drop-shadow(0 0 2px #ffffff)',
+                                }}
+                              />
+                            )}
                           </>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {/* 1. Generous 34px hit-area for effortless cursor detection */}
-                        <path
-                          d={line.hitD || line.d}
-                          stroke="transparent"
-                          strokeWidth={line.isCrossing ? 42 : 34}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          fill="none"
-                        />
+                        );
+                      })()}
+                    </g>
+                  );
+                })}
 
-                        {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS; Track color for tracks & AJ) */}
-                        {(isHovered || isActive) && (() => {
-                          const isAirSection = line.code === 'AIR SECTION (AS)' || line.id.startsWith('overlap_as_');
-                          const isMechanicalApparatus = line.category === 'DISCONNECTING SWITCH (DS)' ||
-                                                        line.category === 'SECTION INSULATOR (FRP)' ||
-                                                        line.id.startsWith('ds_') ||
-                                                        line.id.startsWith('frp_');
-                          const isBlackApparatusOrDivider = isMechanicalApparatus || isAirSection || line.color === '#000000';
-                          
-                          const strokeCol = isBlackApparatusOrDivider ? '#000000' : line.color;
-                          const outerStrokeCol = isBlackApparatusOrDivider ? '#ffffff' : line.color;
-                          const outerWidth = isAirSection ? '8' : (line.id.startsWith('ds_') ? '8' : '10');
-                          const coreWidth = isAirSection ? '3.5' : (line.id.startsWith('ds_') ? '4' : '6');
-                          const glowFilter = isBlackApparatusOrDivider
-                            ? 'drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 12px rgba(56,189,248,0.95)) drop-shadow(0 0 20px rgba(56,189,248,0.7))'
-                            : `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`;
+              {/* ========================================================
+                  LAYER 2: INTERACTIVE WESEL JUNCTION DOTS (ALWAYS ON TOP)
+                  - Rendered on top of all lines so no lines can steal hover
+                  - Generous 40px transparent hit-area circle for effortless cursor detection
+                  ======================================================== */}
+              {allTrackLines
+                .filter((line) => line.isDot)
+                .map((line) => {
+                  const isHovered = hoveredLine?.id === line.id;
+                  const isActive = selectedLocation?.id === line.id;
 
-                          return (
-                            <>
-                              {/* Outer Glow / Halo (Vibrant colored glow for tracks, wesel & AJ; Crisp luminous electric halo for AS, DS & FRP) */}
-                              <path
-                                d={line.d}
-                                stroke={outerStrokeCol}
-                                strokeWidth={outerWidth}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                                style={{
-                                  opacity: isBlackApparatusOrDivider ? 0.95 : 0.85,
-                                  filter: isBlackApparatusOrDivider ? undefined : glowFilter,
-                                }}
-                              />
+                  return (
+                    <g
+                      key={line.id}
+                      className="pointer-events-auto cursor-pointer"
+                      onMouseEnter={() => setHoveredLine(line)}
+                      onMouseLeave={() => setHoveredLine(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHoveredLine(line);
+                        if (onSelectLocation) onSelectLocation(line);
+                      }}
+                    >
+                      {/* 1. Generous 40px hit-area circle for effortless cursor detection */}
+                      <circle
+                        cx={line.cx}
+                        cy={line.cy}
+                        r="20"
+                        fill="transparent"
+                        stroke="transparent"
+                      />
 
-                              {/* Core Solid Line (Black for AS, DS, FRP; Track Color for AJ & tracks) */}
-                              <path
-                                d={line.d}
-                                stroke={strokeCol}
-                                strokeWidth={coreWidth}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                                style={{
-                                  filter: isBlackApparatusOrDivider ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                                }}
-                              />
+                      {/* 2. Default visible black junction circle */}
+                      <circle
+                        cx={line.cx}
+                        cy={line.cy}
+                        r={line.r || 5.5}
+                        fill="#000000"
+                        stroke="#ffffff"
+                        strokeWidth="1.0"
+                        style={{
+                          pointerEvents: 'none',
+                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))',
+                        }}
+                      />
 
-                              {/* 3D Embossed White Laser Centerline for tracks, wesel, and Air Joint (AJ) */}
-                              {!isBlackApparatusOrDivider && (
-                                <path
-                                  d={line.d}
-                                  stroke="#ffffff"
-                                  strokeWidth="2.2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  fill="none"
-                                  style={{
-                                    opacity: 0.95,
-                                    filter: 'drop-shadow(0 0 2px #ffffff)',
-                                  }}
-                                />
-                              )}
-                            </>
-                          );
-                        })()}
-                      </>
-                    )}
-                  </g>
-                );
-              })}
+                      {/* 3. On Hover or Active: Cyan Aura / Glowing Halo */}
+                      {(isHovered || isActive) && (
+                        <g style={{ pointerEvents: 'none' }}>
+                          <circle
+                            cx={line.cx}
+                            cy={line.cy}
+                            r="15"
+                            fill="none"
+                            stroke="#38bdf8"
+                            strokeWidth="3.5"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.8))',
+                            }}
+                          />
+                          <circle
+                            cx={line.cx}
+                            cy={line.cy}
+                            r="8"
+                            fill="#000000"
+                            stroke="#ffffff"
+                            strokeWidth="1.5"
+                          />
+                          <circle
+                            cx={line.cx}
+                            cy={line.cy}
+                            r="2.8"
+                            fill="#ffffff"
+                          />
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
 
               {/* ========================================================
                   ACTIVE WORK BEACONS (TITIK MERAH GLOW KEDIP-KEDIP OTOMATIS)
