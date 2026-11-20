@@ -811,7 +811,7 @@ export async function downloadMapPng({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = true,
+  showOfficialHeader = false,
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
@@ -841,7 +841,7 @@ export async function printMapWindow({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = true,
+  showOfficialHeader = false,
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
