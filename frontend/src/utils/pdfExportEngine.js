@@ -29,7 +29,7 @@ export async function renderUltraHdCanvas({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = true,
+  showOfficialHeader = false,
   scale = 2.0, // 2.0 scale gives 6550 x 2838 px (True 300 DPI Ultra HD)
 }) {
   const baseWidth = 3275;
@@ -758,7 +758,7 @@ export async function downloadMapPdf({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  showOfficialHeader = true,
+  showOfficialHeader = false,
   paperSize = 'NATIVE', // 'NATIVE' (Default CAD 600 DPI) | 'A3' | 'A4'
   quality = 0.95,
 }) {

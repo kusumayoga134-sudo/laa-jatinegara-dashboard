@@ -32,7 +32,7 @@ export default function PdfExportModal({
   const [paperSize, setPaperSize] = useState('NATIVE'); // 'NATIVE' (Default Rekomendasi CAD) | 'A3' | 'A4'
   const [showCallouts, setShowCallouts] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
-  const [showOfficialHeader, setShowOfficialHeader] = useState(true);
+  const showOfficialHeader = false;
   
   const [previewDataUrl, setPreviewDataUrl] = useState(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(true);
@@ -318,18 +318,6 @@ export default function PdfExportModal({
               />
               <span className="font-semibold text-slate-300">
                 Titik Radar Glow Kedip
-              </span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={showOfficialHeader}
-                onChange={(e) => setShowOfficialHeader(e.target.checked)}
-                className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-slate-800 border-slate-700 cursor-pointer"
-              />
-              <span className="font-semibold text-slate-300">
-                Bingkai & Kop Surat Resmi (Danantara & KAI)
               </span>
             </label>
           </div>
