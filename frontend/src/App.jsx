@@ -196,6 +196,17 @@ export default function App() {
           onSelectLocation={(loc) => setSelectedLocation(loc)}
           isAdmin={isAdmin}
           onOpenAddLog={handleOpenAddLog}
+          totalLogsCount={logs.length}
+          onOpenExportPdf={() => setIsExportPdfOpen(true)}
+          onOpenAllLogs={() =>
+            setSelectedLocation({
+              code: '',
+              title: 'Daftar Seluruh Riwayat Pekerjaan LAA',
+              km: 'Seluruh Lintas LAA 1.9',
+              category: 'TOTAL PEKERJAAN',
+              isAllLogs: true,
+            })
+          }
         />
       </main>
 

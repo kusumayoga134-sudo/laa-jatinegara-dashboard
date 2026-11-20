@@ -235,50 +235,6 @@ export default function Header({
               </button>
             )}
 
-            {/* Total Work Clickable Badge */}
-            <button
-              onClick={onOpenAllLogs}
-              className="h-11 bg-slate-50/90 hover:bg-orange-50/60 border border-slate-200/90 hover:border-orange-300 rounded-xl px-3.5 flex items-center space-x-2.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
-              title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
-            >
-              <div className="w-8 h-8 rounded-lg bg-orange-100/90 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-                <ClipboardList className="w-4 h-4" />
-              </div>
-
-              <div>
-                <div className="text-[9.5px] text-slate-500 group-hover:text-orange-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
-                  <span>TOTAL PEKERJAAN</span>
-                  <ChevronRight className="w-2.5 h-2.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <div className="font-mono font-black text-slate-900 text-xs sm:text-sm flex items-center gap-1 mt-1 leading-none">
-                  <span className="text-orange-600">{totalLogsCount}</span>
-                  <span className="font-semibold text-slate-700 text-xs font-sans">Dicatat</span>
-                </div>
-              </div>
-            </button>
-
-            {/* Export PDF Button */}
-            {onOpenExportPdf && (
-              <button
-                onClick={onOpenExportPdf}
-                className="h-11 bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200/90 hover:border-rose-300 rounded-xl px-3.5 flex items-center space-x-2.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
-                title="Buka Menu Export PDF & Cetak Peta Ultra HD"
-              >
-                <div className="w-8 h-8 rounded-lg bg-rose-100/90 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-[9.5px] text-slate-500 group-hover:text-rose-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
-                    <span>CETAK PETA</span>
-                  </div>
-                  <div className="font-black text-slate-900 text-xs sm:text-sm flex items-center gap-1 mt-1 leading-none">
-                    <span className="text-rose-600">Export</span>
-                    <span className="font-semibold text-slate-700 text-xs font-sans">PDF</span>
-                  </div>
-                </div>
-              </button>
-            )}
-
             {/* Live Clock Widget */}
             <div className="h-11 bg-slate-50/90 border border-slate-200/90 rounded-xl px-3.5 flex items-center space-x-2.5 shadow-2xs shrink-0 text-left">
               <div className="w-8 h-8 rounded-lg bg-blue-100/90 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">

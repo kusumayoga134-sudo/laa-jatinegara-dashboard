@@ -15,6 +15,7 @@ import {
   GitCommit,
   X,
   ClipboardList,
+  FileText,
 } from 'lucide-react';
 
 // =========================================================================
@@ -3642,6 +3643,9 @@ export default function SchematicViewer({
   onSelectLocation,
   isAdmin = false,
   onOpenAddLog,
+  totalLogsCount = 0,
+  onOpenAllLogs,
+  onOpenExportPdf,
 }) {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -3907,9 +3911,57 @@ export default function SchematicViewer({
           )}
         </div>
 
-        {/* Right Tools: Resolution & Zoom */}
-        <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
-          <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl p-0.5 sm:p-1 border border-slate-200">
+        {/* Right Tools: Total Work, Export PDF & Zoom Controls */}
+        <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+          
+          {/* Total Work Clickable Badge */}
+          {onOpenAllLogs && (
+            <button
+              onClick={onOpenAllLogs}
+              className="h-9 sm:h-10 bg-slate-50/90 hover:bg-orange-50/60 border border-slate-200/90 hover:border-orange-300 rounded-xl px-2.5 sm:px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+              title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
+            >
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-orange-100/90 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+                <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </div>
+
+              <div>
+                <div className="text-[9px] text-slate-500 group-hover:text-orange-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+                  <span>TOTAL PEKERJAAN</span>
+                  <ChevronRight className="w-2.5 h-2.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="font-mono font-black text-slate-900 text-[11px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+                  <span className="text-orange-600">{totalLogsCount}</span>
+                  <span className="font-semibold text-slate-700 font-sans">Dicatat</span>
+                </div>
+              </div>
+            </button>
+          )}
+
+          {/* Export PDF Button */}
+          {onOpenExportPdf && (
+            <button
+              onClick={onOpenExportPdf}
+              className="h-9 sm:h-10 bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200/90 hover:border-rose-300 rounded-xl px-2.5 sm:px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+              title="Buka Menu Export PDF & Cetak Peta Ultra HD"
+            >
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-rose-100/90 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </div>
+              <div>
+                <div className="text-[9px] text-slate-500 group-hover:text-rose-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+                  <span>CETAK PETA</span>
+                </div>
+                <div className="font-black text-slate-900 text-[11px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+                  <span className="text-rose-600">Export</span>
+                  <span className="font-semibold text-slate-700 font-sans">PDF</span>
+                </div>
+              </div>
+            </button>
+          )}
+
+          {/* Zoom Controls */}
+          <div className="h-9 sm:h-10 flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-xl px-1 sm:px-1.5 border border-slate-200 shadow-2xs shrink-0">
             <button
               onClick={handleZoomOut}
               disabled={zoom <= 1.0}
@@ -3923,7 +3975,7 @@ export default function SchematicViewer({
               <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
-            <span className="text-[11px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-12 sm:min-w-16 text-center">
+            <span className="text-[11px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-12 sm:min-w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
