@@ -227,13 +227,14 @@ export default function WorkHistoryPanel({
   onOpenLogin,
 }) {
   const isAllLogsMode = Boolean(locationData?.isAllLogs) || !locationData?.code;
+  const isOnlyForm = Boolean(locationData?.onlyForm);
 
   // Station Filter (Hanya Nama Stasiun Keseluruhan)
   const [stationFilter, setStationFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Admin Form State (Add / Edit)
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  // Admin Form State (Add / Edit) - Directly open if autoOpenForm or onlyForm
+  const [isFormOpen, setIsFormOpen] = useState(Boolean(locationData?.autoOpenForm || locationData?.onlyForm));
   const [editingLogId, setEditingLogId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -269,9 +270,9 @@ export default function WorkHistoryPanel({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Auto-open Add Form when triggered with autoOpenForm flag
+  // Auto-open Add Form when triggered with autoOpenForm or onlyForm flag
   useEffect(() => {
-    if (locationData?.autoOpenForm && isAdmin) {
+    if ((locationData?.autoOpenForm || locationData?.onlyForm) && isAdmin) {
       handleOpenAdd();
     }
   }, [locationData, isAdmin]);
@@ -381,10 +382,21 @@ export default function WorkHistoryPanel({
     return action.replace(/_/g, ' ');
   };
 
+  // Close Form and clean up
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingLogId(null);
+    if (isOnlyForm && onClose) {
+      onClose();
+    }
+  };
+
   // Open Form to Add New Work Log (Prefilled with exact unique track/apparatus name)
   const handleOpenAdd = () => {
     setEditingLogId(null);
-    const initialTarget = locationTitle || locationCode || 'ST. JATINEGARA (Jalur 1)';
+    const initialTarget = isOnlyForm && isAllLogsMode
+      ? 'ST. JATINEGARA (Jalur 1)'
+      : (locationTitle || locationCode || 'ST. JATINEGARA (Jalur 1)');
     setFormData({
       targetCode: initialTarget,
       targetId: locationData?.id || '',
@@ -429,6 +441,9 @@ export default function WorkHistoryPanel({
       }
       setIsFormOpen(false);
       setEditingLogId(null);
+      if (isOnlyForm && onClose) {
+        onClose();
+      }
     } catch (err) {
       console.error('Error saving log:', err);
     } finally {
@@ -452,14 +467,17 @@ export default function WorkHistoryPanel({
 
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
-      <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 transition-opacity"
-        onClick={onClose}
-      />
+      {/* Mobile Backdrop Overlay - Hanya ditampilkan jika BUKAN mode input-only */}
+      {!isOnlyForm && (
+        <div
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 transition-opacity"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Main Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
+      {/* Main Drawer Panel: DAFTAR RIWAYAT PEKERJAAN - Hanya ditampilkan jika BUKAN mode input-only */}
+      {!isOnlyForm && (
+        <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-250 select-none text-slate-800">
         
         {/* ========================================================
             DRAWER HEADER
@@ -779,6 +797,7 @@ export default function WorkHistoryPanel({
         </div>
 
       </div>
+      )}
 
       {/* ========================================================
           ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN (ELEGAN & MODERN)
@@ -817,7 +836,7 @@ export default function WorkHistoryPanel({
 
               <button
                 type="button"
-                onClick={() => setIsFormOpen(false)}
+                onClick={handleCloseForm}
                 className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
                 title="Tutup (Esc)"
               >
@@ -1112,7 +1131,7 @@ export default function WorkHistoryPanel({
               <div className="flex items-center space-x-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  onClick={handleCloseForm}
                   className="w-1/3 py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
                 >
                   Batal

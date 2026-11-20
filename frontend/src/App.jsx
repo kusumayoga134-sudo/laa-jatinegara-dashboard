@@ -133,21 +133,23 @@ export default function App() {
     }
   };
 
-  // Quick Open Add Log from Header or Line (Directly opens the input modal prefilled)
+  // Quick Open Add Log from Header or Line (Directly opens the input modal prefilled without showing history drawer)
   const handleOpenAddLog = (lineTarget) => {
     if (lineTarget) {
       setSelectedLocation({
         ...lineTarget,
+        onlyForm: true,
         autoOpenForm: true,
       });
     } else {
       setSelectedLocation({
-        code: 'NASPAN 1 JNG-KLD (HU)',
+        code: '',
         title: 'Input Catatan Pekerjaan Baru',
         km: 'Lintas LAA 1.9',
         category: 'INPUT PEKERJAAN',
-        isAllLogs: true,
+        onlyForm: true,
         autoOpenForm: true,
+        isAllLogs: true,
       });
     }
   };
