@@ -902,7 +902,7 @@ export default function WorkHistoryPanel({
                               key={`${item.id}-${item.title}`}
                               type="button"
                               onClick={() => {
-                                setFormData({ ...formData, targetCode: item.title });
+                                setFormData({ ...formData, targetCode: item.code || item.title });
                                 setIsSuggestOpen(false);
                               }}
                               className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50/80 transition flex items-center justify-between gap-2.5 group cursor-pointer"

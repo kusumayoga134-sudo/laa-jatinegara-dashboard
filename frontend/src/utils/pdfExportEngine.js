@@ -130,7 +130,7 @@ export async function renderUltraHdCanvas({
     ctx.textAlign = 'right';
     ctx.fillStyle = '#475569';
     ctx.font = `bold ${11 * scale}px sans-serif`;
-    ctx.fillText('DOKUMEN RESMI TEKNIK LAA — FORMAT ULTRA HD (300 DPI)', totalWidth - 35 * scale, 120 * scale);
+    ctx.fillText('DOKUMEN RESMI TEKNIK LAA — FORMAT ULTRA HD (600 DPI)', totalWidth - 35 * scale, 120 * scale);
     ctx.restore();
 
     // Footer Text
@@ -218,65 +218,150 @@ export async function renderUltraHdCanvas({
     });
   }
 
-  // 4. Draw Callout Boxes with Arrows pointing directly to radar beacons
+  // 4. Draw Callout Boxes with Arrows pointing directly to radar beacons (Collision-Free Layout)
   if (showCallouts && linesWithLogs.length > 0) {
-    linesWithLogs.forEach(({ line, logs, center }) => {
+    const cardW = 275 * scale;
+    const headerHeight = 36 * scale;
+    const logItemHeight = 40 * scale;
+
+    // Step 1: Pre-calculate card properties and natural target coordinates
+    const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
       const targetX = toCanvasX(center.x);
       const targetY = toCanvasY(center.y);
+      const displayLogs = logs.slice(0, 3);
+      const footerExtra = logs.length > 3 ? 18 * scale : 0;
+      const cardH = headerHeight + displayLogs.length * logItemHeight + 12 * scale + footerExtra;
 
-      // Card Dimensions in scale
-      const cardW = 380 * scale;
-      const displayLogs = logs.slice(0, 3); // Top 3 logs
-      const logItemHeight = 44 * scale;
-      const headerHeight = 42 * scale;
-      const footerExtra = logs.length > 3 ? 20 * scale : 0;
-      const cardH = headerHeight + displayLogs.length * logItemHeight + 14 * scale + footerExtra;
+      // Smart Corridor & Direction Assignment:
+      // Upper corridor tracks: center.y < 850
+      // Lower corridor tracks: center.y >= 850
+      const isUpper = center.y < 850;
+      let side = 'above';
+      let boundaryY;
 
-      // Smart positioning: If target is in lower half of map, put box ABOVE; else BELOW
-      const isBottomHalf = center.y > 700;
-      let cardY;
-      let arrowStartY;
-
-      if (isBottomHalf) {
-        cardY = targetY - cardH - 45 * scale;
-        arrowStartY = cardY + cardH;
+      if (isUpper) {
+        // Hilir tracks (y <= 675) placed ABOVE upper rail corridor
+        // Hulu tracks (y > 675) placed BELOW upper rail corridor
+        const isHi = /\b(hi|hilir)\b/i.test(line.code) || /\b(hi|hilir)\b/i.test(line.title) || center.y <= 675;
+        if (isHi) {
+          side = 'above';
+          boundaryY = toCanvasY(Math.min(center.y - 30, 620));
+        } else {
+          side = 'below';
+          boundaryY = toCanvasY(Math.max(center.y + 30, 740));
+        }
       } else {
-        cardY = targetY + 45 * scale;
-        arrowStartY = cardY;
+        // Lower corridor tracks (Cakung - Kranji - Bekasi)
+        if (center.y <= 1085) {
+          side = 'above';
+          boundaryY = toCanvasY(Math.min(center.y - 30, 940));
+        } else {
+          side = 'below';
+          boundaryY = toCanvasY(Math.max(center.y + 30, 1170));
+        }
       }
 
-      // Clamp X position so card doesn't overflow left or right map borders
-      let cardX = targetX - cardW / 2;
+      let initialY = side === 'above' ? boundaryY - cardH : boundaryY;
+      let initialX = targetX - cardW / 2;
       const minX = 25 * scale;
       const maxX = totalWidth - cardW - 25 * scale;
-      cardX = Math.max(minX, Math.min(maxX, cardX));
+      initialX = Math.max(minX, Math.min(maxX, initialX));
 
-      const arrowStartX = Math.max(cardX + 30 * scale, Math.min(cardX + cardW - 30 * scale, targetX));
+      return {
+        line,
+        logs,
+        displayLogs,
+        center,
+        targetX,
+        targetY,
+        cardW,
+        cardH,
+        headerHeight,
+        logItemHeight,
+        footerExtra,
+        side,
+        isUpper,
+        x: initialX,
+        y: initialY,
+      };
+    });
+
+    // Step 2: Group cards by [corridor, side] to resolve collisions
+    const groups = {};
+    preparedCards.forEach((c) => {
+      const key = `${c.isUpper ? 'upper' : 'lower'}_${c.side}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(c);
+    });
+
+    // Step 3: Collision resolution (Horizontal shifting & Vertical Tiering)
+    Object.values(groups).forEach((group) => {
+      group.sort((a, b) => a.targetX - b.targetX);
+
+      for (let i = 1; i < group.length; i++) {
+        const prev = group[i - 1];
+        const curr = group[i];
+        const gap = 16 * scale;
+        const overlap = (prev.x + prev.cardW + gap) - curr.x;
+
+        if (overlap > 0) {
+          // If shift is moderate (< 90 scale), try pushing horizontally
+          const canShiftRight = (curr.x + overlap + curr.cardW) <= (totalWidth - 25 * scale);
+          const shiftDistance = Math.abs((curr.x + overlap) - (curr.targetX - curr.cardW / 2));
+
+          if (canShiftRight && shiftDistance < 100 * scale) {
+            curr.x += overlap;
+          } else {
+            // Otherwise, elevate / lower to Tier 2 to completely avoid overlap
+            if (curr.side === 'above') {
+              curr.y = prev.y - curr.cardH - 18 * scale;
+            } else {
+              curr.y = prev.y + prev.cardH + 18 * scale;
+            }
+          }
+        }
+      }
+    });
+
+    // Step 4: Render Callout Cards and Leader Arrows
+    preparedCards.forEach((card) => {
+      const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY, targetX, targetY, side } = card;
 
       ctx.save();
 
       // ==========================================
       // A. Draw Pointer Arrow / Leader Line
       // ==========================================
-      // Outer Glow shadow for arrow line
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-      ctx.lineWidth = 4 * scale;
+      const arrowStartX = Math.max(cardX + 24 * scale, Math.min(cardX + cardW - 24 * scale, targetX));
+      const arrowStartY = side === 'above' ? cardY + cardH : cardY;
+
+      // Outer glow outline for leader arrow (makes it pop cleanly over any background)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 5 * scale;
       ctx.beginPath();
       ctx.moveTo(arrowStartX, arrowStartY);
       ctx.lineTo(targetX, targetY);
       ctx.stroke();
 
-      // Sharp Core Leader Line
+      // Shadow stroke
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.lineWidth = 3.2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(arrowStartX, arrowStartY);
+      ctx.lineTo(targetX, targetY);
+      ctx.stroke();
+
+      // Sharp Core Leader Line with line's color
       ctx.strokeStyle = line.color || '#0f172a';
-      ctx.lineWidth = 2.5 * scale;
+      ctx.lineWidth = 2 * scale;
       ctx.beginPath();
       ctx.moveTo(arrowStartX, arrowStartY);
       ctx.lineTo(targetX, targetY);
       ctx.stroke();
 
-      // Arrowhead Triangle at Target Point
+      // Arrowhead Triangle at Target Radar Point
       const angle = Math.atan2(targetY - arrowStartY, targetX - arrowStartX);
-      const headLen = 14 * scale;
+      const headLen = 13 * scale;
       ctx.fillStyle = line.color || '#0f172a';
       ctx.beginPath();
       ctx.moveTo(targetX, targetY);
@@ -304,14 +389,14 @@ export async function renderUltraHdCanvas({
       // B. Draw Callout Box Container
       // ==========================================
       // Drop Shadow
-      ctx.shadowColor = 'rgba(15, 23, 42, 0.22)';
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.20)';
       ctx.shadowBlur = 14 * scale;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 6 * scale;
 
       // Card Background
       ctx.fillStyle = '#ffffff';
-      roundRect(ctx, cardX, cardY, cardW, cardH, 10 * scale);
+      roundRect(ctx, cardX, cardY, cardW, cardH, 9 * scale);
       ctx.fill();
 
       // Reset shadow for inner elements
@@ -319,66 +404,66 @@ export async function renderUltraHdCanvas({
 
       // Card Border with track line accent color
       ctx.strokeStyle = line.color || '#334155';
-      ctx.lineWidth = 2.2 * scale;
-      roundRect(ctx, cardX, cardY, cardW, cardH, 10 * scale);
+      ctx.lineWidth = 2 * scale;
+      roundRect(ctx, cardX, cardY, cardW, cardH, 9 * scale);
       ctx.stroke();
 
       // Left Accent Strip
       ctx.fillStyle = line.color || '#139a47';
-      roundRectCustom(ctx, cardX, cardY, 6 * scale, cardH, 10 * scale, 0, 0, 10 * scale);
+      roundRectCustom(ctx, cardX, cardY, 5 * scale, cardH, 9 * scale, 0, 0, 9 * scale);
       ctx.fill();
 
       // Card Header Background Banner
       ctx.fillStyle = '#f8fafc';
-      roundRectCustom(ctx, cardX + 6 * scale, cardY, cardW - 6 * scale, headerHeight, 0, 10 * scale, 0, 0);
+      roundRectCustom(ctx, cardX + 5 * scale, cardY, cardW - 5 * scale, headerHeight, 0, 9 * scale, 0, 0);
       ctx.fill();
 
       // Header Divider Line
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 1 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 6 * scale, cardY + headerHeight);
+      ctx.moveTo(cardX + 5 * scale, cardY + headerHeight);
       ctx.lineTo(cardX + cardW, cardY + headerHeight);
       ctx.stroke();
 
       // Header: Colored Dot
-      const headerDotX = cardX + 18 * scale;
-      const headerDotY = cardY + 21 * scale;
+      const headerDotX = cardX + 16 * scale;
+      const headerDotY = cardY + 18 * scale;
       ctx.fillStyle = line.color || '#139a47';
       ctx.beginPath();
-      ctx.arc(headerDotX, headerDotY, 5 * scale, 0, Math.PI * 2);
+      ctx.arc(headerDotX, headerDotY, 4.5 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Header: Track Title
       ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${12 * scale}px sans-serif`;
+      ctx.font = `bold ${10.5 * scale}px sans-serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      const maxTitleW = cardW - 140 * scale;
+      const maxTitleW = cardW - 110 * scale;
       const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-      ctx.fillText(titleText, cardX + 28 * scale, headerDotY - 3 * scale);
+      ctx.fillText(titleText, cardX + 25 * scale, headerDotY - 3 * scale);
 
       // Header: KM Subtitle
       ctx.fillStyle = '#64748b';
-      ctx.font = `bold ${8.5 * scale}px monospace`;
-      ctx.fillText(line.km || '', cardX + 28 * scale, headerDotY + 9 * scale);
+      ctx.font = `bold ${7.5 * scale}px monospace`;
+      ctx.fillText(line.km || '', cardX + 25 * scale, headerDotY + 8 * scale);
 
       // Header: Job Count Badge (Pill)
-      const badgeW = 75 * scale;
-      const badgeH = 18 * scale;
-      const badgeX = cardX + cardW - badgeW - 10 * scale;
-      const badgeY = cardY + 12 * scale;
+      const badgeW = 68 * scale;
+      const badgeH = 16 * scale;
+      const badgeX = cardX + cardW - badgeW - 8 * scale;
+      const badgeY = cardY + 10 * scale;
 
       ctx.fillStyle = '#fef2f2';
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 6 * scale);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 5 * scale);
       ctx.fill();
       ctx.strokeStyle = '#fca5a5';
       ctx.lineWidth = 1 * scale;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 6 * scale);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 5 * scale);
       ctx.stroke();
 
       ctx.fillStyle = '#b91c1c';
-      ctx.font = `bold ${8.5 * scale}px sans-serif`;
+      ctx.font = `bold ${7.5 * scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`${logs.length} Pekerjaan`, badgeX + badgeW / 2, badgeY + badgeH / 2);
@@ -386,7 +471,7 @@ export async function renderUltraHdCanvas({
       // ==========================================
       // C. Draw Work Log Items Inside Callout
       // ==========================================
-      let currentLogY = cardY + headerHeight + 8 * scale;
+      let currentLogY = cardY + headerHeight + 6 * scale;
 
       displayLogs.forEach((log, logIdx) => {
         const { dateStr, timeStr } = formatLogTimestamp(log.timestamp);
@@ -396,38 +481,38 @@ export async function renderUltraHdCanvas({
           ctx.strokeStyle = '#f1f5f9';
           ctx.lineWidth = 1 * scale;
           ctx.beginPath();
-          ctx.moveTo(cardX + 16 * scale, currentLogY - 4 * scale);
-          ctx.lineTo(cardX + cardW - 16 * scale, currentLogY - 4 * scale);
+          ctx.moveTo(cardX + 14 * scale, currentLogY - 3 * scale);
+          ctx.lineTo(cardX + cardW - 14 * scale, currentLogY - 3 * scale);
           ctx.stroke();
         }
 
         // Row 1: Timestamp & Status
         ctx.textAlign = 'left';
         ctx.fillStyle = '#2563eb';
-        ctx.font = `bold ${8.5 * scale}px monospace`;
-        ctx.fillText(`🕒 ${dateStr} ${timeStr}`, cardX + 16 * scale, currentLogY + 6 * scale);
+        ctx.font = `bold ${7.5 * scale}px monospace`;
+        ctx.fillText(`🕒 ${dateStr} ${timeStr}`, cardX + 14 * scale, currentLogY + 5 * scale);
 
         // Status Tag
         const statusText = (log.status || 'SELESAI').toUpperCase();
         ctx.textAlign = 'right';
         ctx.fillStyle = statusText === 'PROGRESS' ? '#d97706' : '#15803d';
-        ctx.font = `bold ${8 * scale}px sans-serif`;
-        ctx.fillText(`✓ ${statusText}`, cardX + cardW - 16 * scale, currentLogY + 6 * scale);
+        ctx.font = `bold ${7.5 * scale}px sans-serif`;
+        ctx.fillText(`✓ ${statusText}`, cardX + cardW - 14 * scale, currentLogY + 5 * scale);
 
         // Row 2: Action Name / Job Title
         ctx.textAlign = 'left';
         ctx.fillStyle = '#0f172a';
-        ctx.font = `bold ${10 * scale}px sans-serif`;
-        const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', cardW - 32 * scale);
-        ctx.fillText(actionTitle, cardX + 16 * scale, currentLogY + 20 * scale);
+        ctx.font = `bold ${9 * scale}px sans-serif`;
+        const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', cardW - 28 * scale);
+        ctx.fillText(actionTitle, cardX + 14 * scale, currentLogY + 17 * scale);
 
         // Row 3: Executor / Technician & Brief Note
         ctx.fillStyle = '#475569';
-        ctx.font = `500 ${8.5 * scale}px sans-serif`;
+        ctx.font = `500 ${7.5 * scale}px sans-serif`;
         const techStr = log.technician ? `👷 ${log.technician}` : 'UPT 1.9';
         const descStr = log.description ? ` • ${log.description}` : '';
-        const infoFull = truncateText(ctx, `${techStr}${descStr}`, cardW - 32 * scale);
-        ctx.fillText(infoFull, cardX + 16 * scale, currentLogY + 32 * scale);
+        const infoFull = truncateText(ctx, `${techStr}${descStr}`, cardW - 28 * scale);
+        ctx.fillText(infoFull, cardX + 14 * scale, currentLogY + 28 * scale);
 
         currentLogY += logItemHeight;
       });
@@ -435,9 +520,9 @@ export async function renderUltraHdCanvas({
       // Extra note if more than 3 logs
       if (logs.length > 3) {
         ctx.fillStyle = '#94a3b8';
-        ctx.font = `italic bold ${8 * scale}px sans-serif`;
+        ctx.font = `italic bold ${7.5 * scale}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya tercatat pada seksi ini`, cardX + cardW / 2, currentLogY + 4 * scale);
+        ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya pada seksi ini`, cardX + cardW / 2, currentLogY + 3 * scale);
       }
 
       ctx.restore();
@@ -527,7 +612,7 @@ export async function downloadMapPdf({
   showCallouts = true,
   showRadar = true,
   showOfficialHeader = true,
-  paperSize = 'A3', // 'A3' | 'A4' | 'NATIVE'
+  paperSize = 'NATIVE', // 'NATIVE' (Default CAD 600 DPI) | 'A3' | 'A4'
   quality = 0.95,
 }) {
   const canvas = await renderUltraHdCanvas({
@@ -535,7 +620,7 @@ export async function downloadMapPdf({
     showCallouts,
     showRadar,
     showOfficialHeader,
-    scale: 2.0, // 300 DPI Ultra HD
+    scale: 3.0, // 600 DPI Ultra HD Precision
   });
 
   // Convert canvas to JPEG blob
@@ -548,17 +633,16 @@ export async function downloadMapPdf({
   const jpegBuffer = new Uint8Array(arrayBuffer);
 
   // Determine Paper Dimensions in PDF Points (72 pt/inch)
-  // A3 Landscape: 1190.55 x 841.89 pt (420 x 297 mm)
-  // A4 Landscape: 841.89 x 595.28 pt (297 x 210 mm)
-  let pageWPt = 1190.55;
-  let pageHPt = 841.89;
+  // Native CAD Aspect Ratio is DEFAULT
+  let pageWPt = 1200;
+  let pageHPt = (1200 * canvas.height) / canvas.width;
 
   if (paperSize === 'A4') {
     pageWPt = 841.89;
     pageHPt = 595.28;
-  } else if (paperSize === 'NATIVE') {
-    pageWPt = 1200;
-    pageHPt = (1200 * canvas.height) / canvas.width;
+  } else if (paperSize === 'A3') {
+    pageWPt = 1190.55;
+    pageHPt = 841.89;
   }
 
   const pdfBytes = buildPdfFromJpegBuffer(jpegBuffer, canvas.width, canvas.height, pageWPt, pageHPt);
@@ -567,14 +651,14 @@ export async function downloadMapPdf({
   // Filename with timestamp
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const filename = `PETA_LAA_UPT_1.9_JATINEGARA_MONITORING_${dateStr}.pdf`;
+  const filename = `PETA_LAA_UPT_1.9_JATINEGARA_600DPI_${dateStr}.pdf`;
 
   triggerDownload(pdfBlob, filename);
   return filename;
 }
 
 /**
- * 1-Click Direct Download Ultra HD PNG
+ * 1-Click Direct Download Ultra HD PNG (600 DPI)
  */
 export async function downloadMapPng({
   linesWithLogs = [],
@@ -587,7 +671,7 @@ export async function downloadMapPng({
     showCallouts,
     showRadar,
     showOfficialHeader,
-    scale: 2.0,
+    scale: 3.0, // 600 DPI Ultra HD
   });
 
   const pngBlob = await new Promise((resolve) => {
@@ -597,14 +681,14 @@ export async function downloadMapPng({
 
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const filename = `PETA_LAA_UPT_1.9_JATINEGARA_ULTRA_HD_${dateStr}.png`;
+  const filename = `PETA_LAA_UPT_1.9_JATINEGARA_600DPI_${dateStr}.png`;
 
   triggerDownload(pngBlob, filename);
   return filename;
 }
 
 /**
- * Native Browser Print to PDF (Opens print dialog with vector layout)
+ * Native Browser Print to PDF (Opens print dialog with 600 DPI resolution)
  */
 export async function printMapWindow({
   linesWithLogs = [],
@@ -617,7 +701,7 @@ export async function printMapWindow({
     showCallouts,
     showRadar,
     showOfficialHeader,
-    scale: 2.0,
+    scale: 3.0, // 600 DPI Ultra HD
   });
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
@@ -632,7 +716,7 @@ export async function printMapWindow({
     <!DOCTYPE html>
     <html>
       <head>
-        <title>PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA - CETAK PDF</title>
+        <title>PETA WILAYAH UPT RESOR LAA 1.9 JATINEGARA - CETAK PDF (600 DPI)</title>
         <style>
           @page {
             size: landscape;
@@ -643,19 +727,23 @@ export async function printMapWindow({
             margin: 0;
             padding: 0;
           }
-          body {
+          html, body {
             background-color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100vw;
-            height: 100vh;
             overflow: hidden;
           }
           img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
             display: block;
           }
         </style>

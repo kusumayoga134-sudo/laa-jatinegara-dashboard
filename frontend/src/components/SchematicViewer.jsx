@@ -26,8 +26,8 @@ import {
 export const ALL_TRACK_LINES = [
     {
       id: 'kpb_jng_hi_aj',
-      code: 'NASPAN 9 KPB-JNG',
-      title: 'NASPAN 9 KPB-JNG (Jalur Hilir Arah Kramat)',
+      code: 'NASPAN 9 KPB-JNG HI',
+      title: 'NASPAN 9 KPB-JNG HI (Jalur Hilir Arah Kramat)',
       km: 'KM 9+800 - KM 10+000',
       category: 'PERCABANGAN KRAMAT',
       d: 'M 171.9 370.2 L 207.0 370.2',
@@ -40,8 +40,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hi_naspan9',
-      code: 'NASPAN 9 KPB-JNG',
-      title: 'NASPAN 9 KPB-JNG (JNG-POK Jalur Hilir)',
+      code: 'NASPAN 9 KPB-JNG HI',
+      title: 'NASPAN 9 KPB-JNG HI (JNG-POK Jalur Hilir)',
       km: 'KM 9+890 - KM 11+227',
       category: 'PERCABANGAN KRAMAT',
       d: 'M 218.7 370.4 L 587.7 370.4',
@@ -54,8 +54,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hu_aj',
-      code: 'NASPAN 9 JNG-KPB',
-      title: 'NASPAN 9 JNG-KPB (Jalur Hulu Arah Kramat)',
+      code: 'NASPAN 9 JNG-KPB HU',
+      title: 'NASPAN 9 JNG-KPB HU (Jalur Hulu Arah Kramat)',
       km: 'KM 9+800 - KM 10+000',
       category: 'NASPAN 9 JNG-KPB',
       d: 'M 171.9 418.2 L 206.8 418.2',
@@ -68,8 +68,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'kpb_jng_hu_naspan',
-      code: 'NASPAN 9 JNG-KPB',
-      title: 'NASPAN 9 JNG-KPB (POK-JNG Jalur Hulu)',
+      code: 'NASPAN 9 JNG-KPB HU',
+      title: 'NASPAN 9 JNG-KPB HU (POK-JNG Jalur Hulu)',
       km: 'KM 9+890 - KM 11+227',
       category: 'NASPAN 9 JNG-KPB',
       d: 'M 218.7 418.2 L 587.7 418.2',
@@ -82,8 +82,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'jng_mri_hi_western',
-      code: 'JNG-MRI',
-      title: 'JNG-MRI (Jalur Hilir)',
+      code: 'JNG-MRI HI',
+      title: 'JNG-MRI HI (Jalur Hilir)',
       km: 'KM 1+599 - KM 1+880',
       category: 'JNG-MRI',
       d: 'M 310.2 656.2 L 474.5 656.2',
@@ -104,8 +104,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'mri_jng_hu_western',
-      code: 'MRI-JNG',
-      title: 'MRI-JNG (Jalur Hulu)',
+      code: 'MRI-JNG HU',
+      title: 'MRI-JNG HU (Jalur Hulu)',
       km: 'KM 1+599 - KM 1+854',
       category: 'MRI-JNG',
       d: 'M 310.2 703.5 L 474.5 703.5',
@@ -368,8 +368,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_2_jng_kld_hu',
-      code: 'NASPAN 2 JNG-KLD',
-      title: 'NASPAN 2 JNG-KLD (DS 8 s/d AJ KM 13+300)',
+      code: 'NASPAN 2 JNG-KLD HU',
+      title: 'NASPAN 2 JNG-KLD HU (DS 8 s/d AJ KM 13+300)',
       km: 'KM 12+500 - KM 13+300',
       category: 'PETAK JNG-KLD',
       d: 'M 1967.9 703.5 L 2086.4 703.5',
@@ -379,8 +379,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_3_jng_kld_hu',
-      code: 'NASPAN 3 JNG-KLD',
-      title: 'NASPAN 3 JNG-KLD (AJ KM 13+300 s/d AJ KM 14+100)',
+      code: 'NASPAN 3 JNG-KLD HU',
+      title: 'NASPAN 3 JNG-KLD HU (AJ KM 13+300 s/d AJ KM 14+100)',
       km: 'KM 13+300 - KM 14+100',
       category: 'PETAK JNG-KLD',
       d: 'M 2086.4 703.5 L 2161.3 703.5',
@@ -390,8 +390,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_4_jng_kld_hu',
-      code: 'NASPAN 4 JNG-KLD',
-      title: 'NASPAN 4 JNG-KLD (AJ KM 14+100 s/d AJ KM 14+700)',
+      code: 'NASPAN 4 JNG-KLD HU',
+      title: 'NASPAN 4 JNG-KLD HU (AJ KM 14+100 s/d AJ KM 14+700)',
       km: 'KM 14+100 - KM 14+700',
       category: 'PETAK JNG-KLD',
       d: 'M 2161.3 703.0 L 2249.6 703.0',
@@ -401,8 +401,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_4b_kld_bua_hu',
-      code: 'NASPAN 4B KLD-BUA',
-      title: 'NASPAN 4B KLD-BUA (AJ KM 14+700 s/d AS KM 15+450)',
+      code: 'NASPAN 4B KLD-BUA HU',
+      title: 'NASPAN 4B KLD-BUA HU (AJ KM 14+700 s/d AS KM 15+450)',
       km: 'KM 14+700 - KM 15+450',
       category: 'PETAK KLD-BUA',
       d: 'M 2249.6 703.0 L 2518.8 703.0',
@@ -412,8 +412,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_5_kld_bua_hu',
-      code: 'NASPAN 5 KLD-BUA',
-      title: 'NASPAN 5 KLD-BUA (AS KM 15+450 s/d AJ KM 16+500)',
+      code: 'NASPAN 5 KLD-BUA HU',
+      title: 'NASPAN 5 KLD-BUA HU (AS KM 15+450 s/d AJ KM 16+500)',
       km: 'KM 15+450 - KM 16+500',
       category: 'PETAK KLD-BUA',
       d: 'M 2518.8 703.9 L 2635.0 703.9',
@@ -423,8 +423,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_6_kld_bua_hu',
-      code: 'NASPAN 6 KLD-BUA',
-      title: 'NASPAN 6 KLD-BUA (AJ KM 16+500 s/d AS KM 17+239)',
+      code: 'NASPAN 6 KLD-BUA HU',
+      title: 'NASPAN 6 KLD-BUA HU (AJ KM 16+500 s/d AS KM 17+239)',
       km: 'KM 16+500 - KM 17+239',
       category: 'PETAK KLD-BUA',
       d: 'M 2635.0 703.4 L 2740.0 703.4',
@@ -434,8 +434,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_7_bua_kldb_hu',
-      code: 'NASPAN 7 BUA-KLDB',
-      title: 'NASPAN 7 BUA-KLDB (AS KM 17+239 s/d DS 10 KM 17+900)',
+      code: 'NASPAN 7 BUA-KLDB HU',
+      title: 'NASPAN 7 BUA-KLDB HU (AS KM 17+239 s/d DS 10 KM 17+900)',
       km: 'KM 17+239 - KM 17+900',
       category: 'PETAK BUA-KLDB',
       d: 'M 2740.0 703.3 L 2985.7 703.3',
@@ -445,8 +445,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_7b_bua_kldb_hu',
-      code: 'NASPAN 7B BUA-KLDB',
-      title: 'NASPAN 7B BUA-KLDB (DS 10 s/d AJ KM 18+800)',
+      code: 'NASPAN 7B BUA-KLDB HU',
+      title: 'NASPAN 7B BUA-KLDB HU (DS 10 s/d AJ KM 18+800)',
       km: 'KM 17+900 - KM 18+800',
       category: 'PETAK BUA-KLDB',
       d: 'M 2985.7 703.0 L 3098.5 703.0',
@@ -456,8 +456,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_8b_bua_kldb_hu',
-      code: 'NASPAN 8B BUA-KLDB',
-      title: 'NASPAN 8B BUA-KLDB (Jalur Hulu, AJ KM 18+800 s/d AJ KM 19+300)',
+      code: 'NASPAN 8B BUA-KLDB HU',
+      title: 'NASPAN 8B BUA-KLDB HU (Jalur Hulu, AJ KM 18+800 s/d AJ KM 19+300)',
       km: 'KM 18+800 - KM 19+300',
       category: 'TIKUNGAN LOOP BUA-KLDB',
       d: 'M 3098.5 703.0 L 3112.5 703.0 L 3143.9 735.4 L 3143.8 1021.0 L 3102.0 1064.7 L 3046.7 1064.5',
@@ -478,8 +478,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_8b_kldb_cuk_hu',
-      code: 'NASPAN 8B KLDB-CUK',
-      title: 'NASPAN 8B KLDB-CUK (AJ KM 19+300 s/d DS 12 KM 20+150)',
+      code: 'NASPAN 8B KLDB-CUK HU',
+      title: 'NASPAN 8B KLDB-CUK HU (AJ KM 19+300 s/d DS 12 KM 20+150)',
       km: 'KM 19+300 - KM 20+150',
       category: 'PETAK KLDB-CUK',
       d: 'M 3046.7 1064.5 L 2818.6 1064.5',
@@ -533,8 +533,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_10_cuk_kri_hu',
-      code: 'NASPAN 10 CUK-KRI',
-      title: 'NASPAN 10 CUK-KRI (DS 14 s/d AJ KM 22+700)',
+      code: 'NASPAN 10 CUK-KRI HU',
+      title: 'NASPAN 10 CUK-KRI HU (DS 14 s/d AJ KM 22+700)',
       km: 'KM 21+400 - KM 22+700',
       category: 'PETAK CUK-KRI',
       d: 'M 2217.3 1062.2 L 2330.6 1062.2',
@@ -544,8 +544,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_11_cuk_kri_hu',
-      code: 'NASPAN 11 CUK-KRI',
-      title: 'NASPAN 11 CUK-KRI (AJ KM 22+700 s/d DS 16 KM 23+600)',
+      code: 'NASPAN 11 CUK-KRI HU',
+      title: 'NASPAN 11 CUK-KRI HU (AJ KM 22+700 s/d DS 16 KM 23+600)',
       km: 'KM 22+700 - KM 23+600',
       category: 'PETAK CUK-KRI',
       d: 'M 2071.8 1062.0 L 2205.4 1062.0',
@@ -555,8 +555,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_12_kri_bks_hu',
-      code: 'NASPAN 12 KRI-BKS',
-      title: 'NASPAN 12 KRI-BKS (DS 16 s/d AJ KM 24+500)',
+      code: 'NASPAN 12 KRI-BKS HU',
+      title: 'NASPAN 12 KRI-BKS HU (DS 16 s/d AJ KM 24+500)',
       km: 'KM 23+600 - KM 24+500',
       category: 'PETAK KRI-BKS',
       d: 'M 1824.3 1063.2 L 2060.8 1063.2',
@@ -566,8 +566,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_13_kri_bks_hu',
-      code: 'NASPAN 13 KRI-BKS',
-      title: 'NASPAN 13 KRI-BKS (AJ KM 24+500 s/d AJ KM 25+300)',
+      code: 'NASPAN 13 KRI-BKS HU',
+      title: 'NASPAN 13 KRI-BKS HU (AJ KM 24+500 s/d AJ KM 25+300)',
       km: 'KM 24+500 - KM 25+300',
       category: 'PETAK KRI-BKS',
       d: 'M 1754.0 1063.0 L 1809.6 1063.0',
@@ -577,8 +577,8 @@ export const ALL_TRACK_LINES = [
     },
     {
       id: 'naspan_13b_kri_bks_hu',
-      code: 'NASPAN 13B KRI-BKS',
-      title: 'NASPAN 13B KRI-BKS (AJ KM 25+300 s/d AS KM 25+750)',
+      code: 'NASPAN 13B KRI-BKS HU',
+      title: 'NASPAN 13B KRI-BKS HU (AJ KM 25+300 s/d AS KM 25+750)',
       km: 'KM 25+300 - KM 25+750',
       category: 'PETAK KRI-BKS',
       d: 'M 1641.5 1063.0 L 1740.5 1063.0',
@@ -2462,61 +2462,182 @@ export const ALL_TRACK_LINES = [
 
 export const allTrackLines = ALL_TRACK_LINES;
 
-// Smart line-to-log matching function (Fuzzy, aliases & ID matching)
+// Smart line-to-log matching function (Strict isolation, Direction Guard & Auxiliary Device Protection)
 export const matchLineLogs = (lineOrCode, logs = []) => {
-  if (!lineOrCode || !logs) return [];
-  const code = typeof lineOrCode === 'string' ? lineOrCode : (lineOrCode.code || '');
-  const title = typeof lineOrCode === 'object' ? (lineOrCode.title || '') : '';
-  const id = typeof lineOrCode === 'object' ? (lineOrCode.id || '') : '';
+  if (!lineOrCode || !logs || !Array.isArray(logs) || logs.length === 0) return [];
+  const lineObj = typeof lineOrCode === 'object' ? lineOrCode : null;
+  const lineCode = (typeof lineOrCode === 'string' ? lineOrCode : (lineObj?.code || '')).trim();
+  const lineTitle = (lineObj?.title || '').trim();
+  const lineId = (lineObj?.id || '').trim();
+  const lineCat = (lineObj?.category || '').toUpperCase();
 
-  return logs.filter((l) => {
-    if (!l || !l.targetCode) return false;
-    const tc = l.targetCode.trim().toLowerCase();
-    const c = code.trim().toLowerCase();
-    const t = title.trim().toLowerCase();
-    const i = id.trim().toLowerCase();
+  const isSwitchLine = lineCat.includes('DISCONNECTING SWITCH') || lineCat.includes('(DS)') || lineId.startsWith('ds_');
+  const isInsulatorLine = lineCat.includes('SECTION INSULATOR') || lineCat.includes('(FRP)') || lineId.startsWith('frp_');
+  const isAirJointLine = lineCat.includes('AIR JOINT') || lineCat.includes('(AJ)') || lineId.startsWith('aj_');
+  const isAirSectionLine = lineCat.includes('AIR SECTION') || lineCat.includes('(AS)') || lineId.startsWith('as_');
+  const isTurnoutLine = lineCat.includes('WESEL') || lineId.startsWith('wesel_');
+  const isAuxiliaryDevice = isSwitchLine || isInsulatorLine || isAirJointLine || isAirSectionLine || isTurnoutLine;
 
-    // Direct ID match
-    if (i && (l.targetId === i || tc === i)) return true;
+  return logs.filter((log) => {
+    if (!log) return false;
+    const tc = (log.targetCode || '').trim();
+    if (!tc) return false;
 
-    // Direct code match
-    if (c && (tc.includes(c) || c.includes(tc))) return true;
+    // 1. Direct ID match (highest priority)
+    if (log.targetId && lineId && log.targetId.toLowerCase() === lineId.toLowerCase()) {
+      return true;
+    }
 
-    // Direct title match
-    if (t && (tc.includes(t) || t.includes(tc))) return true;
+    const normTc = tc.toLowerCase();
+    const normLineCode = lineCode.toLowerCase();
+    const normLineTitle = lineTitle.toLowerCase();
+    const normLineId = lineId.toLowerCase();
 
-    // Normalized alphanumeric comparison (ignoring punctuation like '.', '-', '(', ')')
-    const normTc = tc.replace(/[^a-z0-9]/g, '');
-    const normC = c.replace(/[^a-z0-9]/g, '');
-    const normT = t.replace(/[^a-z0-9]/g, '');
+    // 2. Direct exact string match
+    if (normLineCode && (normTc === normLineCode || normTc === normLineTitle || normTc === normLineId)) {
+      return true;
+    }
 
-    if (normC && (normTc.includes(normC) || normC.includes(normTc))) return true;
-    if (normT && (normTc.includes(normT) || normT.includes(normTc))) return true;
+    // 3. Strict Direction Guard (HI/Hilir vs HU/Hulu)
+    // Prevents cross-contamination between Hilir and Hulu lines
+    const logIsHi = /\b(hi|hilir)\b/i.test(tc);
+    const logIsHu = /\b(hu|hulu)\b/i.test(tc);
+    const lineIsHi = /\b(hi|hilir)\b/i.test(lineCode) || /\b(hi|hilir)\b/i.test(lineTitle) || /_hi$/i.test(lineId);
+    const lineIsHu = /\b(hu|hulu)\b/i.test(lineCode) || /\b(hu|hulu)\b/i.test(lineTitle) || /_hu$/i.test(lineId);
+
+    if (logIsHi && lineIsHu && !lineIsHi) return false;
+    if (logIsHu && lineIsHi && !lineIsHu) return false;
+
+    // 4. Auxiliary Device Guard (DS, FRP, AJ, AS, Wesel)
+    // If the log is for a track (e.g. "NASPAN 2 JNG-KLD HI (DS 7 s/d AJ KM 13+300)"),
+    // do NOT let the boundary notation "(DS 7...)" match the actual switch DS 7!
+    const logIsTrack = /^(naspan|jalur|petak|st\.|stasiun)/i.test(tc);
+    if (logIsTrack && isAuxiliaryDevice) {
+      return false;
+    }
+
+    if (isSwitchLine) {
+      const dsMatch = lineCode.match(/DS\s*(\d+[A-Z]?)/i) || lineId.match(/ds_?(\d+[A-Z]?)/i);
+      if (dsMatch) {
+        const num = dsMatch[1];
+        const regex = new RegExp(`(^|\\b)DS\\s*-?\\s*${num}\\b`, 'i');
+        return regex.test(tc);
+      }
+      return false;
+    }
+
+    if (isInsulatorLine) {
+      const frpMatch = lineCode.match(/FRP[^\s)]*/i) || lineId.match(/frp[^\s)]*/i);
+      if (frpMatch) {
+        return normTc.includes(frpMatch[0].toLowerCase());
+      }
+      return false;
+    }
+
+    // 5. Track-to-Track matching (stripping boundary parentheses)
+    const baseTc = tc.replace(/\(.*?\)/g, '').trim().toLowerCase();
+    const baseLineCode = lineCode.replace(/\(.*?\)/g, '').trim().toLowerCase();
+    const baseLineTitle = lineTitle.replace(/\(.*?\)/g, '').trim().toLowerCase();
+
+    if (baseTc && (baseTc === baseLineCode || baseTc === baseLineTitle)) {
+      return true;
+    }
+
+    const alphaTc = baseTc.replace(/[^a-z0-9]/g, '');
+    const alphaLineCode = baseLineCode.replace(/[^a-z0-9]/g, '');
+    const alphaLineTitle = baseLineTitle.replace(/[^a-z0-9]/g, '');
+
+    if (alphaTc && alphaLineCode && (alphaTc === alphaLineCode || alphaTc === alphaLineTitle)) {
+      return true;
+    }
+
+    if (alphaTc && alphaLineCode) {
+      if (alphaTc.includes(alphaLineCode) || alphaLineCode.includes(alphaTc)) {
+        const tcNums = baseTc.match(/\d+/g) || [];
+        const lineNums = baseLineCode.match(/\d+/g) || [];
+        if (tcNums.length > 0 && lineNums.length > 0 && tcNums[0] !== lineNums[0]) {
+          return false;
+        }
+        return true;
+      }
+    }
 
     return false;
   });
 };
 
-// Calculate center coordinate (X, Y) for any line, turnout, switch, or overlap
+// Calculate center coordinate (X, Y) accurately parsing SVG commands (including Arc 'A')
 export const getLineCenter = (line) => {
   if (!line) return null;
   if (line.xStart !== undefined && line.xEnd !== undefined && line.y !== undefined) {
     return { x: (line.xStart + line.xEnd) / 2, y: line.y };
   }
-  const nums = (line.d || '').match(/[-+]?[0-9]*\.?[0-9]+/g);
-  if (!nums || nums.length < 2) return null;
+  const d = line.d || '';
+  if (!d) return null;
+
+  const commandRegex = /([a-df-z])([^a-df-z]*)/gi;
+  let match;
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-  for (let i = 0; i < nums.length - 1; i += 2) {
-    const x = parseFloat(nums[i]);
-    const y = parseFloat(nums[i + 1]);
-    if (!isNaN(x) && !isNaN(y)) {
+  let currX = 0, currY = 0;
+
+  const updateBounds = (x, y) => {
+    if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
     }
+  };
+
+  while ((match = commandRegex.exec(d)) !== null) {
+    const cmd = match[1];
+    const args = match[2].trim().match(/[-+]?[0-9]*\.?[0-9]+/g);
+    const nums = args ? args.map(Number) : [];
+
+    if (cmd === 'M' || cmd === 'L') {
+      for (let i = 0; i < nums.length - 1; i += 2) {
+        currX = nums[i];
+        currY = nums[i + 1];
+        updateBounds(currX, currY);
+      }
+    } else if (cmd === 'm' || cmd === 'l') {
+      for (let i = 0; i < nums.length - 1; i += 2) {
+        currX += nums[i];
+        currY += nums[i + 1];
+        updateBounds(currX, currY);
+      }
+    } else if (cmd === 'H') {
+      for (const x of nums) {
+        currX = x;
+        updateBounds(currX, currY);
+      }
+    } else if (cmd === 'V') {
+      for (const y of nums) {
+        currY = y;
+        updateBounds(currX, currY);
+      }
+    } else if (cmd === 'A') {
+      // Arc: rx ry x-rot large sweep x y (parameters 6 & 7 are coordinates)
+      for (let i = 0; i < nums.length - 6; i += 7) {
+        currX = nums[i + 5];
+        currY = nums[i + 6];
+        updateBounds(currX, currY);
+      }
+    } else if (cmd === 'a') {
+      for (let i = 0; i < nums.length - 6; i += 7) {
+        currX += nums[i + 5];
+        currY += nums[i + 6];
+        updateBounds(currX, currY);
+      }
+    }
   }
-  if (minX === Infinity) return null;
+
+  if (minX === Infinity || minY === Infinity) {
+    const rawNums = d.match(/[-+]?[0-9]*\.?[0-9]+/g);
+    if (!rawNums || rawNums.length < 2) return null;
+    return { x: parseFloat(rawNums[0]), y: parseFloat(rawNums[1]) };
+  }
+
   return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
 };
 

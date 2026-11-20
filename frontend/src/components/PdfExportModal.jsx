@@ -29,7 +29,7 @@ export default function PdfExportModal({
   onClose,
   linesWithLogs = [],
 }) {
-  const [paperSize, setPaperSize] = useState('A3'); // 'A3' | 'A4' | 'NATIVE'
+  const [paperSize, setPaperSize] = useState('NATIVE'); // 'NATIVE' (Default Rekomendasi CAD) | 'A3' | 'A4'
   const [showCallouts, setShowCallouts] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
   const [showOfficialHeader, setShowOfficialHeader] = useState(true);
@@ -178,7 +178,7 @@ export default function PdfExportModal({
                   Preview & Export PDF Peta Monitoring Wilayah LAA
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  <Sparkles className="w-2.5 h-2.5" /> Ultra HD 300 DPI
+                  <Sparkles className="w-2.5 h-2.5" /> Ultra HD 600 DPI
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -304,9 +304,9 @@ export default function PdfExportModal({
                 onChange={(e) => setPaperSize(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer"
               >
-                <option value="A3">A3 Landscape (Rekomendasi CAD)</option>
+                <option value="NATIVE">Format Asli CAD (3275 x 1419) (Rekomendasi)</option>
+                <option value="A3">A3 Landscape (Standard Gambar Teknik)</option>
                 <option value="A4">A4 Landscape</option>
-                <option value="NATIVE">Format Asli CAD (3275 x 1419)</option>
               </select>
             </div>
 
