@@ -22,221 +22,193 @@ import { matchLineLogs } from './SchematicViewer';
 
 // ========================================================
 // COLOR RESOLVER: Pemetaan Warna Asli Garis AutoCAD DWG
-// Setiap catatan pekerjaan diberi warna yang sama persis
-// dengan warna jalur / naspan / switch pada peta skematik
+// Sinkronisasi Dinamis & Otomatis (Single Source of Truth)
+// Setiap catatan pekerjaan diberi warna dan nama seksi yang
+// persis sama 100% dengan garis / simbol pada peta skematik.
 // ========================================================
+export function getColorName(hex) {
+  if (!hex) return '';
+  const c = hex.toLowerCase();
+  if (c === '#ec1f24' || c === '#ff0000') return 'Merah';
+  if (c === '#139a47' || c === '#00ff00') return 'Hijau';
+  if (c === '#f8d731' || c === '#eab308' || c === '#facc15') return 'Kuning';
+  if (c === '#cc6827' || c === '#ea580c' || c === '#f97316') return 'Oranye Cokelat';
+  if (c === '#8a6ddd' || c === '#a855f7' || c === '#8b5cf6') return 'Ungu';
+  if (c === '#ff00ff' || c === '#d946ef') return 'Magenta';
+  if (c === '#00bfff' || c === '#00ffff' || c === '#06b6d4' || c === '#0ea5e9') return 'Biru Langit';
+  if (c === '#0000ff' || c === '#2563eb' || c === '#1d4ed8') return 'Biru';
+  if (c === '#ff7fdf') return 'Merah Muda';
+  if (c === '#ff9f7f') return 'Oranye Muda';
+  if (c === '#000000') return 'Hitam';
+  return '';
+}
+
+export function getColorBadgeClass(hex) {
+  if (!hex) return 'bg-slate-50 text-slate-800 border-slate-300';
+  const c = hex.toLowerCase();
+  if (c === '#ec1f24' || c === '#ff0000') return 'bg-red-50 text-red-800 border-red-300';
+  if (c === '#139a47' || c === '#00ff00') return 'bg-emerald-50 text-emerald-800 border-emerald-300';
+  if (c === '#f8d731' || c === '#eab308' || c === '#facc15') return 'bg-yellow-50 text-yellow-800 border-yellow-300';
+  if (c === '#cc6827' || c === '#ea580c' || c === '#f97316') return 'bg-amber-50 text-amber-800 border-amber-300';
+  if (c === '#8a6ddd' || c === '#a855f7' || c === '#8b5cf6') return 'bg-purple-50 text-purple-800 border-purple-300';
+  if (c === '#ff00ff' || c === '#d946ef') return 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300';
+  if (c === '#00bfff' || c === '#00ffff' || c === '#06b6d4' || c === '#0ea5e9') return 'bg-cyan-50 text-cyan-800 border-cyan-300';
+  if (c === '#0000ff' || c === '#2563eb' || c === '#1d4ed8') return 'bg-blue-50 text-blue-800 border-blue-300';
+  return 'bg-slate-50 text-slate-800 border-slate-300';
+}
+
 export function getLineColorInfo(targetCode = '', description = '') {
-  const code = (targetCode || '').toUpperCase().trim();
-  const desc = (description || '').toUpperCase();
+  const rawCode = (targetCode || '').trim();
+  const rawDesc = (description || '').trim();
 
-  // 1. ST. JATINEGARA - Jalur & Wesel
-  if (code.includes('JALUR 7') || code.includes('JALUR 8') || code.includes('W83') || code.includes('W23C')) {
+  if (!rawCode && !rawDesc) {
     return {
-      color: '#139a47',
-      label: 'Jalur 7-8 & Wesel JNG (Hijau)',
-      badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-    };
-  }
-  if (code.includes('JALUR 4') || code.includes('JALUR 5') || code.includes('JALUR 6') || code.includes('W63') || code.includes('W41')) {
-    return {
-      color: '#cc6827',
-      label: 'Jalur 4-6 JNG (Oranye Cokelat)',
-      badgeClass: 'bg-amber-50 text-amber-800 border-amber-300',
-    };
-  }
-  if (code.includes('JALUR 2') || code.includes('JALUR 3') || code.includes('NASPAN 1 ARAH KLD HI') || code.includes('W13') || code.includes('W33')) {
-    return {
-      color: '#f8d731',
-      label: 'Jalur 2-3 JNG / Naspan 1 Hi (Kuning Emas)',
-      badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300',
-    };
-  }
-  if (code.includes('JALUR 1') || code.includes('NASPAN 1 ARAH KLD HU') || code.includes('W53')) {
-    return {
-      color: '#ff00ff',
-      label: 'Jalur 1 JNG / Naspan 1 Hu (Magenta)',
-      badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300',
+      color: '#2563eb',
+      label: 'Lintas LAA 1.9',
+      badgeClass: 'bg-blue-50 text-blue-800 border-blue-300',
     };
   }
 
-  // 2. NASPAN JATINEGARA - KLENDER
-  if (code.includes('NASPAN 1 JNG-KLD (HI)') || code.includes('NASPAN 1 JNG-KLD HI')) {
-    return {
-      color: '#f8d731',
-      label: 'Naspan 1 JNG-KLD Hilir (Kuning Emas)',
-      badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300',
-    };
+  const normTc = rawCode.toLowerCase();
+  const cleanTc = normTc.replace(/\s+/g, ' ');
+  const alphaTc = normTc.replace(/[^a-z0-9]/g, '');
+
+  // 1. Direct Exact Match in Master ALL_MAP_LOCATIONS (id, code, title)
+  let matched = ALL_MAP_LOCATIONS.find((loc) => {
+    if (!loc) return false;
+    const lId = (loc.id || '').toLowerCase();
+    const lCode = (loc.code || '').toLowerCase();
+    const lTitle = (loc.title || '').toLowerCase();
+    return (
+      (lId && (lId === normTc || lId.replace(/\s+/g, ' ') === cleanTc)) ||
+      (lCode && (lCode === normTc || lCode.replace(/\s+/g, ' ') === cleanTc)) ||
+      (lTitle && (lTitle === normTc || lTitle.replace(/\s+/g, ' ') === cleanTc))
+    );
+  });
+
+  // 2. Direct Alphanumeric Exact Match (immune to punctuation, hyphens, brackets)
+  if (!matched && alphaTc) {
+    matched = ALL_MAP_LOCATIONS.find((loc) => {
+      if (!loc) return false;
+      const aId = (loc.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const aCode = (loc.code || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const aTitle = (loc.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return (aId && aId === alphaTc) || (aCode && aCode === alphaTc) || (aTitle && aTitle === alphaTc);
+    });
   }
-  if (code.includes('NASPAN 1 JNG-KLD (HU)') || code.includes('NASPAN 1 JNG-KLD HU')) {
-    return {
-      color: '#ff00ff',
-      label: 'Naspan 1 JNG-KLD Hulu (Magenta)',
-      badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300',
-    };
+
+  // 3. Match via Smart SchematicViewer matchLineLogs (single source of truth with map radar beacons)
+  if (!matched && typeof matchLineLogs === 'function') {
+    const dummyLog = { targetCode: rawCode, description: rawDesc };
+    matched = ALL_MAP_LOCATIONS.find((loc) => {
+      try {
+        const matches = matchLineLogs(loc, [dummyLog]);
+        return Array.isArray(matches) && matches.length > 0;
+      } catch {
+        return false;
+      }
+    });
   }
-  if (code.includes('NASPAN 2') || code.includes('NASPAN 3') || code.includes('NASPAN 4')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#0000ff',
-        label: 'Naspan JNG-KLD Hilir (Biru)',
-        badgeClass: 'bg-blue-50 text-blue-800 border-blue-300',
-      };
+
+  // 4. Special Handlers for Common Naspan & Turnout Variations
+  if (!matched) {
+    // 4a. Naspan 9 Cakung
+    if (normTc.includes('naspan 9') && normTc.includes('cuk')) {
+      matched = ALL_MAP_LOCATIONS.find((loc) => loc.id === 'cuk_jalur_1_empl');
     }
-    return {
-      color: '#ff9f7f',
-      label: 'Naspan JNG-KLD Hulu (Salmon/Oranye)',
-      badgeClass: 'bg-orange-50 text-orange-800 border-orange-300',
-    };
-  }
-
-  // 3. NASPAN KLENDER - BUARAN
-  if (code.includes('NASPAN 4B')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#0000ff',
-        label: 'Naspan 4B KLD-BUA Hilir (Biru)',
-        badgeClass: 'bg-blue-50 text-blue-800 border-blue-300',
-      };
+    // 4b. Naspan 1 Hulu / Hilir
+    else if (normTc.includes('naspan 1')) {
+      if (normTc.includes('hu') || normTc.includes('hulu')) {
+        matched = ALL_MAP_LOCATIONS.find((loc) => loc.id === 'naspan_1_arah_kld_hu');
+      } else if (normTc.includes('hi') || normTc.includes('hilir')) {
+        matched = ALL_MAP_LOCATIONS.find((loc) => loc.id === 'naspan_1_arah_kld_hi');
+      }
     }
-    return {
-      color: '#ff9f7f',
-      label: 'Naspan 4B KLD-BUA Hulu (Salmon)',
-      badgeClass: 'bg-orange-50 text-orange-800 border-orange-300',
-    };
-  }
-  if (code.includes('NASPAN 5') || code.includes('NASPAN 6')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#ff00ff',
-        label: 'Naspan KLD-BUA Hilir (Magenta)',
-        badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300',
-      };
+    // 4c. Partial Station + Jalur Match (e.g. "ST. BEKASI (Jalur 3)" or "Jalur 1 Bekasi")
+    if (!matched) {
+      const jalurM = normTc.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
+      if (jalurM) {
+        const jNum = jalurM[1];
+        for (const st of ['bekasi', 'cakung', 'kranji', 'jatinegara', 'klender baru', 'buaran', 'pondok jati', 'klender']) {
+          if (normTc.includes(st)) {
+            matched = ALL_MAP_LOCATIONS.find((loc) => {
+              const comb = `${loc.title} ${loc.code} ${loc.id}`.toLowerCase();
+              return comb.includes(st) && comb.includes(`jalur ${jNum}`);
+            });
+            if (matched) break;
+          }
+        }
+      }
     }
-    return {
-      color: '#00ff00',
-      label: 'Naspan KLD-BUA Hulu (Hijau Terang)',
-      badgeClass: 'bg-lime-50 text-lime-800 border-lime-300',
-    };
-  }
-
-  // 4. NASPAN BUARAN - KLENDER BARU
-  if (code.includes('NASPAN 7') || code.includes('NASPAN 8')) {
-    if (code.includes('HI') || desc.includes('HILIR') || code.includes('7B BUA-KLDB (HI)')) {
-      return {
-        color: '#f8d731',
-        label: 'Naspan BUA-KLDB Hilir (Kuning)',
-        badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300',
-      };
+    // 4d. Device Regex Match (DS, FRP, AS, AJ, Wesel)
+    if (!matched) {
+      const dsM = rawCode.match(/\bDS\s*(\d+[A-Z]?)\b/i);
+      if (dsM) {
+        const dsNum = dsM[1];
+        matched = ALL_MAP_LOCATIONS.find((loc) => {
+          return new RegExp(`\\bDS\\s*-?\\s*${dsNum}\\b`, 'i').test(loc.code || '') || (loc.id || '').toLowerCase().includes(`ds_${dsNum.toLowerCase()}`);
+        });
+      }
+      const frpM = rawCode.match(/FRP[^\s)]*/i);
+      if (!matched && frpM) {
+        matched = ALL_MAP_LOCATIONS.find((loc) => (loc.code || '').toLowerCase().includes(frpM[0].toLowerCase()) || (loc.id || '').toLowerCase().includes(frpM[0].toLowerCase()));
+      }
+      const wM = rawCode.match(/W\d{2}[A-Z0-9]*/i);
+      if (!matched && wM) {
+        matched = ALL_MAP_LOCATIONS.find((loc) => (loc.code || '').toLowerCase().includes(wM[0].toLowerCase()) || (loc.id || '').toLowerCase().includes(wM[0].toLowerCase()));
+      }
     }
+  }
+
+  // 5. If Matched in Master ALL_MAP_LOCATIONS, return authentic CAD DWG color & label
+  if (matched && matched.color) {
+    const colorName = getColorName(matched.color);
+    const displayTitle = matched.title || matched.code || rawCode;
+    const label = colorName ? `${displayTitle} (${colorName})` : displayTitle;
     return {
-      color: '#ff0000',
-      label: 'Naspan BUA-KLDB Hulu (Merah)',
-      badgeClass: 'bg-red-50 text-red-800 border-red-300',
+      color: matched.color,
+      label,
+      badgeClass: getColorBadgeClass(matched.color),
     };
   }
 
-  // 5. NASPAN KLENDER BARU - CAKUNG - KRANJI
-  if (code.includes('NASPAN 8B')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#f8d731',
-        label: 'Naspan 8B KLDB-CUK Hilir (Kuning)',
-        badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-300',
-      };
-    }
-    return {
-      color: '#ff0000',
-      label: 'Naspan 8B KLDB-CUK Hulu (Merah)',
-      badgeClass: 'bg-red-50 text-red-800 border-red-300',
-    };
-  }
-  if (code.includes('NASPAN 9') && (code.includes('CUK') || code.includes('EMPL'))) {
-    return {
-      color: '#139a47',
-      label: 'Naspan 9 Emplasemen Cakung (Hijau)',
-      badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-    };
-  }
-  if (code.includes('NASPAN 9') && code.includes('KPB')) {
-    return {
-      color: '#ff7fdf',
-      label: 'Naspan 9 Kramat-JNG (Pink)',
-      badgeClass: 'bg-pink-50 text-pink-800 border-pink-300',
-    };
-  }
-  if (code.includes('NASPAN 10') || code.includes('NASPAN 11')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#cc6827',
-        label: 'Naspan CUK-KRI Hilir (Oranye)',
-        badgeClass: 'bg-amber-50 text-amber-800 border-amber-300',
-      };
-    }
-    return {
-      color: '#8a6ddd',
-      label: 'Naspan CUK-KRI Hulu (Ungu)',
-      badgeClass: 'bg-purple-50 text-purple-800 border-purple-300',
-    };
-  }
+  // 6. Station-Level Safe Fallback (only for generic non-specific station names)
+  const descUpper = rawDesc.toUpperCase();
+  const codeUpper = rawCode.toUpperCase();
+  const combinedUpper = `${codeUpper} ${descUpper}`;
 
-  // 6. NASPAN KRANJI - BEKASI
-  if (code.includes('NASPAN 12') || code.includes('NASPAN 13')) {
-    if (code.includes('HI') || desc.includes('HILIR')) {
-      return {
-        color: '#00bfff',
-        label: 'Naspan KRI-BKS Hilir (Biru Langit)',
-        badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300',
-      };
-    }
-    return {
-      color: '#ff00ff',
-      label: 'Naspan KRI-BKS Hulu (Magenta)',
-      badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300',
-    };
+  if (combinedUpper.includes('BEKASI TIMUR') || combinedUpper.includes('BKT')) {
+    return { color: '#ec1f24', label: 'Percabangan Bekasi Timur (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
   }
-
-  // 7. DISCONNECTING SWITCH (DS 1 s/d DS 20) - HITAM
-  if (code.includes('DS ') || code.startsWith('DS-') || code.startsWith('DS_') || code.includes('DISCONNECTING SWITCH')) {
-    return { color: '#000000', label: 'Disconnecting Switch (DS)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
+  if (combinedUpper.includes('BEKASI') || combinedUpper.includes('BKS')) {
+    return { color: '#ec1f24', label: 'St. Bekasi (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
   }
-
-  // 7B. SECTION INSULATOR (FRP) - HITAM
-  if (code.includes('FRP') || code.includes('SECTION INSULATOR')) {
-    return { color: '#000000', label: 'Section Insulator (FRP)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
-  }
-
-  // 7C. PEMISAH SEKSI (AS/AJ) - HITAM
-  if (code.includes('AIR JOINT') || code.includes('AIR SECTION') || code.includes('OVERLAP') || code.includes('AS ') || code.includes('AJ ')) {
-    return { color: '#000000', label: 'Pemisah Seksi (AS/AJ)', badgeClass: 'bg-slate-900 text-white border-slate-700' };
-  }
-
-  // 8. STASIUN UTAMA
-  if (code.includes('PONDOK JATI') || desc.includes('PONDOK JATI')) {
-    return { color: '#ff0000', label: 'St. Pondok Jati (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('JATINEGARA') || desc.includes('JATINEGARA')) {
-    return { color: '#139a47', label: 'St. Jatinegara (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
-  }
-  if (code.includes('KLENDER BARU') || desc.includes('KLENDER BARU')) {
-    return { color: '#ff0000', label: 'St. Klender Baru (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
-  }
-  if (code.includes('KLENDER') || desc.includes('KLENDER')) {
-    return { color: '#0000ff', label: 'St. Klender (Biru)', badgeClass: 'bg-blue-50 text-blue-800 border-blue-300' };
-  }
-  if (code.includes('BUARAN') || desc.includes('BUARAN')) {
-    return { color: '#00ff00', label: 'St. Buaran (Hijau)', badgeClass: 'bg-lime-50 text-lime-800 border-lime-300' };
-  }
-  if (code.includes('CAKUNG') || desc.includes('CAKUNG')) {
-    return { color: '#8a6ddd', label: 'St. Cakung (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
-  }
-  if (code.includes('KRANJI') || desc.includes('KRANJI')) {
+  if (combinedUpper.includes('KRANJI') || combinedUpper.includes('KRI')) {
     return { color: '#00bfff', label: 'St. Kranji (Biru Langit)', badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300' };
   }
-  if (code.includes('BEKASI') || desc.includes('BEKASI')) {
-    return { color: '#00bfff', label: 'St. Bekasi (Biru Langit)', badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-300' };
+  if (combinedUpper.includes('CAKUNG') || combinedUpper.includes('CUK')) {
+    return { color: '#8a6ddd', label: 'St. Cakung (Ungu)', badgeClass: 'bg-purple-50 text-purple-800 border-purple-300' };
+  }
+  if (combinedUpper.includes('KLENDER BARU') || combinedUpper.includes('KLDB')) {
+    return { color: '#ff0000', label: 'St. Klender Baru (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
+  }
+  if (combinedUpper.includes('BUARAN') || combinedUpper.includes('BUA')) {
+    return { color: '#00ff00', label: 'St. Buaran (Hijau)', badgeClass: 'bg-lime-50 text-lime-800 border-lime-300' };
+  }
+  if (combinedUpper.includes('KLENDER') || combinedUpper.includes('KLD')) {
+    return { color: '#0000ff', label: 'St. Klender (Biru)', badgeClass: 'bg-blue-50 text-blue-800 border-blue-300' };
+  }
+  if (combinedUpper.includes('PONDOK JATI') || combinedUpper.includes('POK')) {
+    return { color: '#ff00ff', label: 'St. Pondok Jati (Magenta)', badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-300' };
+  }
+  if (combinedUpper.includes('KRAMAT') || combinedUpper.includes('KPB')) {
+    return { color: '#ff0000', label: 'Percabangan Kramat (Merah)', badgeClass: 'bg-red-50 text-red-800 border-red-300' };
+  }
+  if (combinedUpper.includes('JATINEGARA') || combinedUpper.includes('JNG')) {
+    return { color: '#139a47', label: 'St. Jatinegara (Hijau)', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
   }
 
-  // 9. DEFAULT FALLBACK
+  // 7. General Default Fallback
   return {
     color: '#2563eb',
     label: 'Lintas LAA 1.9',
