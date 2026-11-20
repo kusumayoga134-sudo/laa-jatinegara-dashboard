@@ -19,6 +19,7 @@ import {
   computeCalloutLayout,
   getElbowSvgPath,
   formatLogTimestamp,
+  getCleanLogDetails,
   downloadMapPdf,
   downloadMapPng,
   printMapWindow,
@@ -672,73 +673,75 @@ export default function PdfExportModal({
                     >
                       {/* Left Accent Bar */}
                       <div
-                        className="absolute left-0 top-0 bottom-0 w-[4.5px]"
+                        className="absolute left-0 top-0 bottom-0 w-[3.5px]"
                         style={{ backgroundColor: trackColor }}
                       />
 
-                      {/* Header (34px) */}
-                      <div className="h-[34px] bg-slate-50 border-b border-slate-200 flex items-center justify-between px-3 pl-4 shrink-0">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {/* Header (24px) */}
+                      <div className="h-[24px] bg-slate-50 border-b border-slate-200 flex items-center justify-between px-2 pl-3 shrink-0">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-white shadow-xs"
+                            className="w-2 h-2 rounded-full shrink-0 border border-white shadow-xs"
                             style={{ backgroundColor: trackColor }}
                           />
-                          <span className="font-bold text-[12px] text-slate-900 truncate leading-none">
+                          <span
+                            className="font-bold text-[9.5px] text-slate-900 truncate leading-none"
+                            title={card.line.title || card.line.code}
+                          >
                             {card.line.title || card.line.code}
                           </span>
-                          <span className="font-mono text-[9.5px] text-slate-500 shrink-0 font-bold">
-                            {card.line.km || ''}
-                          </span>
+                          {card.line.km && (
+                            <span className="font-mono text-[8px] text-slate-500 shrink-0 font-semibold">
+                              {card.line.km}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[9.5px] font-bold text-slate-700 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                            {card.logs.length} Pekerjaan
+                        <div className="flex items-center gap-1 shrink-0 ml-1.5">
+                          <span className="px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[8px] font-bold text-slate-700 flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-blue-600" />
+                            {card.logs.length} Pkj
                           </span>
-                          <GripVertical className="w-3.5 h-3.5 text-slate-400" />
+                          <GripVertical className="w-3 h-3 text-slate-400" />
                         </div>
                       </div>
 
-                      {/* Body Work Log Items (106px) */}
-                      <div className="p-2.5 pl-4 flex-1 flex flex-col justify-center space-y-1.5 bg-white">
+                      {/* Body Work Log Items (2 Tight Lines per Item) */}
+                      <div className="p-1.5 pl-2.5 flex-1 flex flex-col justify-center space-y-1 bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
-                          const { dateStr, timeStr } = formatLogTimestamp(log.createdAt || log.timestamp);
-                          const status = (log.status || 'DONE').toUpperCase();
-                          const isCompleted = status === 'DONE' || status === 'COMPLETED';
-                          const isInProgress = status === 'IN_PROGRESS' || status === 'PROGRESS';
+                          const { actionName, contractor, year } = getCleanLogDetails(log);
 
                           return (
-                            <div key={idx} className="leading-snug">
-                              <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 font-semibold">
-                                <span>
-                                  {dateStr} • {timeStr}
-                                </span>
-                                <span
-                                  className={`px-1.5 py-0.2 rounded-md font-extrabold text-[8px] uppercase tracking-wide ${
-                                    isCompleted
-                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                                      : isInProgress
-                                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                                      : 'bg-slate-100 text-slate-700 border border-slate-300'
-                                  }`}
-                                >
-                                  {isCompleted ? 'SELESAI' : isInProgress ? 'PROSES' : status}
-                                </span>
+                            <div
+                              key={idx}
+                              className={`leading-tight ${idx > 0 ? 'border-t border-slate-100 pt-1' : ''}`}
+                            >
+                              {/* Baris 1: Nama Pekerjaan */}
+                              <div
+                                className="font-bold text-[9px] text-slate-900 truncate"
+                                title={actionName}
+                              >
+                                {actionName}
                               </div>
-                              <div className="font-extrabold text-[11px] text-slate-900 truncate mt-0.5">
-                                {log.actionType || 'Pemeliharaan LAA'}
-                              </div>
-                              <div className="text-[9.5px] text-slate-600 truncate flex items-center gap-1.5 mt-0.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span className="font-medium">
-                                  {log.technician || 'UPT Resor 1.9'}
-                                  {log.description ? ` • ${log.description}` : ''}
-                                </span>
+                              {/* Baris 2: Pelaksana • Tahun */}
+                              <div
+                                className="text-[8px] font-medium text-slate-500 truncate mt-0.5 flex items-center gap-1"
+                                title={`${contractor} • ${year}`}
+                              >
+                                <span>{contractor}</span>
+                                <span className="text-slate-300">•</span>
+                                <span className="font-semibold text-slate-600">{year}</span>
                               </div>
                             </div>
                           );
                         })}
+
+                        {/* Footer: +N pekerjaan lainnya (jika logs > 3) */}
+                        {card.logs.length > 3 && (
+                          <div className="text-center text-[7.5px] font-semibold italic text-slate-400 border-t border-slate-100/80 pt-0.5 leading-none">
+                            + {card.logs.length - 3} pekerjaan lainnya
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

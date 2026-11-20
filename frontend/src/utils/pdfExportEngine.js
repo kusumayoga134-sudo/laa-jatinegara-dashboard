@@ -14,9 +14,9 @@ export const VIRTUAL_CANVAS = {
   LANE_BOTTOM_H: 220,
   CAD_BASE_W: 3275,
   CAD_BASE_H: 1419,
-  CARD_W: 280,
-  CARD_H: 140,
-  GAP: 20,
+  CARD_W: 220, // 20-25% more compact (down from 280)
+  CARD_H: 108, // Default fallback card height
+  GAP: 18,
   MARGIN_X: 40,
 };
 
@@ -41,8 +41,46 @@ export function formatLogTimestamp(timestamp) {
 }
 
 /**
+ * Filter and extract ONLY the 3 essential fields:
+ * 1) Nama Pekerjaan
+ * 2) Pelaksana Pekerjaan (Clean PT/team only)
+ * 3) Tahun Pekerjaan (4-digit string)
+ */
+export function getCleanLogDetails(log) {
+  // 1. Nama Pekerjaan
+  const actionName = (log.actionType || log.title || 'Pemeliharaan LAA')
+    .replace(/_/g, ' ')
+    .trim();
+
+  // 2. Tahun (4 digit)
+  let year = '';
+  if (log.year || log.tahun) {
+    year = String(log.year || log.tahun).trim();
+  }
+  const combinedText = [log.technician, log.description, log.rkad].filter(Boolean).join(' ');
+  const yearMatch = combinedText.match(/\b(20\d{2})\b/);
+  if (yearMatch) {
+    year = yearMatch[1];
+  } else if (log.createdAt || log.timestamp) {
+    const d = new Date(log.createdAt || log.timestamp);
+    if (!isNaN(d.getTime())) {
+      year = String(d.getFullYear());
+    }
+  }
+  if (!year) year = String(new Date().getFullYear());
+
+  // 3. Pelaksana (hanya nama PT / organisasi)
+  let contractor = (log.technician || log.contractor || log.pelaksana || 'UPT 1.9').trim();
+  contractor = contractor.split('•')[0].split(' - ')[0].trim();
+  contractor = contractor.replace(/\b(RKAD|TAHUN|THN).*/i, '').trim();
+  if (!contractor) contractor = 'UPT 1.9';
+
+  return { actionName, contractor, year };
+}
+
+/**
  * 1D Deterministic Collision-Resolution & Corridor Placement Engine for Callout Cards
- * Computes strictly bounded card positions on the 2400 x 1480 Virtual Canvas.
+ * Computes compact dynamic-height card positions on the 2400 x 1480 Virtual Canvas.
  */
 export function computeCalloutLayout({
   linesWithLogs = [],
@@ -58,7 +96,6 @@ export function computeCalloutLayout({
     CAD_BASE_W,
     CAD_BASE_H,
     CARD_W,
-    CARD_H,
     GAP,
     MARGIN_X,
   } = VIRTUAL_CANVAS;
@@ -73,17 +110,26 @@ export function computeCalloutLayout({
     const radarX = Math.round((rawX / CAD_BASE_W) * MAP_W);
     const radarY = Math.round(LANE_TOP_H + (rawY / CAD_BASE_H) * MAP_H);
 
+    // Dynamic height based on number of items (max 3 items shown)
+    const displayLogs = logs.slice(0, 3);
+    const hasExtra = logs.length > 3;
+    const HEADER_H = 24;
+    const ITEM_H = 26;
+    const PADDING_V = 6;
+    const FOOTER_H = 14;
+    const cardH = HEADER_H + displayLogs.length * ITEM_H + PADDING_V + (hasExtra ? FOOTER_H : 0);
+
     return {
       id: line.id,
       line,
       logs,
-      displayLogs: logs.slice(0, 2),
+      displayLogs,
       radarX,
       radarY,
       rawX,
       rawY,
       w: CARD_W,
-      h: CARD_H,
+      h: cardH,
       x: 0,
       y: 0,
       isUpper: true,
@@ -101,7 +147,6 @@ export function computeCalloutLayout({
   const lowerCards = [];
 
   items.forEach((item) => {
-    // If rawY >= 850 (Cakung, Kranji, Bekasi, Bekasi Timur) -> Lower Lane
     if (item.rawY >= 850) {
       item.isUpper = false;
       lowerCards.push(item);
@@ -124,7 +169,7 @@ export function computeCalloutLayout({
   }
 
   // 1D Horizontal Layout Function for a Single Lane
-  const layoutLane = (cards, laneY, isUpper) => {
+  const layoutLane = (cards, isUpper) => {
     if (cards.length === 0) return;
 
     cards.sort((a, b) => a.radarX - b.radarX);
@@ -137,12 +182,15 @@ export function computeCalloutLayout({
       curCardW = Math.floor((maxAvailableW - (cards.length - 1) * GAP) / cards.length);
     }
 
-    // Set initial position centered on radarX
+    // Set initial position centered on radarX with dynamic lane Y
     cards.forEach((card) => {
       card.w = curCardW;
-      card.h = CARD_H;
-      card.y = laneY;
       card.isUpper = isUpper;
+      if (isUpper) {
+        card.y = Math.round((LANE_TOP_H - card.h) / 2);
+      } else {
+        card.y = Math.round(LANE_TOP_H + MAP_H + (LANE_BOTTOM_H - card.h) / 2);
+      }
       card.x = Math.round(card.radarX - curCardW / 2);
     });
 
@@ -173,11 +221,8 @@ export function computeCalloutLayout({
     }
   };
 
-  const upperLaneY = Math.round((LANE_TOP_H - CARD_H) / 2); // 40px from top
-  const lowerLaneY = Math.round(LANE_TOP_H + MAP_H + (LANE_BOTTOM_H - CARD_H) / 2); // 1300px from top
-
-  layoutLane(upperCards, upperLaneY, true);
-  layoutLane(lowerCards, lowerLaneY, false);
+  layoutLane(upperCards, true);
+  layoutLane(lowerCards, false);
 
   const allCards = [...upperCards, ...lowerCards];
 
@@ -195,21 +240,19 @@ export function computeCalloutLayout({
   // Calculate Orthogonal Elbow Anchor Points and Staggered Belokan
   allCards.forEach((card, idx) => {
     card.startX = Math.round(card.x + card.w / 2);
-    const stagger = (idx % 3) * 10;
+    const stagger = (idx % 3) * 8;
 
     if (card.isUpper) {
       card.startY = card.y + card.h;
-      // Stagger elbow Y between card bottom (180) and map top (220)
       card.elbowY = Math.min(card.radarY - 14, 195 + stagger);
       if (card.elbowY <= card.startY) {
-        card.elbowY = card.startY + (card.radarY - card.startY) * 0.4;
+        card.elbowY = card.startY + (card.radarY - card.startY) * 0.35;
       }
     } else {
       card.startY = card.y;
-      // Stagger elbow Y between map bottom (1260) and card top (1300)
       card.elbowY = Math.max(card.radarY + 14, 1285 - stagger);
       if (card.elbowY >= card.startY) {
-        card.elbowY = card.startY - (card.startY - card.radarY) * 0.4;
+        card.elbowY = card.startY - (card.startY - card.radarY) * 0.35;
       }
     }
   });
@@ -357,6 +400,7 @@ function drawOrthogonalElbow(ctx, card, scale) {
 
 /**
  * Render Callout Box on Canvas (at given scale)
+ * Compact 2-Line Format (Nama Pekerjaan & Pelaksana • Tahun)
  */
 function drawCalloutBox(ctx, card, scale) {
   const cardX = card.x * scale;
@@ -367,16 +411,16 @@ function drawCalloutBox(ctx, card, scale) {
 
   ctx.save();
 
-  const cardRadius = 8 * scale;
+  const cardRadius = 6 * scale;
   const trackColor = line.color || '#334155';
-  const headerHeight = 34 * scale;
+  const headerHeight = 24 * scale;
 
   // 1. Drop Shadow
   ctx.save();
-  ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
-  ctx.shadowBlur = 12 * scale;
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.14)';
+  ctx.shadowBlur = 8 * scale;
   ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 4 * scale;
+  ctx.shadowOffsetY = 3 * scale;
   ctx.fillStyle = '#ffffff';
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.fill();
@@ -393,17 +437,17 @@ function drawCalloutBox(ctx, card, scale) {
 
   // Left Accent Strip in Track color
   ctx.fillStyle = trackColor;
-  ctx.fillRect(cardX, cardY, 4.5 * scale, cardH);
+  ctx.fillRect(cardX, cardY, 3.5 * scale, cardH);
 
   // Header Background Banner
   ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(cardX + 4.5 * scale, cardY, cardW - 4.5 * scale, headerHeight);
+  ctx.fillRect(cardX + 3.5 * scale, cardY, cardW - 3.5 * scale, headerHeight);
 
   // Header Divider Line
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1 * scale;
   ctx.beginPath();
-  ctx.moveTo(cardX + 4.5 * scale, cardY + headerHeight);
+  ctx.moveTo(cardX + 3.5 * scale, cardY + headerHeight);
   ctx.lineTo(cardX + cardW, cardY + headerHeight);
   ctx.stroke();
 
@@ -411,144 +455,108 @@ function drawCalloutBox(ctx, card, scale) {
 
   // 3. Outer Border Frame
   ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1.2 * scale;
+  ctx.lineWidth = 1 * scale;
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.stroke();
 
   // ==========================================
   // Header Information & Badges
   // ==========================================
-  const headerDotX = cardX + 16 * scale;
+  const headerDotX = cardX + 11 * scale;
   const headerDotY = cardY + headerHeight / 2;
 
   // Track color circle
   ctx.fillStyle = trackColor;
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 5 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 3.5 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 1.8 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 1.2 * scale, 0, Math.PI * 2);
   ctx.fill();
 
-  // Track Title
+  // Track Title & KM (Single row)
   ctx.fillStyle = '#0f172a';
-  ctx.font = `bold ${11 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  const maxTitleW = cardW - 110 * scale;
+  const badgeW = 42 * scale;
+  const maxTitleW = cardW - badgeW - 28 * scale;
   const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-  ctx.fillText(titleText, cardX + 26 * scale, headerDotY - 5 * scale);
-
-  // KM Subtitle
-  ctx.fillStyle = '#64748b';
-  ctx.font = `600 ${8.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
-  ctx.fillText(line.km || '', cardX + 26 * scale, headerDotY + 7 * scale);
+  ctx.fillText(titleText, cardX + 18 * scale, headerDotY);
 
   // Job Count Badge Pill
-  const badgeW = 68 * scale;
-  const badgeH = 18 * scale;
-  const badgeX = cardX + cardW - badgeW - 8 * scale;
+  const badgeH = 14 * scale;
+  const badgeX = cardX + cardW - badgeW - 6 * scale;
   const badgeY = cardY + (headerHeight - badgeH) / 2;
 
   ctx.fillStyle = '#f1f5f9';
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
+  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
   ctx.fill();
   ctx.strokeStyle = '#cbd5e1';
   ctx.lineWidth = 0.8 * scale;
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
+  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
   ctx.stroke();
 
   ctx.fillStyle = '#2563eb';
   ctx.beginPath();
-  ctx.arc(badgeX + 8 * scale, badgeY + badgeH / 2, 2.5 * scale, 0, Math.PI * 2);
+  ctx.arc(badgeX + 5 * scale, badgeY + badgeH / 2, 1.8 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#1e293b';
-  ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `bold ${7 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 7 * scale) / 2, badgeY + badgeH / 2);
+  ctx.fillText(`${logs.length} Pkj`, badgeX + (badgeW + 4 * scale) / 2, badgeY + badgeH / 2);
 
   // ==========================================
-  // Work Log Items Inside Callout
+  // Work Log Items (2 Tight Lines per Item)
   // ==========================================
-  let currentLogY = cardY + headerHeight + 6 * scale;
-  const itemContentX = cardX + 16 * scale;
-  const itemContentW = cardW - 28 * scale;
-  const logRowHeight = 44 * scale;
+  let currentLogY = cardY + headerHeight + 2 * scale;
+  const itemContentX = cardX + 11 * scale;
+  const itemContentW = cardW - 18 * scale;
+  const itemHeight = 26 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
       ctx.strokeStyle = '#f1f5f9';
       ctx.lineWidth = 0.8 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 12 * scale, currentLogY);
-      ctx.lineTo(cardX + cardW - 12 * scale, currentLogY);
+      ctx.moveTo(cardX + 8 * scale, currentLogY);
+      ctx.lineTo(cardX + cardW - 8 * scale, currentLogY);
       ctx.stroke();
-      currentLogY += 4 * scale;
+      currentLogY += 1 * scale;
     }
 
-    const { dateStr, timeStr } = formatLogTimestamp(log.createdAt || log.timestamp);
-    const row1Y = currentLogY + 8 * scale;
+    const { actionName, contractor, year } = getCleanLogDetails(log);
 
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#64748b';
-    ctx.font = `600 ${8 * scale}px "SF Mono", Menlo, Consolas, monospace`;
-    ctx.fillText(`${dateStr} • ${timeStr}`, itemContentX, row1Y);
-
-    // Status Badge
-    const status = (log.status || 'DONE').toUpperCase();
-    const isCompleted = status === 'DONE' || status === 'COMPLETED';
-    const isInProgress = status === 'IN_PROGRESS' || status === 'PROGRESS';
-
-    const statusText = isCompleted ? 'SELESAI' : isInProgress ? 'PROSES' : status;
-    const statusBg = isCompleted ? '#dcfce7' : isInProgress ? '#fef3c7' : '#f1f5f9';
-    const statusColor = isCompleted ? '#166534' : isInProgress ? '#92400e' : '#475569';
-
-    ctx.font = `bold ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const sTextW = ctx.measureText(statusText).width;
-    const sPillW = sTextW + 10 * scale;
-    const sPillH = 14 * scale;
-    const sPillX = cardX + cardW - sPillW - 12 * scale;
-    const sPillY = row1Y - sPillH / 2;
-
-    ctx.fillStyle = statusBg;
-    roundRect(ctx, sPillX, sPillY, sPillW, sPillH, 4 * scale);
-    ctx.fill();
-
-    ctx.fillStyle = statusColor;
-    ctx.textAlign = 'center';
-    ctx.fillText(statusText, sPillX + sPillW / 2, row1Y);
-
-    // Row 2: Action / Job Type
-    const row2Y = currentLogY + 20 * scale;
+    // Baris 1: Nama Pekerjaan (Font Bold, Slate-900)
+    const line1Y = currentLogY + 7.5 * scale;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${9.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', itemContentW);
-    ctx.fillText(actionTitle, itemContentX, row2Y);
+    ctx.font = `bold ${8.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(truncateText(ctx, actionName, itemContentW), itemContentX, line1Y);
 
-    // Row 3: Executor / Technician
-    const row3Y = currentLogY + 31 * scale;
-    const techStr = log.technician ? log.technician : 'UPT Resor 1.9';
-    const descStr = log.description ? ` • ${log.description}` : '';
-    const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 10 * scale);
+    // Baris 2: Pelaksana • Tahun (Font Tipis, Slate-500)
+    const line2Y = currentLogY + 18.5 * scale;
+    ctx.fillStyle = '#64748b';
+    ctx.font = `500 ${7.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(truncateText(ctx, `${contractor} • ${year}`, itemContentW), itemContentX, line2Y);
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.beginPath();
-    ctx.arc(itemContentX + 2 * scale, row3Y, 1.8 * scale, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#475569';
-    ctx.font = `500 ${8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(infoFull, itemContentX + 7 * scale, row3Y);
-
-    currentLogY += logRowHeight;
+    currentLogY += itemHeight;
   });
+
+  // Footer: +N pekerjaan lainnya (if logs > 3)
+  if (logs.length > 3) {
+    const footerY = currentLogY + 6 * scale;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = `italic 600 ${6.8 * scale}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya`, cardX + cardW / 2, footerY);
+  }
 
   ctx.restore();
 }
