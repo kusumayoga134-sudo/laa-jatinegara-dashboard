@@ -220,9 +220,9 @@ export async function renderUltraHdCanvas({
 
   // 4. Draw Callout Boxes with Arrows pointing directly to radar beacons (Collision-Free Layout)
   if (showCallouts && linesWithLogs.length > 0) {
-    const cardW = 275 * scale;
-    const headerHeight = 36 * scale;
-    const logItemHeight = 40 * scale;
+    const cardW = 280 * scale;
+    const headerHeight = 38 * scale;
+    const logItemHeight = 44 * scale;
 
     // Step 1: Pre-calculate card properties and natural target coordinates
     const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
@@ -230,7 +230,7 @@ export async function renderUltraHdCanvas({
       const targetY = toCanvasY(center.y);
       const displayLogs = logs.slice(0, 3);
       const footerExtra = logs.length > 3 ? 18 * scale : 0;
-      const cardH = headerHeight + displayLogs.length * logItemHeight + 12 * scale + footerExtra;
+      const cardH = headerHeight + displayLogs.length * logItemHeight + 10 * scale + footerExtra;
 
       // Smart Corridor & Direction Assignment:
       // Upper corridor tracks: center.y < 850
@@ -323,7 +323,7 @@ export async function renderUltraHdCanvas({
       }
     });
 
-    // Step 4: Render Callout Cards and Leader Arrows
+    // Step 4: Render Callout Cards and Leader Arrows (Unified, Elegant CAD Styling)
     preparedCards.forEach((card) => {
       const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY, targetX, targetY, side } = card;
 
@@ -332,197 +332,288 @@ export async function renderUltraHdCanvas({
       // ==========================================
       // A. Draw Pointer Arrow / Leader Line
       // ==========================================
-      const arrowStartX = Math.max(cardX + 24 * scale, Math.min(cardX + cardW - 24 * scale, targetX));
+      const arrowStartX = Math.max(cardX + 28 * scale, Math.min(cardX + cardW - 28 * scale, targetX));
       const arrowStartY = side === 'above' ? cardY + cardH : cardY;
 
-      // Outer glow outline for leader arrow (makes it pop cleanly over any background)
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 5 * scale;
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(targetX, targetY);
-      ctx.stroke();
-
-      // Shadow stroke
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
-      ctx.lineWidth = 3.2 * scale;
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(targetX, targetY);
-      ctx.stroke();
-
-      // Sharp Core Leader Line with line's color
-      ctx.strokeStyle = line.color || '#0f172a';
-      ctx.lineWidth = 2 * scale;
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(targetX, targetY);
-      ctx.stroke();
-
-      // Arrowhead Triangle at Target Radar Point
+      // Calculate direction from card anchor to radar target beacon
       const angle = Math.atan2(targetY - arrowStartY, targetX - arrowStartX);
-      const headLen = 13 * scale;
-      ctx.fillStyle = line.color || '#0f172a';
+      const distToTarget = Math.hypot(targetX - arrowStartX, targetY - arrowStartY);
+
+      // Stop arrowhead at the outer perimeter of the radar beacon so the beacon stays 100% visible
+      const beaconStopRadius = Math.min(13 * scale, Math.max(0, distToTarget - 14 * scale));
+      const arrowEndX = targetX - beaconStopRadius * Math.cos(angle);
+      const arrowEndY = targetY - beaconStopRadius * Math.sin(angle);
+
+      // Outer White Halo outline (ensures leader line stands out cleanly over tracks and background)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4.5 * scale;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo(targetX, targetY);
+      ctx.moveTo(arrowStartX, arrowStartY);
+      ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.stroke();
+
+      // Soft Shadow outline
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.20)';
+      ctx.lineWidth = 2.8 * scale;
+      ctx.beginPath();
+      ctx.moveTo(arrowStartX, arrowStartY);
+      ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.stroke();
+
+      // Sharp Core Leader Line in Unified Dark Slate (#0f172a, Senada & Professional!)
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.6 * scale;
+      ctx.beginPath();
+      ctx.moveTo(arrowStartX, arrowStartY);
+      ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.stroke();
+
+      // Sleek Architectural Arrowhead pointing at radar target
+      const headLen = 9.5 * scale;
+      const headAngle = Math.PI / 7.5;
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.moveTo(arrowEndX, arrowEndY);
       ctx.lineTo(
-        targetX - headLen * Math.cos(angle - Math.PI / 7),
-        targetY - headLen * Math.sin(angle - Math.PI / 7)
+        arrowEndX - headLen * Math.cos(angle - headAngle),
+        arrowEndY - headLen * Math.sin(angle - headAngle)
       );
       ctx.lineTo(
-        targetX - headLen * Math.cos(angle + Math.PI / 7),
-        targetY - headLen * Math.sin(angle + Math.PI / 7)
+        arrowEndX - headLen * 0.7 * Math.cos(angle),
+        arrowEndY - headLen * 0.7 * Math.sin(angle)
+      );
+      ctx.lineTo(
+        arrowEndX - headLen * Math.cos(angle + headAngle),
+        arrowEndY - headLen * Math.sin(angle + headAngle)
       );
       ctx.closePath();
       ctx.fill();
 
-      // Target anchor dot
-      ctx.fillStyle = '#dc2626';
+      // Card Base Anchor Pin (Tactile anchor on card border)
+      ctx.fillStyle = '#0f172a';
       ctx.beginPath();
-      ctx.arc(targetX, targetY, 4 * scale, 0, Math.PI * 2);
+      ctx.arc(arrowStartX, arrowStartY, 3.2 * scale, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.2 * scale;
-      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(arrowStartX, arrowStartY, 1.4 * scale, 0, Math.PI * 2);
+      ctx.fill();
 
       // ==========================================
       // B. Draw Callout Box Container
       // ==========================================
-      // Drop Shadow
-      ctx.shadowColor = 'rgba(15, 23, 42, 0.20)';
-      ctx.shadowBlur = 14 * scale;
+      const cardRadius = 8 * scale;
+      const trackColor = line.color || '#334155';
+
+      // 1. Drop Shadow (Soft, ambient modern shadow)
+      ctx.save();
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.14)';
+      ctx.shadowBlur = 18 * scale;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 6 * scale;
-
-      // Card Background
       ctx.fillStyle = '#ffffff';
-      roundRect(ctx, cardX, cardY, cardW, cardH, 9 * scale);
+      roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
       ctx.fill();
+      ctx.restore();
 
-      // Reset shadow for inner elements
-      ctx.shadowColor = 'transparent';
+      // 2. Inner Layer clipped to card bounds (Guarantees perfect rounded corners!)
+      ctx.save();
+      roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
+      ctx.clip();
 
-      // Card Border with track line accent color
-      ctx.strokeStyle = line.color || '#334155';
-      ctx.lineWidth = 2 * scale;
-      roundRect(ctx, cardX, cardY, cardW, cardH, 9 * scale);
-      ctx.stroke();
+      // Card Base Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(cardX, cardY, cardW, cardH);
 
-      // Left Accent Strip
-      ctx.fillStyle = line.color || '#139a47';
-      roundRectCustom(ctx, cardX, cardY, 5 * scale, cardH, 9 * scale, 0, 0, 9 * scale);
-      ctx.fill();
+      // Left Accent Strip in Track's authentic color (Provides clear identity without gaudy borders!)
+      ctx.fillStyle = trackColor;
+      ctx.fillRect(cardX, cardY, 4.5 * scale, cardH);
 
-      // Card Header Background Banner
+      // Header Background Banner (Subtle cool slate-50)
       ctx.fillStyle = '#f8fafc';
-      roundRectCustom(ctx, cardX + 5 * scale, cardY, cardW - 5 * scale, headerHeight, 0, 9 * scale, 0, 0);
-      ctx.fill();
+      ctx.fillRect(cardX + 4.5 * scale, cardY, cardW - 4.5 * scale, headerHeight);
 
-      // Header Divider Line
+      // Hairline Header Bottom Divider
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 1 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 5 * scale, cardY + headerHeight);
+      ctx.moveTo(cardX + 4.5 * scale, cardY + headerHeight);
       ctx.lineTo(cardX + cardW, cardY + headerHeight);
       ctx.stroke();
 
-      // Header: Colored Dot
+      ctx.restore();
+
+      // 3. Unified Sleek Outer Border Frame (Slate-300 hairline, senada across all cards!)
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.2 * scale;
+      roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
+      ctx.stroke();
+
+      // ==========================================
+      // C. Header Information & Badges
+      // ==========================================
+      // Header: Jewel Track Indicator Dot
       const headerDotX = cardX + 16 * scale;
-      const headerDotY = cardY + 18 * scale;
-      ctx.fillStyle = line.color || '#139a47';
+      const headerDotY = cardY + headerHeight / 2;
+
+      // Outer track color circle
+      ctx.fillStyle = trackColor;
       ctx.beginPath();
-      ctx.arc(headerDotX, headerDotY, 4.5 * scale, 0, Math.PI * 2);
+      ctx.arc(headerDotX, headerDotY, 5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner white center pip (gives it an optical lens / jewel look)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(headerDotX, headerDotY, 1.8 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Header: Track Title
       ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${10.5 * scale}px sans-serif`;
+      ctx.font = `bold ${10 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      const maxTitleW = cardW - 110 * scale;
+      const maxTitleW = cardW - 118 * scale;
       const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-      ctx.fillText(titleText, cardX + 25 * scale, headerDotY - 3 * scale);
+      ctx.fillText(titleText, cardX + 26 * scale, headerDotY - 4 * scale);
 
       // Header: KM Subtitle
       ctx.fillStyle = '#64748b';
-      ctx.font = `bold ${7.5 * scale}px monospace`;
-      ctx.fillText(line.km || '', cardX + 25 * scale, headerDotY + 8 * scale);
+      ctx.font = `600 ${7.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+      ctx.fillText(line.km || '', cardX + 26 * scale, headerDotY + 7 * scale);
 
-      // Header: Job Count Badge (Pill)
-      const badgeW = 68 * scale;
-      const badgeH = 16 * scale;
-      const badgeX = cardX + cardW - badgeW - 8 * scale;
-      const badgeY = cardY + 10 * scale;
+      // Header: Job Count Badge (Elegant Pill Badge)
+      const badgeW = 72 * scale;
+      const badgeH = 18 * scale;
+      const badgeX = cardX + cardW - badgeW - 10 * scale;
+      const badgeY = cardY + (headerHeight - badgeH) / 2;
 
-      ctx.fillStyle = '#fef2f2';
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 5 * scale);
+      // Badge pill background (Sophisticated slate/indigo)
+      ctx.fillStyle = '#f1f5f9';
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
       ctx.fill();
-      ctx.strokeStyle = '#fca5a5';
-      ctx.lineWidth = 1 * scale;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 5 * scale);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 0.8 * scale;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * scale);
       ctx.stroke();
 
-      ctx.fillStyle = '#b91c1c';
-      ctx.font = `bold ${7.5 * scale}px sans-serif`;
+      // Badge indicator dot
+      ctx.fillStyle = '#2563eb';
+      ctx.beginPath();
+      ctx.arc(badgeX + 8.5 * scale, badgeY + badgeH / 2, 2.5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Badge text
+      ctx.fillStyle = '#1e293b';
+      ctx.font = `bold ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${logs.length} Pekerjaan`, badgeX + badgeW / 2, badgeY + badgeH / 2);
+      ctx.fillText(`${logs.length} Pekerjaan`, badgeX + (badgeW + 7 * scale) / 2, badgeY + badgeH / 2);
 
       // ==========================================
-      // C. Draw Work Log Items Inside Callout
+      // D. Draw Work Log Items Inside Callout
       // ==========================================
-      let currentLogY = cardY + headerHeight + 6 * scale;
+      let currentLogY = cardY + headerHeight + 5 * scale;
 
       displayLogs.forEach((log, logIdx) => {
         const { dateStr, timeStr } = formatLogTimestamp(log.timestamp);
 
-        // Subtle divider between log items
+        // Subtle divider between multiple log items
         if (logIdx > 0) {
           ctx.strokeStyle = '#f1f5f9';
           ctx.lineWidth = 1 * scale;
           ctx.beginPath();
-          ctx.moveTo(cardX + 14 * scale, currentLogY - 3 * scale);
-          ctx.lineTo(cardX + cardW - 14 * scale, currentLogY - 3 * scale);
+          ctx.moveTo(cardX + 12 * scale, currentLogY - 2 * scale);
+          ctx.lineTo(cardX + cardW - 12 * scale, currentLogY - 2 * scale);
           ctx.stroke();
         }
 
-        // Row 1: Timestamp & Status
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#2563eb';
-        ctx.font = `bold ${7.5 * scale}px monospace`;
-        ctx.fillText(`🕒 ${dateStr} ${timeStr}`, cardX + 14 * scale, currentLogY + 5 * scale);
+        const itemContentX = cardX + 14 * scale;
+        const itemContentW = cardW - 28 * scale;
+        const row1Y = currentLogY + 6 * scale;
 
-        // Status Tag
-        const statusText = (log.status || 'SELESAI').toUpperCase();
-        ctx.textAlign = 'right';
-        ctx.fillStyle = statusText === 'PROGRESS' ? '#d97706' : '#15803d';
-        ctx.font = `bold ${7.5 * scale}px sans-serif`;
-        ctx.fillText(`✓ ${statusText}`, cardX + cardW - 14 * scale, currentLogY + 5 * scale);
+        // Vector Clock Icon (Razor-sharp at any DPI, zero emoji rendering bugs)
+        const clockX = itemContentX + 3.5 * scale;
+        const clockY = row1Y;
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 0.9 * scale;
+        ctx.beginPath();
+        ctx.arc(clockX, clockY, 3.2 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(clockX, clockY);
+        ctx.lineTo(clockX, clockY - 1.8 * scale);
+        ctx.moveTo(clockX, clockY);
+        ctx.lineTo(clockX + 1.4 * scale, clockY);
+        ctx.stroke();
+
+        // Timestamp Text
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#64748b';
+        ctx.font = `600 ${7.5 * scale}px "SF Mono", Menlo, Consolas, monospace`;
+        ctx.fillText(`${dateStr}  ${timeStr}`, itemContentX + 10 * scale, row1Y);
+
+        // Status Pill (Right Aligned)
+        const rawStatus = (log.status || 'SELESAI').toUpperCase();
+        const isProgress = rawStatus === 'PROGRESS';
+        const pillW = 56 * scale;
+        const pillH = 14 * scale;
+        const pillX = cardX + cardW - 14 * scale - pillW;
+        const pillY = row1Y - pillH / 2;
+
+        ctx.fillStyle = isProgress ? '#fffbeb' : '#ecfdf5';
+        roundRect(ctx, pillX, pillY, pillW, pillH, 4 * scale);
+        ctx.fill();
+        ctx.strokeStyle = isProgress ? '#fde68a' : '#a7f3d0';
+        ctx.lineWidth = 0.8 * scale;
+        roundRect(ctx, pillX, pillY, pillW, pillH, 4 * scale);
+        ctx.stroke();
+
+        // Status Pill Text
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isProgress ? '#b45309' : '#047857';
+        ctx.font = `bold ${7 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillText(isProgress ? '● PROGRES' : '✓ SELESAI', pillX + pillW / 2, row1Y);
 
         // Row 2: Action Name / Job Title
+        const row2Y = currentLogY + 18 * scale;
         ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = '#0f172a';
-        ctx.font = `bold ${9 * scale}px sans-serif`;
-        const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', cardW - 28 * scale);
-        ctx.fillText(actionTitle, cardX + 14 * scale, currentLogY + 17 * scale);
+        ctx.font = `bold ${9 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        const actionTitle = truncateText(ctx, log.actionType || 'Pemeliharaan LAA', itemContentW);
+        ctx.fillText(actionTitle, itemContentX, row2Y);
 
         // Row 3: Executor / Technician & Brief Note
-        ctx.fillStyle = '#475569';
-        ctx.font = `500 ${7.5 * scale}px sans-serif`;
-        const techStr = log.technician ? `👷 ${log.technician}` : 'UPT 1.9';
+        const row3Y = currentLogY + 29 * scale;
+        const techStr = log.technician ? log.technician : 'UPT Resor 1.9';
         const descStr = log.description ? ` • ${log.description}` : '';
-        const infoFull = truncateText(ctx, `${techStr}${descStr}`, cardW - 28 * scale);
-        ctx.fillText(infoFull, cardX + 14 * scale, currentLogY + 28 * scale);
+        const infoFull = truncateText(ctx, `${techStr}${descStr}`, itemContentW - 10 * scale);
+
+        // Tiny team bullet
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(itemContentX + 2.5 * scale, row3Y, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#475569';
+        ctx.font = `500 ${7.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillText(infoFull, itemContentX + 8 * scale, row3Y);
 
         currentLogY += logItemHeight;
       });
 
       // Extra note if more than 3 logs
       if (logs.length > 3) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = `italic bold ${7.5 * scale}px sans-serif`;
+        ctx.fillStyle = '#64748b';
+        ctx.font = `italic 600 ${7.5 * scale}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya pada seksi ini`, cardX + cardW / 2, currentLogY + 3 * scale);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya pada seksi ini`, cardX + cardW / 2, currentLogY + 2 * scale);
       }
 
       ctx.restore();
