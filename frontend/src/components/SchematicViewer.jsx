@@ -904,6 +904,74 @@ export const ALL_TRACK_LINES = [
       isCrossing: true,
     },
     {
+      id: 'titik_wesel_w31c1',
+      code: 'Wesel W31C1',
+      title: 'Wesel W31C1 (W31C1 ke Jalur 2)',
+      km: 'KM 11+650',
+      category: 'WESEL',
+      cx: 932.6,
+      cy: 656.1,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 927.1 656.1 A 5.5 5.5 0 1 0 938.1 656.1 A 5.5 5.5 0 1 0 927.1 656.1',
+      hitD: 'M 914.6 656.1 A 18 18 0 1 0 950.6 656.1 A 18 18 0 1 0 914.6 656.1',
+      startDivider: { type: 'WESEL', label: 'Wesel W31C1', km: 'KM 11+650' },
+      endDivider: { type: 'JALUR', label: 'Jalur 2 St. Jatinegara', km: 'KM 11+650' },
+    },
+    {
+      id: 'titik_wesel_w31c2',
+      code: 'Wesel W31C2',
+      title: 'Wesel W31C2 (W31C2 ke Jalur 2)',
+      km: 'KM 11+700',
+      category: 'WESEL',
+      cx: 992.0,
+      cy: 656.1,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 986.5 656.1 A 5.5 5.5 0 1 0 997.5 656.1 A 5.5 5.5 0 1 0 986.5 656.1',
+      hitD: 'M 974.0 656.1 A 18 18 0 1 0 1010.0 656.1 A 18 18 0 1 0 974.0 656.1',
+      startDivider: { type: 'WESEL', label: 'Wesel W31C2', km: 'KM 11+700' },
+      endDivider: { type: 'JALUR', label: 'Jalur 2 St. Jatinegara', km: 'KM 11+700' },
+    },
+    {
+      id: 'titik_wesel_w51d1',
+      code: 'Wesel W51D1',
+      title: 'Wesel W51D1 (W51D1 ke Jalur 1)',
+      km: 'KM 11+650',
+      category: 'WESEL',
+      cx: 932.6,
+      cy: 703.5,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 927.1 703.5 A 5.5 5.5 0 1 0 938.1 703.5 A 5.5 5.5 0 1 0 927.1 703.5',
+      hitD: 'M 914.6 703.5 A 18 18 0 1 0 950.6 703.5 A 18 18 0 1 0 914.6 703.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W51D1', km: 'KM 11+650' },
+      endDivider: { type: 'JALUR', label: 'Jalur 1 St. Jatinegara', km: 'KM 11+650' },
+    },
+    {
+      id: 'titik_wesel_w51d2',
+      code: 'Wesel W51D2',
+      title: 'Wesel W51D2 (W51D2 ke Jalur 1)',
+      km: 'KM 11+700',
+      category: 'WESEL',
+      cx: 992.0,
+      cy: 703.5,
+      r: 5.5,
+      isDot: true,
+      isCrossing: true,
+      color: '#000000',
+      d: 'M 986.5 703.5 A 5.5 5.5 0 1 0 997.5 703.5 A 5.5 5.5 0 1 0 986.5 703.5',
+      hitD: 'M 974.0 703.5 A 18 18 0 1 0 1010.0 703.5 A 18 18 0 1 0 974.0 703.5',
+      startDivider: { type: 'WESEL', label: 'Wesel W51D2', km: 'KM 11+700' },
+      endDivider: { type: 'JALUR', label: 'Jalur 1 St. Jatinegara', km: 'KM 11+700' },
+    },
+    {
       id: 'wesel_w31c1_932',
       code: 'WESEL W31C1',
       title: 'Wesel W31C1 / W51D1 (Jalur 2 ke Jalur 1, KM 11+650)',
@@ -2465,7 +2533,7 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
   const isInsulatorLine = lineCat.includes('SECTION INSULATOR') || lineCat.includes('(FRP)') || lineId.startsWith('frp_');
   const isAirJointLine = lineCat.includes('AIR JOINT') || lineCat.includes('(AJ)') || lineId.startsWith('aj_');
   const isAirSectionLine = lineCat.includes('AIR SECTION') || lineCat.includes('(AS)') || lineId.startsWith('as_');
-  const isTurnoutLine = lineCat.includes('WESEL') || lineId.startsWith('wesel_');
+  const isTurnoutLine = lineCat.includes('WESEL') || lineId.startsWith('wesel_') || lineId.startsWith('titik_wesel_');
   const isAuxiliaryDevice = isSwitchLine || isInsulatorLine || isAirJointLine || isAirSectionLine || isTurnoutLine;
 
   return logs.filter((log) => {
@@ -2559,6 +2627,9 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
 // Calculate center coordinate (X, Y) accurately parsing SVG commands (including Arc 'A')
 export const getLineCenter = (line) => {
   if (!line) return null;
+  if (line.cx !== undefined && line.cy !== undefined) {
+    return { x: line.cx, y: line.cy };
+  }
   if (line.xStart !== undefined && line.xEnd !== undefined && line.y !== undefined) {
     return { x: (line.xStart + line.xEnd) / 2, y: line.y };
   }
@@ -3218,80 +3289,136 @@ export default function SchematicViewer({
                       if (onSelectLocation) onSelectLocation(line);
                     }}
                   >
-                    {/* 1. Generous 34px hit-area for effortless cursor detection */}
-                    <path
-                      d={line.hitD || line.d}
-                      stroke="transparent"
-                      strokeWidth={line.isCrossing ? 42 : 34}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
+                    {line.isDot ? (
+                      <>
+                        {/* 1. Generous 36px hit-area circle for effortless cursor detection */}
+                        <circle
+                          cx={line.cx}
+                          cy={line.cy}
+                          r="18"
+                          fill="transparent"
+                          stroke="transparent"
+                        />
 
-                    {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS/AJ) */}
-                    {(isHovered || isActive) && (() => {
-                      const isSymbol = line.category === 'DISCONNECTING SWITCH (DS)' ||
-                                       line.category === 'SECTION INSULATOR (FRP)' ||
-                                       line.category === 'PEMISAH SEKSI (AS/AJ)' ||
-                                       line.id.startsWith('ds_') ||
-                                       line.id.startsWith('frp_') ||
-                                       line.id.startsWith('overlap_');
-                      
-                      const strokeCol = isSymbol ? '#000000' : line.color;
-                      const outerStrokeCol = isSymbol ? '#ffffff' : line.color;
-                      const outerWidth = isSymbol ? (line.id.startsWith('ds_') ? '8' : '10') : '11';
-                      const coreWidth = isSymbol ? (line.id.startsWith('ds_') ? '4' : '6') : '6';
-                      const glowFilter = isSymbol
-                        ? 'drop-shadow(0 0 6px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(0,0,0,0.6))'
-                        : `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`;
+                        {/* 2. Default visible black junction circle */}
+                        <circle
+                          cx={line.cx}
+                          cy={line.cy}
+                          r={line.r || 5.5}
+                          fill="#000000"
+                          stroke="#ffffff"
+                          strokeWidth="0.8"
+                        />
 
-                      return (
-                        <>
-                          {/* Outer Glow / Halo (White for black symbols for crisp high contrast) */}
-                          <path
-                            d={line.d}
-                            stroke={outerStrokeCol}
-                            strokeWidth={outerWidth}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                            style={{
-                              opacity: isSymbol ? 0.95 : 0.85,
-                              filter: isSymbol ? undefined : glowFilter,
-                            }}
-                          />
-
-                          {/* Core Solid Line (BLACK for DS, FRP, AS/AJ) */}
-                          <path
-                            d={line.d}
-                            stroke={strokeCol}
-                            strokeWidth={coreWidth}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                            style={{
-                              filter: isSymbol ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                            }}
-                          />
-
-                          {/* 3D Embossed White Laser Centerline for regular track lines */}
-                          {!isSymbol && (
-                            <path
-                              d={line.d}
-                              stroke="#ffffff"
-                              strokeWidth="2.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                        {/* 3. On Hover or Active: Cyan Aura / Glowing Halo */}
+                        {(isHovered || isActive) && (
+                          <>
+                            <circle
+                              cx={line.cx}
+                              cy={line.cy}
+                              r="14"
                               fill="none"
+                              stroke="#38bdf8"
+                              strokeWidth="3.5"
                               style={{
-                                opacity: 0.95,
-                                filter: 'drop-shadow(0 0 2px #ffffff)',
+                                filter: 'drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.8))',
                               }}
                             />
-                          )}
-                        </>
-                      );
-                    })()}
+                            <circle
+                              cx={line.cx}
+                              cy={line.cy}
+                              r="7.5"
+                              fill="#000000"
+                              stroke="#ffffff"
+                              strokeWidth="1.5"
+                            />
+                            <circle
+                              cx={line.cx}
+                              cy={line.cy}
+                              r="2.5"
+                              fill="#ffffff"
+                            />
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {/* 1. Generous 34px hit-area for effortless cursor detection */}
+                        <path
+                          d={line.hitD || line.d}
+                          stroke="transparent"
+                          strokeWidth={line.isCrossing ? 42 : 34}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="none"
+                        />
+
+                        {/* 2. On Hover or Active (1 line only): Glowing Line in authentic color (BLACK for DS, FRP, AS/AJ) */}
+                        {(isHovered || isActive) && (() => {
+                          const isSymbol = line.category === 'DISCONNECTING SWITCH (DS)' ||
+                                           line.category === 'SECTION INSULATOR (FRP)' ||
+                                           line.category === 'PEMISAH SEKSI (AS/AJ)' ||
+                                           line.id.startsWith('ds_') ||
+                                           line.id.startsWith('frp_') ||
+                                           line.id.startsWith('overlap_');
+                          
+                          const strokeCol = isSymbol ? '#000000' : line.color;
+                          const outerStrokeCol = isSymbol ? '#ffffff' : line.color;
+                          const outerWidth = isSymbol ? (line.id.startsWith('ds_') ? '8' : '10') : '11';
+                          const coreWidth = isSymbol ? (line.id.startsWith('ds_') ? '4' : '6') : '6';
+                          const glowFilter = isSymbol
+                            ? 'drop-shadow(0 0 6px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(0,0,0,0.6))'
+                            : `drop-shadow(0 0 10px ${line.color}) drop-shadow(0 0 20px ${line.color})`;
+
+                          return (
+                            <>
+                              {/* Outer Glow / Halo (White for black symbols for crisp high contrast) */}
+                              <path
+                                d={line.d}
+                                stroke={outerStrokeCol}
+                                strokeWidth={outerWidth}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                fill="none"
+                                style={{
+                                  opacity: isSymbol ? 0.95 : 0.85,
+                                  filter: isSymbol ? undefined : glowFilter,
+                                }}
+                              />
+
+                              {/* Core Solid Line (BLACK for DS, FRP, AS/AJ) */}
+                              <path
+                                d={line.d}
+                                stroke={strokeCol}
+                                strokeWidth={coreWidth}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                fill="none"
+                                style={{
+                                  filter: isSymbol ? glowFilter : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                                }}
+                              />
+
+                              {/* 3D Embossed White Laser Centerline for regular track lines */}
+                              {!isSymbol && (
+                                <path
+                                  d={line.d}
+                                  stroke="#ffffff"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  fill="none"
+                                  style={{
+                                    opacity: 0.95,
+                                    filter: 'drop-shadow(0 0 2px #ffffff)',
+                                  }}
+                                />
+                              )}
+                            </>
+                          );
+                        })()}
+                      </>
+                    )}
                   </g>
                 );
               })}
