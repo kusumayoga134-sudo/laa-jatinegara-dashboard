@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
+import { matchLineLogs } from './SchematicViewer';
 
 // ========================================================
 // COLOR RESOLVER: Pemetaan Warna Asli Garis AutoCAD DWG
@@ -253,7 +254,7 @@ export default function WorkHistoryPanel({
   onDeleteLog,
   onOpenLogin,
 }) {
-  const isAllLogsMode = Boolean(locationData?.isAllLogs);
+  const isAllLogsMode = Boolean(locationData?.isAllLogs) || !locationData?.code;
 
   // Station Filter (Hanya Nama Stasiun Keseluruhan)
   const [stationFilter, setStationFilter] = useState('ALL');
@@ -330,45 +331,67 @@ export default function WorkHistoryPanel({
   const locationCode = locationData.code || locationData.name || '';
   const locationTitle = locationData.title || locationData.name || locationCode;
 
-  // Filter logs relevant to location or station
-  const matchingLogs = logs.filter((log) => {
-    // If opened from a specific track line on the map
-    if (!isAllLogsMode && locationCode) {
-      return (
-        log.targetCode &&
-        (log.targetCode.toLowerCase().includes(locationCode.toLowerCase()) ||
-          locationCode.toLowerCase().includes(log.targetCode.toLowerCase()))
-      );
+  // Filter logs relevant to location or station (100% synchronized with map radar dots & hover cards)
+  const matchingLogs = useMemo(() => {
+    // 1. All Logs Mode (Seluruh Lintas / Filter per Stasiun)
+    if (isAllLogsMode) {
+      if (stationFilter === 'ALL') return logs;
+      return logs.filter((log) => {
+        const tc = (log.targetCode || '').toUpperCase();
+        const desc = (log.description || '').toUpperCase();
+        const combined = `${tc} ${desc}`;
+
+        if (stationFilter === 'PND') {
+          if (!combined.includes('PONDOK JATI') && !combined.includes('PND') && !combined.includes('KRAMAT')) return false;
+        } else if (stationFilter === 'JNG') {
+          if (!combined.includes('JATINEGARA') && !combined.includes('JNG') && !combined.includes('MRI') && !combined.includes('MANGGARAI') && !tc.startsWith('DS 1') && !tc.startsWith('DS 2') && !tc.startsWith('DS 4') && !tc.startsWith('DS 5') && !tc.startsWith('DS 6') && !tc.startsWith('DS 7') && !tc.startsWith('DS 8')) return false;
+        } else if (stationFilter === 'KLD') {
+          if ((combined.includes('KLENDER BARU') || combined.includes('KLDB')) && !combined.includes('JNG-KLD') && !combined.includes('KLD-BUA')) return false;
+          if (!combined.includes('KLENDER') && !combined.includes('KLD')) return false;
+        } else if (stationFilter === 'BUA') {
+          if (!combined.includes('BUARAN') && !combined.includes('BUA') && !tc.startsWith('DS 9') && !tc.startsWith('DS 10')) return false;
+        } else if (stationFilter === 'KLDB') {
+          if (!combined.includes('KLENDER BARU') && !combined.includes('KLDB') && !tc.startsWith('DS 9') && !tc.startsWith('DS 10') && !tc.startsWith('DS 11') && !tc.startsWith('DS 12')) return false;
+        } else if (stationFilter === 'CUK') {
+          if (!combined.includes('CAKUNG') && !combined.includes('CUK') && !tc.startsWith('DS 11') && !tc.startsWith('DS 12') && !tc.startsWith('DS 13') && !tc.startsWith('DS 14')) return false;
+        } else if (stationFilter === 'KRI') {
+          if (!combined.includes('KRANJI') && !combined.includes('KRI') && !tc.startsWith('DS 13') && !tc.startsWith('DS 14') && !tc.startsWith('DS 16')) return false;
+        } else if (stationFilter === 'BKS') {
+          if (!combined.includes('BEKASI') && !combined.includes('BKS') && !tc.startsWith('DS 15') && !tc.startsWith('DS 16') && !tc.startsWith('DS 17') && !tc.startsWith('DS 18') && !tc.startsWith('DS 19') && !tc.startsWith('DS 20')) return false;
+        }
+        return true;
+      });
     }
 
-    // Filter Nama Stasiun Keseluruhan (Hanya Stasiun Saja)
-    if (isAllLogsMode && stationFilter !== 'ALL') {
-      const tc = (log.targetCode || '').toUpperCase();
-      const desc = (log.description || '').toUpperCase();
-      const combined = `${tc} ${desc}`;
-
-      if (stationFilter === 'PND') {
-        if (!combined.includes('PONDOK JATI') && !combined.includes('PND') && !combined.includes('KRAMAT')) return false;
-      } else if (stationFilter === 'JNG') {
-        if (!combined.includes('JATINEGARA') && !combined.includes('JNG') && !combined.includes('MRI') && !combined.includes('MANGGARAI') && !tc.startsWith('DS 1') && !tc.startsWith('DS 2') && !tc.startsWith('DS 4') && !tc.startsWith('DS 5') && !tc.startsWith('DS 6') && !tc.startsWith('DS 7') && !tc.startsWith('DS 8')) return false;
-      } else if (stationFilter === 'KLD') {
-        if ((combined.includes('KLENDER BARU') || combined.includes('KLDB')) && !combined.includes('JNG-KLD') && !combined.includes('KLD-BUA')) return false;
-        if (!combined.includes('KLENDER') && !combined.includes('KLD')) return false;
-      } else if (stationFilter === 'BUA') {
-        if (!combined.includes('BUARAN') && !combined.includes('BUA') && !tc.startsWith('DS 9') && !tc.startsWith('DS 10')) return false;
-      } else if (stationFilter === 'KLDB') {
-        if (!combined.includes('KLENDER BARU') && !combined.includes('KLDB') && !tc.startsWith('DS 9') && !tc.startsWith('DS 10') && !tc.startsWith('DS 11') && !tc.startsWith('DS 12')) return false;
-      } else if (stationFilter === 'CUK') {
-        if (!combined.includes('CAKUNG') && !combined.includes('CUK') && !tc.startsWith('DS 11') && !tc.startsWith('DS 12') && !tc.startsWith('DS 13') && !tc.startsWith('DS 14')) return false;
-      } else if (stationFilter === 'KRI') {
-        if (!combined.includes('KRANJI') && !combined.includes('KRI') && !tc.startsWith('DS 13') && !tc.startsWith('DS 14') && !tc.startsWith('DS 16')) return false;
-      } else if (stationFilter === 'BKS') {
-        if (!combined.includes('BEKASI') && !combined.includes('BKS') && !tc.startsWith('DS 15') && !tc.startsWith('DS 16') && !tc.startsWith('DS 17') && !tc.startsWith('DS 18') && !tc.startsWith('DS 19') && !tc.startsWith('DS 20')) return false;
+    // 2. Specific Location Mode: Synchronized 1-to-1 with map radar dots & popup card
+    if (locationData) {
+      // First priority: use master matchLineLogs helper
+      const masterMatched = matchLineLogs(locationData, logs);
+      if (masterMatched && masterMatched.length > 0) {
+        return masterMatched;
       }
+
+      // Robust fallback: match by title, code, id, or normalized string
+      const lCode = (locationData.code || '').trim().toLowerCase();
+      const lTitle = (locationData.title || '').trim().toLowerCase();
+      const lId = (locationData.id || '').trim().toLowerCase();
+
+      return logs.filter((log) => {
+        if (!log || !log.targetCode) return false;
+        const tc = log.targetCode.trim().toLowerCase();
+        const tid = (log.targetId || '').trim().toLowerCase();
+
+        if (lId && tid && lId === tid) return true;
+        if (lTitle && (tc === lTitle || tc.includes(lTitle) || lTitle.includes(tc))) return true;
+        if (lCode && (tc === lCode || tc.includes(lCode) || lCode.includes(tc))) return true;
+        if (lId && (tc === lId || tc.includes(lId) || lId.includes(tc))) return true;
+
+        return false;
+      });
     }
 
-    return true;
-  });
+    return [];
+  }, [logs, locationData, isAllLogsMode, stationFilter]);
 
   const filteredLogs = matchingLogs.filter((log) => {
     if (!searchQuery.trim()) return true;

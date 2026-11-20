@@ -3449,8 +3449,27 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
     const normLineTitle = lineTitle.toLowerCase();
     const normLineId = lineId.toLowerCase();
 
-    // 2. Direct exact string match (case-insensitive)
-    if (normLineCode && (normTc === normLineCode || normTc === normLineTitle || normTc === normLineId)) {
+    const cleanTc = normTc.replace(/\s+/g, ' ');
+    const cleanLineCode = normLineCode.replace(/\s+/g, ' ');
+    const cleanLineTitle = normLineTitle.replace(/\s+/g, ' ');
+    const cleanLineId = normLineId.replace(/\s+/g, ' ');
+
+    // 2. Direct exact string match (case-insensitive & space-normalized)
+    if (
+      (cleanLineCode && cleanTc === cleanLineCode) ||
+      (cleanLineTitle && cleanTc === cleanLineTitle) ||
+      (cleanLineId && cleanTc === cleanLineId)
+    ) {
+      return true;
+    }
+
+    // 2b. Exact Alphanumeric Match (immune to punctuation/bracket differences)
+    const alphaTc = normTc.replace(/[^a-z0-9]/g, '');
+    const alphaLineTitle = normLineTitle.replace(/[^a-z0-9]/g, '');
+    const alphaLineCode = normLineCode.replace(/[^a-z0-9]/g, '');
+    const alphaLineId = normLineId.replace(/[^a-z0-9]/g, '');
+
+    if (alphaTc && (alphaTc === alphaLineTitle || alphaTc === alphaLineCode || alphaTc === alphaLineId)) {
       return true;
     }
 
@@ -3543,13 +3562,14 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
       return false;
     }
 
-    // 9. Exact Alphanumeric Match (NO loose substring matching!)
-    const alphaTc = normTc.replace(/[^a-z0-9]/g, '');
-    const alphaLineTitle = normLineTitle.replace(/[^a-z0-9]/g, '');
-    const alphaLineCode = normLineCode.replace(/[^a-z0-9]/g, '');
-
-    if (alphaTc && (alphaTc === alphaLineTitle || alphaTc === alphaLineCode)) {
-      return true;
+    // 10. Intelligent Station + Jalur Matching for natural user inputs
+    // e.g. "ST. BEKASI (Jalur 1)" or "Jalur 1 St. Bekasi" matching "ST. BEKASI (Jalur 1 Peron Utama Hulu)"
+    if (logJalurMatch && lineJalurMatch && logJalurMatch[1] === lineJalurMatch[1]) {
+      for (const st of stations) {
+        if (normTc.includes(st) && combinedLine.includes(st)) {
+          return true;
+        }
+      }
     }
 
     return false;
