@@ -280,8 +280,10 @@ export async function renderUltraHdCanvas({
     const maxX = totalWidth - cardW - 25 * scale;
 
     // Absolute safety boundary: NO card can EVER enter the official header banner or footer banner!
-    const absoluteMinY = mapYOffset + 14 * scale;
-    const absoluteMaxY = (mapYOffset + mapH) - (headerHeight + logItemHeight + 6 * scale) - 14 * scale;
+    const absoluteMinY = showOfficialHeader
+      ? mapYOffset + 14 * scale
+      : Math.max(mapYOffset + 14 * scale, 215 * scale);
+    const absoluteMaxY = (mapYOffset + mapH) - (headerHeight + logItemHeight + 6 * scale) - 18 * scale;
 
     // Step 1: Pre-calculate card properties with natural proximity to target beacons
     const preparedCards = linesWithLogs.map(({ line, logs, center }) => {
@@ -295,14 +297,22 @@ export async function renderUltraHdCanvas({
       const code = (line.code || '').toLowerCase();
       const title = (line.title || '').toLowerCase();
 
-      // Proximity side selection: Hilir/upper tracks go above, Hulu/lower tracks go below
+      // Proximity side selection:
+      // Upper corridor tracks (cadY < 850):
+      // The petak naspan labels (NASPAN 1 through 8) and switches are densely printed BELOW the tracks (Y=715–830).
+      // Placing cards ABOVE the tracks (Y < 650) keeps them in clear open space and 100% free of naspan text!
+      // St. Cakung (cadY >= 850 && cx >= 2250 && cx <= 2920):
+      // (NASPAN 9 EMPL CUK) and DS 11/13 are printed BELOW the tracks (Y=1135–1250).
+      // Placing Cakung cards ABOVE (Y < 1050) keeps them in clear open space and 100% free of (NASPAN 9 EMPL CUK)!
       let side;
       if (cadY < 850) {
-        const isHi = /\b(hi|hilir)\b/i.test(code) || /\b(hi|hilir)\b/i.test(title) || cadY <= 675;
-        side = isHi ? 'above' : 'below';
+        side = 'above';
+      } else if (center.x >= 2250 && center.x <= 2920) {
+        side = 'above';
+      } else if (cadY <= 1085) {
+        side = 'above';
       } else {
-        const isHu = /\b(hu|hulu)\b/i.test(code) || /\b(hu|hulu)\b/i.test(title) || cadY <= 1085;
-        side = isHu ? 'above' : 'below';
+        side = 'below';
       }
 
       // Natural, elegant offset: ~48px from the track beacon (NOT hundreds of pixels away!)
@@ -347,7 +357,7 @@ export async function renderUltraHdCanvas({
       );
     };
 
-    // Step 2: Sort cards by horizontal position (targetX) and resolve collisions
+    // Step 2: Sort cards by horizontal position (targetX) and resolve collisions with generous staggering
     preparedCards.sort((a, b) => a.targetX - b.targetX);
 
     for (let i = 0; i < preparedCards.length; i++) {
@@ -355,29 +365,45 @@ export async function renderUltraHdCanvas({
       for (let j = 0; j < i; j++) {
         const prev = preparedCards[j];
         if (checkOverlap(curr, prev)) {
-          // Option A: Horizontal shift (staggering) if shift is modest
-          const shiftX = (prev.x + prev.cardW + gapX) - curr.x;
+          // Option A: Horizontal shift (staggering)
+          const shiftRightX = (prev.x + prev.cardW + gapX) - curr.x;
           const targetCenter = curr.targetX - cardW / 2;
-          const distFromTarget = Math.abs((curr.x + shiftX) - targetCenter);
+          const distRight = Math.abs((curr.x + shiftRightX) - targetCenter);
+          const shiftLeftX = (prev.x - curr.cardW - gapX) - curr.x;
+          const distLeft = Math.abs((curr.x + shiftLeftX) - targetCenter);
+          const maxStagger = cardW * 1.8;
 
-          if (curr.x + shiftX + curr.cardW <= maxX && distFromTarget <= 110 * scale) {
-            curr.x += shiftX;
-          } else {
-            // Option B: Vertical tiering (close, compact tiering!)
+          let shifted = false;
+          const canRight = curr.x + shiftRightX + curr.cardW <= maxX && distRight <= maxStagger;
+          const canLeft = curr.x + shiftLeftX >= minX && distLeft <= maxStagger;
+
+          if (canRight && (!canLeft || distRight <= distLeft)) {
+            curr.x += shiftRightX;
+            shifted = true;
+          } else if (canLeft) {
+            curr.x += shiftLeftX;
+            shifted = true;
+          }
+
+          if (!shifted) {
+            // Option B: Vertical tiering only if leader line doesn't cross prev card
             if (curr.side === 'above') {
               const newY = prev.y - curr.cardH - gapY;
-              // Strict check: NEVER allow newY to go above absoluteMinY (top banner)
-              if (newY >= absoluteMinY) {
+              if (newY >= absoluteMinY && curr.targetY <= prev.y + gapY) {
                 curr.y = newY;
-              } else {
-                curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
+              } else if (curr.x + shiftRightX + curr.cardW <= maxX) {
+                curr.x += shiftRightX;
+              } else if (curr.x + shiftLeftX >= minX) {
+                curr.x += shiftLeftX;
               }
             } else {
               const newY = prev.y + prev.cardH + gapY;
-              if (newY <= absoluteMaxY) {
+              if (newY <= absoluteMaxY && curr.targetY >= prev.y + prev.cardH - gapY) {
                 curr.y = newY;
-              } else {
-                curr.x = Math.min(maxX, prev.x + prev.cardW + gapX);
+              } else if (curr.x + shiftRightX + curr.cardW <= maxX) {
+                curr.x += shiftRightX;
+              } else if (curr.x + shiftLeftX >= minX) {
+                curr.x += shiftLeftX;
               }
             }
           }
@@ -417,21 +443,41 @@ export async function renderUltraHdCanvas({
       if (!hasOverlap) break;
     }
 
-    // Step 4: Final boundary clamping (strict guarantee: NEVER touches the banner)
+    // Step 4: Protected CAD Zones Avoidance & Final Boundary Clamping
     preparedCards.forEach((c) => {
+      const cadX1 = c.x / scale;
+      const cadY1 = (c.y - mapYOffset) / scale;
+      const cadX2 = (c.x + c.cardW) / scale;
+      const cadY2 = (c.y + c.cardH - mapYOffset) / scale;
+
+      for (const zone of PROTECTED_CAD_ZONES) {
+        const overlaps = cadX1 < zone.x2 && cadX2 > zone.x1 && cadY1 < zone.y2 && cadY2 > zone.y1;
+        if (overlaps) {
+          if (zone.name === 'CAD Header Banner') {
+            c.y = mapYOffset + (zone.y2 + 8) * scale;
+          } else if (zone.name === 'Upper Naspan Row' || zone.name === 'Cakung Naspan 9 & DS' || zone.name === 'Lower Naspan Row') {
+            if (c.side === 'above') {
+              c.y = mapYOffset + (zone.y1 - 8) * scale - c.cardH;
+            } else {
+              c.y = mapYOffset + (zone.y2 + 8) * scale;
+            }
+          }
+        }
+      }
+
       c.x = Math.max(minX, Math.min(maxX, c.x));
       c.y = Math.max(absoluteMinY, Math.min(absoluteMaxY, c.y));
     });
 
-    // Step 5: Render Callout Cards and Leader Arrows (Unified, Elegant CAD Styling)
+    // ==========================================
+    // Step 5A: Render ALL Leader Lines & Arrows FIRST
+    // Guarantees NO arrow can EVER be drawn on top of ANY callout card box!
+    // ==========================================
     preparedCards.forEach((card) => {
-      const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY, targetX, targetY, side } = card;
+      const { cardW, cardH, x: cardX, y: cardY, targetX, targetY } = card;
 
       ctx.save();
 
-      // ==========================================
-      // A. Draw Pointer Arrow / Leader Line
-      // ==========================================
       const arrowStartX = Math.max(cardX + 20 * scale, Math.min(cardX + cardW - 20 * scale, targetX));
       let arrowStartY;
       if (cardY + cardH < targetY) {
@@ -442,39 +488,58 @@ export async function renderUltraHdCanvas({
         arrowStartY = cardY + cardH / 2;
       }
 
-      // Calculate direction from card anchor to radar target beacon
-      const angle = Math.atan2(targetY - arrowStartY, targetX - arrowStartX);
-      const distToTarget = Math.hypot(targetX - arrowStartX, targetY - arrowStartY);
+      // Check if direct line segment to target intersects any other card
+      let detour = null;
+      for (const other of preparedCards) {
+        if (other === card) continue;
+        if (lineIntersectsCard(arrowStartX, arrowStartY, targetX, targetY, other, 5 * scale)) {
+          const goLeft = arrowStartX <= (other.x + other.cardW / 2);
+          const detourX = goLeft ? (other.x - 14 * scale) : (other.x + other.cardW + 14 * scale);
+          const detourY = arrowStartY < other.y ? (other.y - 8 * scale) : (other.y + other.cardH + 8 * scale);
+          detour = { x: detourX, y: detourY };
+          break;
+        }
+      }
 
-      // Stop arrowhead at the outer perimeter of the radar beacon so the beacon stays 100% visible
+      const angle = detour
+        ? Math.atan2(targetY - detour.y, targetX - detour.x)
+        : Math.atan2(targetY - arrowStartY, targetX - arrowStartX);
+      const distToTarget = detour
+        ? Math.hypot(targetX - detour.x, targetY - detour.y)
+        : Math.hypot(targetX - arrowStartX, targetY - arrowStartY);
+
       const beaconStopRadius = Math.min(13 * scale, Math.max(0, distToTarget - 14 * scale));
       const arrowEndX = targetX - beaconStopRadius * Math.cos(angle);
       const arrowEndY = targetY - beaconStopRadius * Math.sin(angle);
+
+      const drawPath = (context) => {
+        context.beginPath();
+        context.moveTo(arrowStartX, arrowStartY);
+        if (detour) {
+          context.lineTo(detour.x, arrowStartY);
+          context.lineTo(detour.x, detour.y);
+        }
+        context.lineTo(arrowEndX, arrowEndY);
+      };
 
       // Outer White Halo outline (ensures leader line stands out cleanly over tracks and background)
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 4.2 * scale;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(arrowEndX, arrowEndY);
+      drawPath(ctx);
       ctx.stroke();
 
       // Soft Shadow outline
       ctx.strokeStyle = 'rgba(15, 23, 42, 0.20)';
       ctx.lineWidth = 2.5 * scale;
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(arrowEndX, arrowEndY);
+      drawPath(ctx);
       ctx.stroke();
 
       // Sharp Core Leader Line in Unified Dark Slate (#0f172a, Senada & Professional!)
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 1.5 * scale;
-      ctx.beginPath();
-      ctx.moveTo(arrowStartX, arrowStartY);
-      ctx.lineTo(arrowEndX, arrowEndY);
+      drawPath(ctx);
       ctx.stroke();
 
       // Sleek Architectural Arrowhead pointing at radar target
@@ -507,6 +572,18 @@ export async function renderUltraHdCanvas({
       ctx.beginPath();
       ctx.arc(arrowStartX, arrowStartY, 1.3 * scale, 0, Math.PI * 2);
       ctx.fill();
+
+      ctx.restore();
+    });
+
+    // ==========================================
+    // Step 5B: Render ALL Callout Card Boxes ON TOP
+    // Crisp white backgrounds and modern shadows overlay cleanly over any canvas background
+    // ==========================================
+    preparedCards.forEach((card) => {
+      const { line, logs, displayLogs, cardW, cardH, x: cardX, y: cardY } = card;
+
+      ctx.save();
 
       // ==========================================
       // B. Draw Callout Box Container
