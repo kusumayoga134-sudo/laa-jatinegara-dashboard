@@ -54,7 +54,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
         
         {/* Top Accent Ribbon */}
@@ -106,7 +106,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan User ID"
                 autoFocus
-                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400"
+                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan Password"
-                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
               />
             </div>
           </div>

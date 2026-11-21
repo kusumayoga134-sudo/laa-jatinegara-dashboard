@@ -74,7 +74,7 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
               <select
                 value={formData.targetType}
                 onChange={(e) => setFormData({ ...formData, targetType: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="SWITCH">Sakelar Pemutus (DS)</option>
                 <option value="STATION">Stasiun</option>
@@ -90,7 +90,7 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
                 required
                 value={formData.targetCode}
                 onChange={(e) => setFormData({ ...formData, targetCode: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500 font-mono"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
 
@@ -99,7 +99,7 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
               <select
                 value={formData.actionType}
                 onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="ROUTINE_INSPECTION">Inspeksi Rutin</option>
                 <option value="MANUAL_TOGGLE">Pengoperasian Sakelar</option>
@@ -119,7 +119,7 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
                 placeholder="mis. Ahmad Subarkah (LAA 1.9)"
                 value={formData.technician}
                 onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
                 placeholder="Rincian hasil inspeksi, nilai resistansi, atau status operasional..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>

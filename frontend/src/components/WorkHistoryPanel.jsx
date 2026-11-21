@@ -593,7 +593,7 @@ export default function WorkHistoryPanel({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari lokasi/naspan, teknisi, jenis pekerjaan..."
-              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-xs pl-10 pr-8 py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
+              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-base sm:text-xs pl-10 pr-8 py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
             />
             {searchQuery && (
               <button
@@ -869,7 +869,7 @@ export default function WorkHistoryPanel({
                         setIsSuggestOpen(true);
                       }}
                       placeholder="Ketik atau pilih line, naspan, wesel, DS, FRP..."
-                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-16"
+                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-16"
                     />
 
                     {/* Right Action Icons: Live Color Dot & Toggle Chevron */}
@@ -944,7 +944,7 @@ export default function WorkHistoryPanel({
                             value={suggestSearchQuery}
                             onChange={(e) => setSuggestSearchQuery(e.target.value)}
                             placeholder="Cari jalur, stasiun, seksi, wesel..."
-                            className="w-full bg-transparent text-slate-800 text-[11px] font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
+                            className="w-full bg-transparent text-slate-800 text-base sm:text-[11px] font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                           />
                         </div>
                         {suggestSearchQuery && (
@@ -1042,7 +1042,7 @@ export default function WorkHistoryPanel({
                   value={formData.actionType}
                   onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
                   placeholder="Ketik jenis tindakan / pekerjaan (contoh: PENGUKURAN KAWAT KONTAK)..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
@@ -1061,7 +1061,7 @@ export default function WorkHistoryPanel({
                   value={formData.technician}
                   onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
                   placeholder="Ketik nama pelaksana / teknisi regu..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
@@ -1076,7 +1076,7 @@ export default function WorkHistoryPanel({
                   required
                   value={formData.timestamp}
                   onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-medium px-4 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-800"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-medium px-4 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-800"
                 />
               </div>
 
@@ -1095,7 +1095,7 @@ export default function WorkHistoryPanel({
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Jelaskan detail tindakan teknis, nilai ukur (mm/volt/ohm), kondisi komponen, serta window kerja malam..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400"
                 />
               </div>
 

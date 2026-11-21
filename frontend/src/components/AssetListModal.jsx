@@ -33,7 +33,7 @@ export default function AssetListModal({ assets = [], sections = [] }) {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex flex-wrap gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <div className="flex overflow-x-auto whitespace-nowrap scrollbar-none gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 max-w-full">
           <button
             onClick={() => setActiveTab('ALL')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
@@ -138,14 +138,14 @@ export default function AssetListModal({ assets = [], sections = [] }) {
                 placeholder="Cari kode atau KM (mis. AJ KM 14+100)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <select
               value={conditionFilter}
               onChange={(e) => setConditionFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none"
+              className="bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-slate-300 px-3 py-1.5 focus:outline-none w-full sm:w-auto"
             >
               <option value="ALL">Semua Kondisi</option>
               <option value="BAIK">Kondisi Baik</option>

@@ -249,13 +249,14 @@ export default function App() {
       />
 
       {/* Minimalist White Footer */}
-      <footer className="bg-white border-t border-slate-200 py-2.5 px-3 sm:py-3.5 sm:px-6 text-[11px] sm:text-xs text-slate-500 mt-auto">
-        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
+      <footer className="bg-white border-t border-slate-200 py-1.5 px-2.5 sm:py-3.5 sm:px-6 text-[9.5px] sm:text-xs text-slate-500 mt-auto shrink-0 select-none">
+        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-0.5 sm:gap-1.5 text-center sm:text-left">
           <div>
-            <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA
+            <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — <span className="hidden sm:inline">Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA</span><span className="sm:hidden">Sistem Monitoring LAA</span>
           </div>
           <div>
-            PT Kereta Api Indonesia (Persero) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}
+            <span className="hidden sm:inline">PT Kereta Api Indonesia (Persero) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}</span>
+            <span className="sm:hidden">KAI & Danantara © {new Date().getFullYear()}</span>
           </div>
         </div>
       </footer>

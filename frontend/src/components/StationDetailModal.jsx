@@ -5,54 +5,54 @@ export default function StationDetailModal({ station, onClose, onSelectSwitch })
   if (!station) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-blue-900/40 border border-blue-700/60 text-blue-400">
+        <div className="bg-slate-950 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+            <div className="p-2 rounded-xl bg-blue-900/40 border border-blue-700/60 text-blue-400 shrink-0">
               <Train className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center space-x-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 shrink-0">
                   {station.code}
                 </span>
-                <span className="text-xs font-mono text-cyan-300 font-bold">{station.km}</span>
+                <span className="text-xs font-mono text-cyan-300 font-bold truncate">{station.km}</span>
               </div>
-              <h3 className="text-lg font-bold text-white mt-0.5">{station.name}</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white mt-0.5 truncate">{station.name}</h3>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer shrink-0 ml-2"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5 text-xs text-slate-300 max-h-[75vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 text-xs text-slate-300 max-h-[75vh] overflow-y-auto">
           
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-slate-950 p-2.5 sm:p-3 rounded-xl border border-slate-800 flex items-center justify-between sm:block">
               <span className="text-slate-400 text-[10px] block">Jumlah Jalur:</span>
-              <span className="font-mono font-bold text-white text-base">
+              <span className="font-mono font-bold text-white text-sm sm:text-base">
                 {station.tracksCount} Jalur Kereta
               </span>
             </div>
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div className="bg-slate-950 p-2.5 sm:p-3 rounded-xl border border-slate-800 flex items-center justify-between sm:block">
               <span className="text-slate-400 text-[10px] block">Jumlah Peron:</span>
-              <span className="font-mono font-bold text-white text-base">
+              <span className="font-mono font-bold text-white text-sm sm:text-base">
                 {station.platforms} Peron Penumpang
               </span>
             </div>
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div className="bg-slate-950 p-2.5 sm:p-3 rounded-xl border border-slate-800 flex items-center justify-between sm:block">
               <span className="text-slate-400 text-[10px] block">Status Operasi:</span>
-              <span className="font-mono font-bold text-emerald-400 text-base">
+              <span className="font-mono font-bold text-emerald-400 text-sm sm:text-base">
                 {station.status}
               </span>
             </div>
@@ -60,11 +60,11 @@ export default function StationDetailModal({ station, onClose, onSelectSwitch })
 
           {/* Description */}
           {station.description && (
-            <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+            <div className="bg-slate-950/60 p-3 sm:p-3.5 rounded-xl border border-slate-800/80">
               <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
                 Keterangan Stasiun
               </span>
-              <p className="text-slate-300 leading-relaxed">{station.description}</p>
+              <p className="text-slate-300 leading-relaxed text-[11px] sm:text-xs">{station.description}</p>
             </div>
           )}
 
@@ -75,7 +75,7 @@ export default function StationDetailModal({ station, onClose, onSelectSwitch })
               Pemutus Beban (DS) Terpasang di {station.name}
             </h4>
             {station.switches && station.switches.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {station.switches.map((sw) => (
                   <div
                     key={sw.id}

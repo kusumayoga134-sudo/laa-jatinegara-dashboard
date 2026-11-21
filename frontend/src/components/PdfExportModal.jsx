@@ -143,10 +143,28 @@ export default function PdfExportModal({
     setCustomPositions({});
   };
 
-  // Card Mouse Down (Initiate Drag-and-Drop)
+  // Card Mouse Down (Initiate Drag-and-Drop) - Guarded against double-firing with Pointer Events
   const handleCardMouseDown = (e, card) => {
+    if (window.PointerEvent) return; // Use Pointer Events if supported to prevent double-trigger
     e.preventDefault();
     e.stopPropagation();
+    setDraggingCardId(card.id);
+    dragStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      cardX: card.x,
+      cardY: card.y,
+    };
+  };
+
+  // Card Pointer Down (Touch & Mouse unified drag)
+  const handleCardPointerDown = (e, card) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch {}
     setDraggingCardId(card.id);
     dragStartRef.current = {
       clientX: e.clientX,
@@ -166,7 +184,7 @@ export default function PdfExportModal({
     };
   };
 
-  // Container Mouse Move (Dispatches to either card dragging or stage panning)
+  // Container Mouse / Pointer Move (Dispatches to either card dragging or stage panning)
   const handleContainerMouseMove = (e) => {
     if (draggingCardId) {
       const dx = (e.clientX - dragStartRef.current.clientX) / currentScale;
@@ -203,6 +221,19 @@ export default function PdfExportModal({
       setIsDraggingStage(false);
     }
   };
+
+  // Prevent mobile browser page pulling while dragging callouts on preview stage
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    const preventTouchScroll = (e) => {
+      if (draggingCardId || isDraggingStage) {
+        e.preventDefault();
+      }
+    };
+    el.addEventListener('touchmove', preventTouchScroll, { passive: false });
+    return () => el.removeEventListener('touchmove', preventTouchScroll);
+  }, [draggingCardId, isDraggingStage]);
 
   // Window-level mouseup fallback
   useEffect(() => {
@@ -278,28 +309,28 @@ export default function PdfExportModal({
         {/* ========================================================
             MODAL HEADER BAR
             ======================================================== */}
-        <div className="px-4 sm:px-6 py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between shrink-0 gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl shadow-xs">
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between shrink-0 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div className="p-1.5 sm:p-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg sm:rounded-xl shrink-0 shadow-xs">
+              <FileText className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-black text-white tracking-tight">
-                  Preview & Export PDF Peta Monitoring Wilayah LAA
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="text-xs sm:text-base font-black text-white tracking-tight truncate">
+                  Preview & Export PDF Peta LAA
                 </h2>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
                   <Sparkles className="w-2.5 h-2.5" /> Ultra HD 600 DPI
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="hidden sm:block text-xs text-slate-400 mt-0.5 truncate">
                 Format Cetak Blueprint Standar CAD • Lengkap dengan Titik Radar & Callout Riwayat Pekerjaan
               </p>
             </div>
           </div>
 
           {/* Action Buttons in Header */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handlePrintPdf}
               disabled={isExporting}
@@ -323,13 +354,13 @@ export default function PdfExportModal({
             <button
               onClick={handleDownloadPdf}
               disabled={isExporting}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs shadow-md shadow-red-900/30 transition cursor-pointer active:scale-95"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs shadow-md shadow-red-900/30 transition cursor-pointer active:scale-95 shrink-0"
               title="Download Dokumen PDF Standar CAD Ultra HD"
             >
               {isExporting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Memproses PDF...</span>
+                  <span>Memproses...</span>
                 </>
               ) : (
                 <>
@@ -341,7 +372,7 @@ export default function PdfExportModal({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition cursor-pointer ml-1"
+              className="p-1 sm:p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg sm:rounded-xl transition cursor-pointer ml-0.5 sm:ml-1"
               title="Tutup Modal"
             >
               <X className="w-5 h-5" />
@@ -351,12 +382,12 @@ export default function PdfExportModal({
 
         {/* Success Alert Banner if exported */}
         {exportSuccessMsg && (
-          <div className="bg-emerald-950/80 border-b border-emerald-800/80 px-4 py-2 text-xs text-emerald-300 font-bold flex items-center justify-between animate-in slide-in-from-top-2">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              {exportSuccessMsg}
+          <div className="bg-emerald-950/80 border-b border-emerald-800/80 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs text-emerald-300 font-bold flex items-center justify-between animate-in slide-in-from-top-2">
+            <span className="flex items-center gap-2 truncate">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="truncate">{exportSuccessMsg}</span>
             </span>
-            <button onClick={() => setExportSuccessMsg(null)} className="text-emerald-400 hover:text-white">
+            <button onClick={() => setExportSuccessMsg(null)} className="text-emerald-400 hover:text-white shrink-0 ml-2">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -365,31 +396,31 @@ export default function PdfExportModal({
         {/* ========================================================
             SETTINGS & TOOLBAR STRIP
             ======================================================== */}
-        <div className="px-4 sm:px-6 py-2 bg-slate-950/70 border-b border-slate-800/80 flex items-center justify-between flex-wrap gap-2.5 text-xs shrink-0">
+        <div className="px-3 sm:px-6 py-2 bg-slate-950/70 border-b border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs shrink-0">
 
           {/* Options Toggles */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+          <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap text-[11px] sm:text-xs">
+            <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={showCallouts}
                 onChange={(e) => setShowCallouts(e.target.checked)}
-                className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-slate-800 border-slate-700 cursor-pointer"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded text-red-600 focus:ring-red-500 bg-slate-800 border-slate-700 cursor-pointer"
               />
-              <span className="font-semibold text-slate-300">
-                Kotak Callout Riwayat + Panah
+              <span className="font-semibold text-slate-300 whitespace-nowrap">
+                Callout Riwayat
               </span>
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={showRadar}
                 onChange={(e) => setShowRadar(e.target.checked)}
-                className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-slate-800 border-slate-700 cursor-pointer"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded text-red-600 focus:ring-red-500 bg-slate-800 border-slate-700 cursor-pointer"
               />
-              <span className="font-semibold text-slate-300">
-                Titik Radar Glow Kedip
+              <span className="font-semibold text-slate-300 whitespace-nowrap">
+                Titik Radar
               </span>
             </label>
 
@@ -398,11 +429,11 @@ export default function PdfExportModal({
               <button
                 onClick={handleResetCallouts}
                 disabled={Object.keys(customPositions).length === 0}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-bold transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ml-1"
+                className="flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[10px] sm:text-[11px] font-bold transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
                 title="Kembalikan posisi kotak callout ke tata letak aman otomatis (Auto-Layout)"
               >
                 <RotateCcw className="w-3 h-3 text-amber-400" />
-                <span>Reset Posisi Callout</span>
+                <span>Reset Posisi</span>
                 {Object.keys(customPositions).length > 0 && (
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 )}
@@ -411,31 +442,31 @@ export default function PdfExportModal({
           </div>
 
           {/* Right Tools: Paper Format Selector & Preview Zoom */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-400 font-semibold text-[11px]">Format Kertas:</span>
+          <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-1.5 min-w-0 max-w-[62%] sm:max-w-none">
+              <span className="text-slate-400 font-semibold text-[10.5px] sm:text-[11px] shrink-0">Kertas:</span>
               <select
                 value={paperSize}
                 onChange={(e) => setPaperSize(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer"
+                className="bg-slate-800 border border-slate-700 text-slate-200 text-[10.5px] sm:text-xs font-bold rounded-lg px-2 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer truncate max-w-full"
               >
-                <option value="NATIVE">Format Asli CAD Model 2 - Ultra HD 600 DPI (3.275 x 1.835 px) (Rekomendasi)</option>
-                <option value="A3">A3 Landscape (Standard Gambar Teknik)</option>
+                <option value="NATIVE">Format Asli CAD Model 2 (3.275 × 1.835 px)</option>
+                <option value="A3">A3 Landscape (Standar Gambar Teknik)</option>
                 <option value="A4">A4 Landscape</option>
               </select>
             </div>
 
             {/* Preview Zoom Controls */}
-            <div className="flex items-center space-x-1 bg-slate-800/80 rounded-xl p-1 border border-slate-700/80">
+            <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-800/80 rounded-xl p-0.5 sm:p-1 border border-slate-700/80 shrink-0">
               <button
                 onClick={handleZoomOut}
                 disabled={previewZoom <= 0.5}
                 className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition disabled:opacity-40 cursor-pointer"
                 title="Perkecil Preview"
               >
-                <ZoomOut className="w-3.5 h-3.5" />
+                <ZoomOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
-              <span className="text-[11px] font-mono font-bold px-1.5 text-slate-300 min-w-10 text-center">
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold px-1 text-slate-300 min-w-8 text-center">
                 {Math.round(previewZoom * 100)}%
               </span>
               <button
@@ -444,14 +475,14 @@ export default function PdfExportModal({
                 className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition disabled:opacity-40 cursor-pointer"
                 title="Perbesar Preview"
               >
-                <ZoomIn className="w-3.5 h-3.5" />
+                <ZoomIn className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
               <button
                 onClick={handleResetZoom}
                 className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
                 title="Reset Zoom"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           </div>
@@ -466,8 +497,12 @@ export default function PdfExportModal({
           onMouseMove={handleContainerMouseMove}
           onMouseUp={handleContainerMouseUp}
           onMouseLeave={handleContainerMouseUp}
-          className="flex-1 bg-slate-950 p-4 overflow-hidden relative flex items-center justify-center select-none"
+          onPointerMove={handleContainerMouseMove}
+          onPointerUp={handleContainerMouseUp}
+          onPointerCancel={handleContainerMouseUp}
+          className="flex-1 bg-slate-950 p-2 sm:p-4 overflow-hidden relative flex items-center justify-center select-none"
           style={{
+            touchAction: 'none',
             cursor: draggingCardId
               ? 'grabbing'
               : previewZoom > 1
@@ -615,6 +650,7 @@ export default function PdfExportModal({
                     <div
                       key={card.id}
                       onMouseDown={(e) => handleCardMouseDown(e, card)}
+                      onPointerDown={(e) => handleCardPointerDown(e, card)}
                       style={{
                         position: 'absolute',
                         left: `${card.x}px`,
@@ -623,6 +659,7 @@ export default function PdfExportModal({
                         height: `${card.h}px`,
                         cursor: isDraggingThis ? 'grabbing' : 'grab',
                         zIndex: isDraggingThis ? 50 : 30,
+                        touchAction: 'none',
                       }}
                       className={`rounded-xl bg-white border ${
                         isDraggingThis
@@ -718,38 +755,64 @@ export default function PdfExportModal({
         </div>
 
         {/* ========================================================
-            MODAL FOOTER SUMMARY BAR
+            MODAL FOOTER SUMMARY & ACTION BAR
             ======================================================== */}
-        <div className="px-4 sm:px-6 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0 flex-wrap gap-2">
-          <div className="flex items-center space-x-2">
-            <span className="font-mono text-slate-300 font-bold">Dimensi:</span>
-            <span>9.825 × 5.505 px (Ultra HD 600 DPI Model 2)</span>
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 shrink-0 gap-2">
+          {/* Dimension Info Summary (Compact on mobile) */}
+          <div className="flex items-center space-x-1.5 text-[10px] sm:text-xs text-slate-400 w-full sm:w-auto justify-center sm:justify-start overflow-hidden truncate">
+            <span className="font-mono text-slate-300 font-bold shrink-0">Model 2:</span>
+            <span className="truncate">3.275 × 1.835 px</span>
             <span>•</span>
-            <span className="text-emerald-400 font-bold">Kualitas Cetak: 600 DPI Ultra HD</span>
+            <span className="text-emerald-400 font-bold shrink-0">600 DPI Ultra HD</span>
             {Object.keys(customPositions).length > 0 && (
               <>
                 <span>•</span>
-                <span className="text-amber-400 font-bold">
-                  {Object.keys(customPositions).length} posisi callout telah disesuaikan manual
+                <span className="text-amber-400 font-bold shrink-0">
+                  {Object.keys(customPositions).length} disesuaikan
                 </span>
               </>
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Action Buttons: Full suite cleanly available on mobile */}
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
             <button
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition cursor-pointer"
+              onClick={handlePrintPdf}
+              disabled={isExporting}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
+              title="Cetak Langsung atau Simpan sebagai PDF via Browser Print"
             >
-              Tutup
+              <Printer className="w-3.5 h-3.5 text-blue-400" />
+              <span>Cetak</span>
             </button>
+
+            <button
+              onClick={handleDownloadPng}
+              disabled={isExporting}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
+              title="Download Gambar Ultra HD Resolusi Penuh (PNG 600 DPI)"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
+              <span>PNG HD</span>
+            </button>
+
             <button
               onClick={handleDownloadPdf}
               disabled={isExporting}
-              className="px-5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-red-900/30"
+              className="flex-1 sm:flex-none px-3.5 sm:px-5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-[11px] sm:text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-red-900/30 active:scale-95 shrink-0"
+              title="Download Dokumen PDF Standar CAD Ultra HD 600 DPI"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download Dokumen PDF</span>
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Proses...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF</span>
+                </>
+              )}
             </button>
           </div>
         </div>

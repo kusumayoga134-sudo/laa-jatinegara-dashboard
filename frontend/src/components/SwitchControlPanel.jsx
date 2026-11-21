@@ -91,7 +91,7 @@ export default function SwitchControlPanel({
             placeholder="Cari DS (mis. DS 4, JALUR 1)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
@@ -101,7 +101,7 @@ export default function SwitchControlPanel({
           <select
             value={selectedStation}
             onChange={(e) => setSelectedStation(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500"
+            className="bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500 flex-1 sm:flex-none"
           >
             <option value="ALL">Semua Stasiun</option>
             <option value="JNG">St. Jatinegara</option>
@@ -117,7 +117,7 @@ export default function SwitchControlPanel({
           <select
             value={selectedLine}
             onChange={(e) => setSelectedLine(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500"
+            className="bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500 flex-1 sm:flex-none"
           >
             <option value="ALL">Semua Lintasan</option>
             <option value="HI">Jalur Hulu (HI)</option>
@@ -129,7 +129,7 @@ export default function SwitchControlPanel({
           <select
             value={selectedState}
             onChange={(e) => setSelectedState(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500"
+            className="bg-slate-950 border border-slate-700 rounded-lg text-base sm:text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-blue-500 flex-1 sm:flex-none"
           >
             <option value="ALL">Semua Posisi</option>
             <option value="NC">Tertutup (NC)</option>
