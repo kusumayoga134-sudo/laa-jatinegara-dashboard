@@ -34,7 +34,7 @@ cards.forEach((c, idx) => {
   const right = c.x + c.w;
   const top = c.y;
   const bottom = c.y + c.h;
-  const isValid = left >= 40 && right <= 2360 && top >= 0 && bottom <= 1480;
+  const isValid = left >= 40 && right <= 3235 && top >= 0 && bottom <= 1835;
   if (!isValid) allValid = false;
 
   console.log(`Card ${idx + 1} [${c.line.code}]:`);
@@ -42,9 +42,9 @@ cards.forEach((c, idx) => {
   console.log(`  Box X: [${left} .. ${right}] (w=${c.w}), Y: [${top} .. ${bottom}] (h=${c.h})`);
   console.log(`  Radar Target: (${c.radarX}, ${c.radarY})`);
   console.log(`  SVG Path: ${getElbowSvgPath(c)}`);
-  console.log(`  Validation [40 <= x <= 2360]: ${isValid ? 'PASSED ✅' : 'FAILED ❌'}\n`);
+  console.log(`  Validation [40 <= x <= 3235]: ${isValid ? 'PASSED ✅' : 'FAILED ❌'}\n`);
 });
 
 console.log('=============================================');
-console.log(`MATHEMATICAL VERIFICATION: ${allValid ? 'ALL 9 CARDS 100% IN BOUNDS [40..2360] ✅' : 'FAILED ❌'}`);
+console.log(`MATHEMATICAL VERIFICATION: ${allValid ? 'ALL 9 CARDS 100% IN BOUNDS [40..3235] ✅' : 'FAILED ❌'}`);
 console.log('=============================================');

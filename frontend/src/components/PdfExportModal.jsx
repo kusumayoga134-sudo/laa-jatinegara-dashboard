@@ -73,7 +73,7 @@ export default function PdfExportModal({
     };
   }, [isOpen]);
 
-  // Fit scale: Fit virtual canvas (2400 x 1480) comfortably to ~92% width & height of the modal
+  // Fit scale: Fit native canvas (3275 x 1835) comfortably to ~94% width & height of the modal
   const fitScale = useMemo(() => {
     const padW = containerDim.width * 0.94;
     const padH = containerDim.height * 0.94;
@@ -82,7 +82,7 @@ export default function PdfExportModal({
 
   const currentScale = fitScale * previewZoom;
 
-  // Compute Active Callout Cards and Orthogonal Elbow Layout on the 2400 x 1480 Virtual Canvas
+  // Compute Active Callout Cards and Orthogonal Elbow Layout on the 3275 x 1835 Native AutoCAD Canvas
   const activeCards = useMemo(() => {
     if (!showCallouts || linesWithLogs.length === 0) return [];
     return computeCalloutLayout({
@@ -419,7 +419,7 @@ export default function PdfExportModal({
                 onChange={(e) => setPaperSize(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-red-500 outline-none cursor-pointer"
               >
-                <option value="NATIVE">Format Asli CAD - Ultra HD 600 DPI (9.600 x 5.920 px) (Rekomendasi)</option>
+                <option value="NATIVE">Format Asli CAD Model 2 - Ultra HD 600 DPI (3.275 x 1.835 px) (Rekomendasi)</option>
                 <option value="A3">A3 Landscape (Standard Gambar Teknik)</option>
                 <option value="A4">A4 Landscape</option>
               </select>
@@ -458,7 +458,7 @@ export default function PdfExportModal({
         </div>
 
         {/* ========================================================
-            MAIN LIVE PREVIEW STAGE (2400 x 1480 FIXED VIRTUAL CANVAS)
+            MAIN LIVE PREVIEW STAGE (3275 x 1835 NATIVE AUTOCAD CANVAS)
             ======================================================== */}
         <div
           ref={previewContainerRef}
@@ -487,7 +487,7 @@ export default function PdfExportModal({
             }}
             className="transition-transform duration-75 ease-out shadow-2xl"
           >
-            {/* 2400 x 1480 Fixed Virtual Canvas Paper Container */}
+            {/* 3275 x 1835 Native AutoCAD Model 2 Canvas Paper Container */}
             <div
               style={{
                 width: `${CANVAS_W}px`,
@@ -500,16 +500,16 @@ export default function PdfExportModal({
               }}
               className="bg-white border border-slate-700 relative overflow-hidden"
             >
-              {/* 1. CAD Blueprint Map Image at [top: 220px, left: 0, width: 2400px, height: 1040px] */}
+              {/* 1. CAD Blueprint Map Image Native AutoCAD Model 2 */}
               <img
-                src="/peta-laa-cropped-hd.png"
+                src="/peta-laa-cropped-hd.png?v=model2"
                 alt="Peta Wilayah LAA UPT Resor 1.9 Jatinegara"
                 style={{
                   position: 'absolute',
                   left: 0,
-                  top: `${LANE_TOP_H}px`,
-                  width: `${MAP_W}px`,
-                  height: `${MAP_H}px`,
+                  top: 0,
+                  width: `${CANVAS_W}px`,
+                  height: `${CANVAS_H}px`,
                   objectFit: 'contain',
                   pointerEvents: 'none',
                   userSelect: 'none',
@@ -551,7 +551,7 @@ export default function PdfExportModal({
                   );
                 })}
 
-              {/* 3. SVG Layer: Slim Orthogonal (Elbow) Leader Lines & Arrowheads (viewBox 0 0 2400 1480) */}
+              {/* 3. SVG Layer: Slim Orthogonal (Elbow) Leader Lines & Arrowheads (viewBox 0 0 3275 1835) */}
               {showCallouts && activeCards.length > 0 && (
                 <svg
                   viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
@@ -723,7 +723,7 @@ export default function PdfExportModal({
         <div className="px-4 sm:px-6 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0 flex-wrap gap-2">
           <div className="flex items-center space-x-2">
             <span className="font-mono text-slate-300 font-bold">Dimensi:</span>
-            <span>9.600 × 5.920 px (Ultra HD 600 DPI)</span>
+            <span>9.825 × 5.505 px (Ultra HD 600 DPI Model 2)</span>
             <span>•</span>
             <span className="text-emerald-400 font-bold">Kualitas Cetak: 600 DPI Ultra HD</span>
             {Object.keys(customPositions).length > 0 && (

@@ -1,23 +1,23 @@
 /**
  * PDF & High-Resolution Export Engine for Peta Wilayah LAA UPT Resor 1.9 Jatinegara
- * Single Fixed Virtual Canvas Architecture: 2400 x 1480 px
- * (MAP: 2400 x 1040, TOP LANE: 220, BOTTOM LANE: 220)
+ * Native AutoCAD Model 2 Architecture: 3275 x 1835 px
+ * (Direct 1:1 CAD Base Coordinates with 3 Internal Whitespace Zones: Top, Mid, Bottom)
  * Ultra HD (600 DPI CAD Precision), Zero External Dependencies.
  */
 
 export const VIRTUAL_CANVAS = {
-  CANVAS_W: 2400,
-  CANVAS_H: 1480,
-  MAP_W: 2400,
-  MAP_H: 1040,
-  LANE_TOP_H: 220,
-  LANE_BOTTOM_H: 220,
+  CANVAS_W: 3275,
+  CANVAS_H: 1835,
+  MAP_W: 3275,
+  MAP_H: 1835,
+  LANE_TOP_H: 0,
+  LANE_BOTTOM_H: 0,
   CAD_BASE_W: 3275,
-  CAD_BASE_H: 1419,
-  CARD_W: 220, // 20-25% more compact (down from 280)
+  CAD_BASE_H: 1835,
+  CARD_W: 240, // compact 2-line card design
   CARD_H: 108, // Default fallback card height
-  GAP: 18,
-  MARGIN_X: 40,
+  GAP: 20,
+  MARGIN_X: 50,
 };
 
 // Helper to format timestamps in Indonesian
@@ -80,7 +80,11 @@ export function getCleanLogDetails(log) {
 
 /**
  * 1D Deterministic Collision-Resolution & Corridor Placement Engine for Callout Cards
- * Computes compact dynamic-height card positions on the 2400 x 1480 Virtual Canvas.
+ * Computes compact dynamic-height card positions on the 3275 x 1835 Native AutoCAD Model 2 Canvas.
+ * Uses 3 Internal Whitespace Zones:
+ * - Zona Atas (Y ~ 240): above top tracks (Y <= 720)
+ * - Zona Tengah (Y ~ 930 / 1100): wide corridor between upper and lower tracks
+ * - Zona Bawah (Y ~ 1620): below bottom tracks (Y > 1360)
  */
 export function computeCalloutLayout({
   linesWithLogs = [],
@@ -89,12 +93,6 @@ export function computeCalloutLayout({
   const {
     CANVAS_W,
     CANVAS_H,
-    MAP_W,
-    MAP_H,
-    LANE_TOP_H,
-    LANE_BOTTOM_H,
-    CAD_BASE_W,
-    CAD_BASE_H,
     CARD_W,
     GAP,
     MARGIN_X,
@@ -102,13 +100,13 @@ export function computeCalloutLayout({
 
   if (!linesWithLogs || linesWithLogs.length === 0) return [];
 
-  // Convert radar centers from CAD base coords (3275x1419) to Virtual Canvas coords (2400x1480)
+  // Directly map CAD base coords (3275 x 1835) 1:1
   const items = linesWithLogs.map(({ line, logs, center }) => {
     const rawX = center && center.x != null ? center.x : 1600;
-    const rawY = center && center.y != null ? center.y : 700;
+    const rawY = center && center.y != null ? center.y : 900;
 
-    const radarX = Math.round((rawX / CAD_BASE_W) * MAP_W);
-    const radarY = Math.round(LANE_TOP_H + (rawY / CAD_BASE_H) * MAP_H);
+    const radarX = Math.round(rawX);
+    const radarY = Math.round(rawY);
 
     // Dynamic height based on number of items (max 3 items shown)
     const displayLogs = logs.slice(0, 3);
@@ -142,34 +140,37 @@ export function computeCalloutLayout({
   // Sort items by radarX ascending
   items.sort((a, b) => a.radarX - b.radarX);
 
-  // Partition into Upper Lane and Lower Lane
-  const upperCards = [];
-  const lowerCards = [];
+  // Partition into the 3 Internal Whitespace Zones
+  const topCards = [];
+  const midCards = [];
+  const bottomCards = [];
 
   items.forEach((item) => {
-    if (item.rawY >= 850) {
-      item.isUpper = false;
-      lowerCards.push(item);
-    } else {
+    if (item.radarY <= 720) {
+      // Upper track section (Jalur 8..4, POK) -> Zona Atas
       item.isUpper = true;
-      upperCards.push(item);
+      item.baseY = 240;
+      topCards.push(item);
+    } else if (item.radarY > 1360) {
+      // Lower track southern section -> Zona Bawah
+      item.isUpper = false;
+      item.baseY = 1620;
+      bottomCards.push(item);
+    } else {
+      // Intermediate tracks (JNG Emplasemen Selatan / CUK-KRI northern) -> Zona Tengah
+      if (item.radarY <= 1000) {
+        item.isUpper = false;
+        item.baseY = 930;
+      } else {
+        item.isUpper = true;
+        item.baseY = 1090;
+      }
+      midCards.push(item);
     }
   });
 
-  // Rebalance if one lane has more than 6 cards to maintain ample breathing room
-  while (upperCards.length > 6) {
-    const moved = upperCards.pop();
-    moved.isUpper = false;
-    lowerCards.push(moved);
-  }
-  while (lowerCards.length > 6) {
-    const moved = lowerCards.pop();
-    moved.isUpper = true;
-    upperCards.push(moved);
-  }
-
-  // 1D Horizontal Layout Function for a Single Lane
-  const layoutLane = (cards, isUpper) => {
+  // 1D Horizontal Layout Function for a Single Zone
+  const layoutZone = (cards) => {
     if (cards.length === 0) return;
 
     cards.sort((a, b) => a.radarX - b.radarX);
@@ -182,15 +183,9 @@ export function computeCalloutLayout({
       curCardW = Math.floor((maxAvailableW - (cards.length - 1) * GAP) / cards.length);
     }
 
-    // Set initial position centered on radarX with dynamic lane Y
     cards.forEach((card) => {
       card.w = curCardW;
-      card.isUpper = isUpper;
-      if (isUpper) {
-        card.y = Math.round((LANE_TOP_H - card.h) / 2);
-      } else {
-        card.y = Math.round(LANE_TOP_H + MAP_H + (LANE_BOTTOM_H - card.h) / 2);
-      }
+      card.y = card.baseY;
       card.x = Math.round(card.radarX - curCardW / 2);
     });
 
@@ -221,10 +216,11 @@ export function computeCalloutLayout({
     }
   };
 
-  layoutLane(upperCards, true);
-  layoutLane(lowerCards, false);
+  layoutZone(topCards);
+  layoutZone(midCards);
+  layoutZone(bottomCards);
 
-  const allCards = [...upperCards, ...lowerCards];
+  const allCards = [...topCards, ...midCards, ...bottomCards];
 
   // Apply User Manual Drag-and-Drop Overrides (if any)
   allCards.forEach((card) => {
@@ -240,20 +236,14 @@ export function computeCalloutLayout({
   // Calculate Orthogonal Elbow Anchor Points and Staggered Belokan
   allCards.forEach((card, idx) => {
     card.startX = Math.round(card.x + card.w / 2);
-    const stagger = (idx % 3) * 8;
+    const stagger = ((idx % 3) - 1) * 12;
 
     if (card.isUpper) {
       card.startY = card.y + card.h;
-      card.elbowY = Math.min(card.radarY - 14, 195 + stagger);
-      if (card.elbowY <= card.startY) {
-        card.elbowY = card.startY + (card.radarY - card.startY) * 0.35;
-      }
+      card.elbowY = Math.round(card.startY + (card.radarY - card.startY) * 0.45 + stagger);
     } else {
       card.startY = card.y;
-      card.elbowY = Math.max(card.radarY + 14, 1285 - stagger);
-      if (card.elbowY >= card.startY) {
-        card.elbowY = card.startY - (card.startY - card.radarY) * 0.35;
-      }
+      card.elbowY = Math.round(card.startY - (card.startY - card.radarY) * 0.45 + stagger);
     }
   });
 
@@ -562,17 +552,17 @@ function drawCalloutBox(ctx, card, scale) {
 }
 
 /**
- * Generate Ultra HD Canvas from CAD base map + track glows + radar dots + callout cards
- * Uses the Single Fixed Virtual Canvas (2400 x 1480 px) scaled by `scale` (e.g. 4.0 = 9600 x 5920 px)
+ * Generate Ultra HD Canvas from CAD base map + radar dots + callout cards
+ * Uses Native AutoCAD Model 2 Canvas (3275 x 1835 px) scaled by `scale` (e.g. 3.0 = 9825 x 5505 px)
  */
 export async function renderUltraHdCanvas({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  scale = 4.0, // 4.0 scale gives 9600 x 5920 px (Ultra HD 600 DPI)
+  scale = 3.0, // 3.0 scale gives 9825 x 5505 px (True Ultra HD 600 DPI)
   customCardPositions = {},
 }) {
-  const { CANVAS_W, CANVAS_H, MAP_W, MAP_H, LANE_TOP_H, CAD_BASE_W, CAD_BASE_H } = VIRTUAL_CANVAS;
+  const { CANVAS_W, CANVAS_H } = VIRTUAL_CANVAS;
 
   const totalWidth = Math.round(CANVAS_W * scale);
   const totalHeight = Math.round(CANVAS_H * scale);
@@ -587,22 +577,17 @@ export async function renderUltraHdCanvas({
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-  // Load CAD Background image
+  // Load CAD Background image (with cache-buster)
   const img = new Image();
   img.crossOrigin = 'anonymous';
   await new Promise((resolve, reject) => {
     img.onload = () => resolve();
     img.onerror = () => reject(new Error('Failed to load base CAD map image'));
-    img.src = '/peta-laa-cropped-hd.png';
+    img.src = '/peta-laa-cropped-hd.png?v=model2';
   });
 
-  const mapX = 0;
-  const mapY = LANE_TOP_H * scale;
-  const mapW = MAP_W * scale;
-  const mapH = MAP_H * scale;
-
-  // Draw CAD map precisely in its designated area [0, LANE_TOP_H, MAP_W, MAP_H]
-  ctx.drawImage(img, mapX, mapY, mapW, mapH);
+  // Draw CAD map precisely in full canvas
+  ctx.drawImage(img, 0, 0, totalWidth, totalHeight);
 
   // Outer blueprint border
   ctx.strokeStyle = '#0f172a';
@@ -792,7 +777,7 @@ export async function downloadMapPdf({
     linesWithLogs,
     showCallouts,
     showRadar,
-    scale: 4.0, // 4.0 gives 9600 x 5920 px (True 600 DPI Ultra HD)
+    scale: 3.0, // 3.0 gives 9825 x 5505 px (True 600 DPI Ultra HD)
     customCardPositions,
   });
 
@@ -839,7 +824,7 @@ export async function downloadMapPng({
     linesWithLogs,
     showCallouts,
     showRadar,
-    scale: 4.0, // 9600 x 5920 px Ultra HD
+    scale: 3.0, // 9825 x 5505 px Ultra HD
     customCardPositions,
   });
 
