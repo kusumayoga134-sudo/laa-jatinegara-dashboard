@@ -34,5 +34,10 @@
     background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px) !important;
     background-size: 20px 20px !important;
   }
+  .mobile-cad-canvas img {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
 }
 

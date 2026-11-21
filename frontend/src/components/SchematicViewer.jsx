@@ -5592,6 +5592,10 @@ export default function SchematicViewer({
   const hasMovedRef = useRef(false);
 
   const [viewportBase, setViewportBase] = useState({ width: 1420, height: 796 });
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [mobileFitScale, setMobileFitScale] = useState(0.1096);
 
   // Responsive Fit Calculation: Guarantees that at Zoom 100%, the entire map fits perfectly centered without ANY side cut off!
   useEffect(() => {
@@ -5603,6 +5607,17 @@ export default function SchematicViewer({
       const ch = el.clientHeight;
       if (!cw || !ch) return;
 
+      const mobileMode = window.innerWidth < 768;
+      setIsMobile(mobileMode);
+
+      // Mobile fit scale: fits native 3275 x 1835 into mobile screen without blur/raster stretching
+      const padM = 8;
+      const fitW = (cw - padM * 2) / 3275;
+      const fitH = (ch - padM * 2) / 1835;
+      const fitScale = Math.min(fitW, fitH);
+      setMobileFitScale(fitScale);
+
+      // Desktop fit calculation (strictly unchanged for Desktop >= 768px / >= 1024px)
       const pad = window.innerWidth < 640 ? 8 : 20;
       const maxW = Math.max(cw - pad * 2, 280);
       const maxH = Math.max(ch - pad * 2, 160);
@@ -5629,17 +5644,25 @@ export default function SchematicViewer({
     };
   }, []);
 
-  // Zoom handlers (Min 100% - Max 1000%)
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 10.0));
+  // Zoom handlers (Desktop: 100% - 1000%, Mobile: 100% - 1500%)
+  const maxZoomLimit = isMobile ? 15.0 : 10.0;
+  const handleZoomIn = () =>
+    setZoom((prev) => {
+      const step = isMobile ? (prev >= 4.0 ? 1.0 : 0.5) : 0.25;
+      return Math.min(prev + step, maxZoomLimit);
+    });
+
   const handleZoomOut = () =>
     setZoom((prev) => {
-      const next = Math.max(prev - 0.25, 1.0);
+      const step = isMobile ? (prev > 4.0 ? 1.0 : 0.5) : 0.25;
+      const next = Math.max(prev - step, 1.0);
       if (next === 1.0) {
         setPosition({ x: 0, y: 0 });
         setActiveStation('ALL');
       }
       return next;
     });
+
   const handleResetZoom = () => {
     setZoom(1.0);
     setPosition({ x: 0, y: 0 });
@@ -5654,14 +5677,24 @@ export default function SchematicViewer({
       setPosition({ x: 0, y: 0 });
       return;
     }
-    const targetZoom = 2.4;
-    const dx = (st.x - 1637.5) * (viewportBase.width / 3275);
-    const dy = (st.y - 917.5) * (viewportBase.height / 1835);
+    const targetZoom = isMobile ? 3.0 : 2.4;
     setZoom(targetZoom);
-    setPosition({
-      x: Math.round(-targetZoom * dx),
-      y: Math.round(-targetZoom * dy),
-    });
+    if (isMobile) {
+      const effectiveScale = mobileFitScale * targetZoom;
+      const dx = st.x - 1637.5;
+      const dy = st.y - 917.5;
+      setPosition({
+        x: Math.round(-effectiveScale * dx),
+        y: Math.round(-effectiveScale * dy),
+      });
+    } else {
+      const dx = (st.x - 1637.5) * (viewportBase.width / 3275);
+      const dy = (st.y - 917.5) * (viewportBase.height / 1835);
+      setPosition({
+        x: Math.round(-targetZoom * dx),
+        y: Math.round(-targetZoom * dy),
+      });
+    }
   };
 
   // Drag handlers
@@ -5733,10 +5766,11 @@ export default function SchematicViewer({
         e.touches[0].clientY - e.touches[1].clientY
       );
       const factor = dist / pinchRef.current.distance;
-      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), 10.0);
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), maxZoomLimit);
       setZoom(nextZoom);
       if (nextZoom <= 1.0) {
         setPosition({ x: 0, y: 0 });
+        setActiveStation('ALL');
       }
     }
   };
@@ -6129,18 +6163,25 @@ export default function SchematicViewer({
         <div className="md:hidden absolute right-2.5 bottom-14 z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
           <button
             onClick={handleZoomIn}
-            disabled={zoom >= 10.0}
-            className="w-8.5 h-8.5 flex items-center justify-center rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 transition cursor-pointer"
+            disabled={zoom >= maxZoomLimit}
+            className={`w-8.5 h-8.5 flex items-center justify-center rounded-xl transition ${
+              zoom >= maxZoomLimit
+                ? 'text-slate-300 cursor-not-allowed'
+                : 'text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 cursor-pointer'
+            }`}
             title="Perbesar (+)"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={handleResetZoom}
-            className="w-8.5 h-8.5 flex items-center justify-center rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 transition cursor-pointer"
+            className="w-8.5 h-9 flex flex-col items-center justify-center rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 transition cursor-pointer"
             title="Reset Fit Peta (100%)"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="text-[8.5px] font-mono font-black leading-none text-slate-800">
+              {Math.round(zoom * 100)}%
+            </span>
+            <RotateCcw className="w-2.5 h-2.5 mt-0.5 text-slate-400" />
           </button>
           <button
             onClick={handleZoomOut}
@@ -6343,7 +6384,9 @@ export default function SchematicViewer({
         {/* Viewport Content (Centered) */}
         <div
           style={{
-            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transform: `translate(${position.x}px, ${position.y}px) scale(${
+              isMobile ? (mobileFitScale * zoom) : zoom
+            })`,
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
@@ -6352,17 +6395,18 @@ export default function SchematicViewer({
           {/* Container tightly wrapping cropped schematic (Centered) */}
           <div
             style={{
-              width: `${viewportBase.width}px`,
-              height: `${viewportBase.height}px`,
+              width: isMobile ? '3275px' : `${viewportBase.width}px`,
+              height: isMobile ? '1835px' : `${viewportBase.height}px`,
             }}
             className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 border-slate-300/90 bg-white shrink-0"
           >
             
-            {/* Cropped AutoCAD Master Image */}
+            {/* Cropped AutoCAD Master Image (Ultra HD 9098x5097) */}
             <img
               src={imageSrc}
               alt="Peta Wilayah UPT Resor LAA 1.9 Jatinegara - Potongan Garis Tepi Terluar"
               className="w-full h-full object-contain block select-none pointer-events-none"
+              style={{ imageRendering: 'auto' }}
               draggable={false}
             />
 
