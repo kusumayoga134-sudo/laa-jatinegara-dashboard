@@ -91,6 +91,12 @@ export default function PdfExportModal({
     });
   }, [linesWithLogs, customPositions, showCallouts]);
 
+  // Minimum & Maximum Preview Zoom (Up to 1500% for ultra-deep inspection & easy dragging)
+  const MIN_PREVIEW_ZOOM = 0.5;
+  const MAX_PREVIEW_ZOOM = 15.0;
+
+  const pinchRef = useRef({ distance: 0, initialZoom: 1 });
+
   // Mouse Wheel Zoom for preview stage
   useEffect(() => {
     const container = previewContainerRef.current;
@@ -100,10 +106,10 @@ export default function PdfExportModal({
       e.preventDefault();
       e.stopPropagation();
 
-      const zoomDelta = e.deltaY < 0 ? 0.2 : -0.2;
+      const zoomDelta = e.deltaY < 0 ? (previewZoom >= 3.0 ? 0.5 : 0.2) : (previewZoom > 3.0 ? -0.5 : -0.2);
 
       setPreviewZoom((prevZoom) => {
-        const nextZoom = Math.min(Math.max(prevZoom + zoomDelta, 0.5), 5.0);
+        const nextZoom = Math.min(Math.max(prevZoom + zoomDelta, MIN_PREVIEW_ZOOM), MAX_PREVIEW_ZOOM);
         const roundedZoom = parseFloat(nextZoom.toFixed(2));
 
         if (roundedZoom <= 1.0) {
@@ -128,11 +134,23 @@ export default function PdfExportModal({
     return () => {
       container.removeEventListener('wheel', handleWheel);
     };
-  }, [isOpen]);
+  }, [isOpen, previewZoom]);
 
-  // Zoom button handlers
-  const handleZoomIn = () => setPreviewZoom((z) => Math.min(z + 0.25, 4));
-  const handleZoomOut = () => setPreviewZoom((z) => Math.max(z - 0.25, 0.5));
+  // Zoom button handlers with smooth adaptive stepping
+  const handleZoomIn = () =>
+    setPreviewZoom((z) => {
+      const step = z >= 4.0 ? 1.0 : (z >= 2.0 ? 0.5 : 0.25);
+      return Math.min(parseFloat((z + step).toFixed(2)), MAX_PREVIEW_ZOOM);
+    });
+
+  const handleZoomOut = () =>
+    setPreviewZoom((z) => {
+      const step = z > 4.0 ? 1.0 : (z > 2.0 ? 0.5 : 0.25);
+      const next = Math.max(parseFloat((z - step).toFixed(2)), MIN_PREVIEW_ZOOM);
+      if (next <= 1.0) setPreviewPos({ x: 0, y: 0 });
+      return next;
+    });
+
   const handleResetZoom = () => {
     setPreviewZoom(1);
     setPreviewPos({ x: 0, y: 0 });
@@ -143,9 +161,9 @@ export default function PdfExportModal({
     setCustomPositions({});
   };
 
-  // Card Mouse Down (Initiate Drag-and-Drop) - Guarded against double-firing with Pointer Events
+  // Card Mouse Down (Initiate Drag-and-Drop on Desktop Mouse)
   const handleCardMouseDown = (e, card) => {
-    if (window.PointerEvent) return; // Use Pointer Events if supported to prevent double-trigger
+    if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
     setDraggingCardId(card.id);
@@ -157,8 +175,9 @@ export default function PdfExportModal({
     };
   };
 
-  // Card Pointer Down (Touch & Mouse unified drag)
+  // Card Pointer Down (Guarded: ignore touch so touch events handle mobile dragging cleanly)
   const handleCardPointerDown = (e, card) => {
+    if (e.pointerType === 'touch') return;
     if (e.button !== undefined && e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
@@ -174,14 +193,131 @@ export default function PdfExportModal({
     };
   };
 
-  // Stage Mouse Down (Initiate Pan when zoomed)
+  // Card Touch Start (Explicit mobile touch drag support)
+  const handleCardTouchStart = (e, card) => {
+    if (e.touches.length === 1) {
+      e.stopPropagation();
+      setDraggingCardId(card.id);
+      dragStartRef.current = {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+        cardX: card.x,
+        cardY: card.y,
+      };
+    }
+  };
+
+  // Stage Mouse Down (Initiate Pan when zoomed on desktop)
   const handleStageMouseDown = (e) => {
-    if (previewZoom <= 1) return;
+    if (e.button !== 0) return;
+    if (e.target.closest('[data-callout-card]')) return;
     setIsDraggingStage(true);
     stageDragStartRef.current = {
       x: e.clientX - previewPos.x,
       y: e.clientY - previewPos.y,
     };
+  };
+
+  // Mobile Touch Gestures on Preview Stage (Single-finger Pan & Two-finger Pinch Zoom)
+  const handleTouchStart = (e) => {
+    if (e.target.closest('[data-callout-card]') || e.target.closest('button') || e.target.closest('select')) {
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      setIsDraggingStage(true);
+      stageDragStartRef.current = {
+        x: e.touches[0].clientX - previewPos.x,
+        y: e.touches[0].clientY - previewPos.y,
+      };
+    } else if (e.touches.length === 2) {
+      setIsDraggingStage(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchRef.current = {
+        distance: dist,
+        initialZoom: previewZoom,
+        midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+        initialPos: { ...previewPos },
+      };
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    // If a callout card is being dragged by finger
+    if (draggingCardId) {
+      if (e.touches.length === 1) {
+        const dx = (e.touches[0].clientX - dragStartRef.current.clientX) / currentScale;
+        const dy = (e.touches[0].clientY - dragStartRef.current.clientY) / currentScale;
+
+        const card = activeCards.find((c) => c.id === draggingCardId);
+        const cardW = card ? card.w : VIRTUAL_CANVAS.CARD_W;
+        const cardH = card ? card.h : VIRTUAL_CANVAS.CARD_H;
+
+        const newX = Math.max(0, Math.min(CANVAS_W - cardW, Math.round(dragStartRef.current.cardX + dx)));
+        const newY = Math.max(0, Math.min(CANVAS_H - cardH, Math.round(dragStartRef.current.cardY + dy)));
+
+        setCustomPositions((prev) => ({
+          ...prev,
+          [draggingCardId]: { x: newX, y: newY },
+        }));
+      }
+      return;
+    }
+
+    // Single finger: Pan stage
+    if (e.touches.length === 1 && isDraggingStage) {
+      setPreviewPos({
+        x: e.touches[0].clientX - stageDragStartRef.current.x,
+        y: e.touches[0].clientY - stageDragStartRef.current.y,
+      });
+    } else if (e.touches.length === 2 && pinchRef.current.distance > 0) {
+      // Two fingers: Pinch-to-zoom (smooth zoom clamped between MIN_PREVIEW_ZOOM and MAX_PREVIEW_ZOOM)
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / pinchRef.current.distance;
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, MIN_PREVIEW_ZOOM), MAX_PREVIEW_ZOOM);
+      const roundedZoom = parseFloat(nextZoom.toFixed(2));
+      setPreviewZoom(roundedZoom);
+
+      if (roundedZoom <= 1.0) {
+        setPreviewPos({ x: 0, y: 0 });
+      } else if (previewContainerRef.current) {
+        const rect = previewContainerRef.current.getBoundingClientRect();
+        const curMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const curMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const focalX = curMidX - rect.left - rect.width / 2;
+        const focalY = curMidY - rect.top - rect.height / 2;
+        const scaleRatio = roundedZoom / pinchRef.current.initialZoom;
+
+        const origFocalX = pinchRef.current.midX - rect.left - rect.width / 2;
+        const origFocalY = pinchRef.current.midY - rect.top - rect.height / 2;
+
+        setPreviewPos({
+          x: focalX - (origFocalX - pinchRef.current.initialPos.x) * scaleRatio,
+          y: focalY - (origFocalY - pinchRef.current.initialPos.y) * scaleRatio,
+        });
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length === 0) {
+      setIsDraggingStage(false);
+      setDraggingCardId(null);
+      pinchRef.current = { distance: 0, initialZoom: 1 };
+    } else if (e.touches.length === 1 && !draggingCardId) {
+      setIsDraggingStage(true);
+      stageDragStartRef.current = {
+        x: e.touches[0].clientX - previewPos.x,
+        y: e.touches[0].clientY - previewPos.y,
+      };
+    }
   };
 
   // Container Mouse / Pointer Move (Dispatches to either card dragging or stage panning)
@@ -222,18 +358,18 @@ export default function PdfExportModal({
     }
   };
 
-  // Prevent mobile browser page pulling while dragging callouts on preview stage
+  // Prevent mobile browser page pulling while interacting with preview stage
   useEffect(() => {
     const el = previewContainerRef.current;
     if (!el) return;
     const preventTouchScroll = (e) => {
-      if (draggingCardId || isDraggingStage) {
+      if (e.touches.length > 0) {
         e.preventDefault();
       }
     };
     el.addEventListener('touchmove', preventTouchScroll, { passive: false });
     return () => el.removeEventListener('touchmove', preventTouchScroll);
-  }, [draggingCardId, isDraggingStage]);
+  }, []);
 
   // Window-level mouseup fallback
   useEffect(() => {
@@ -460,7 +596,7 @@ export default function PdfExportModal({
             <div className="flex items-center space-x-0.5 sm:space-x-1 bg-slate-800/80 rounded-xl p-0.5 sm:p-1 border border-slate-700/80 shrink-0">
               <button
                 onClick={handleZoomOut}
-                disabled={previewZoom <= 0.5}
+                disabled={previewZoom <= MIN_PREVIEW_ZOOM}
                 className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition disabled:opacity-40 cursor-pointer"
                 title="Perkecil Preview"
               >
@@ -471,7 +607,7 @@ export default function PdfExportModal({
               </span>
               <button
                 onClick={handleZoomIn}
-                disabled={previewZoom >= 4}
+                disabled={previewZoom >= MAX_PREVIEW_ZOOM}
                 className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition disabled:opacity-40 cursor-pointer"
                 title="Perbesar Preview"
               >
@@ -497,9 +633,10 @@ export default function PdfExportModal({
           onMouseMove={handleContainerMouseMove}
           onMouseUp={handleContainerMouseUp}
           onMouseLeave={handleContainerMouseUp}
-          onPointerMove={handleContainerMouseMove}
-          onPointerUp={handleContainerMouseUp}
-          onPointerCancel={handleContainerMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
           className="flex-1 bg-slate-950 p-2 sm:p-4 overflow-hidden relative flex items-center justify-center select-none"
           style={{
             touchAction: 'none',
@@ -512,28 +649,22 @@ export default function PdfExportModal({
               : 'default',
           }}
         >
-          {/* Scaled Wrapper: perfectly matches the visually rendered dimensions */}
+          {/* Unified Stage Wrapper with Single-Pass Transform (Preserves full HD crispness & 15x zoom clarity) */}
           <div
             style={{
-              width: `${CANVAS_W * currentScale}px`,
-              height: `${CANVAS_H * currentScale}px`,
-              transform: `translate(${previewPos.x}px, ${previewPos.y}px)`,
-              position: 'relative',
+              transform: `translate(${previewPos.x}px, ${previewPos.y}px) scale(${currentScale})`,
+              transformOrigin: 'center center',
+              transition: (isDraggingStage || draggingCardId || pinchRef.current.distance > 0) ? 'none' : 'transform 0.12s ease-out',
             }}
-            className="transition-transform duration-75 ease-out shadow-2xl"
+            className="relative flex items-center justify-center shrink-0"
           >
             {/* 3275 x 1835 Native AutoCAD Model 2 Canvas Paper Container */}
             <div
               style={{
                 width: `${CANVAS_W}px`,
                 height: `${CANVAS_H}px`,
-                transform: `scale(${currentScale})`,
-                transformOrigin: 'top left',
-                position: 'absolute',
-                top: 0,
-                left: 0,
               }}
-              className="bg-white border border-slate-700 relative overflow-hidden"
+              className="bg-white border-2 border-slate-700 relative overflow-hidden shadow-2xl shrink-0"
             >
               {/* 1. CAD Blueprint Map Image Native AutoCAD Model 2 */}
               <img
@@ -548,6 +679,7 @@ export default function PdfExportModal({
                   objectFit: 'contain',
                   pointerEvents: 'none',
                   userSelect: 'none',
+                  imageRendering: 'high-quality',
                 }}
                 draggable={false}
               />
@@ -649,8 +781,10 @@ export default function PdfExportModal({
                   return (
                     <div
                       key={card.id}
+                      data-callout-card="true"
                       onMouseDown={(e) => handleCardMouseDown(e, card)}
                       onPointerDown={(e) => handleCardPointerDown(e, card)}
+                      onTouchStart={(e) => handleCardTouchStart(e, card)}
                       style={{
                         position: 'absolute',
                         left: `${card.x}px`,
