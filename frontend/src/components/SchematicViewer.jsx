@@ -5222,7 +5222,7 @@ export const ALL_TRACK_LINES = [
     "endDivider": {
       "type": "WESEL",
       "label": "WESEL 73 BEKASI",
-      "km": "KM 26+500"
+>      "km": "KM 26+500"
     }
   }
 ];
