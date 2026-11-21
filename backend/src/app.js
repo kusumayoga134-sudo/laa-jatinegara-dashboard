@@ -7,8 +7,52 @@ const apiRoutes = require('./routes/api');
 
 const app = express();
 
-app.use(cors());
+// Konfigurasi CORS: mendukung FRONTEND_URL dari env (dipisah koma), localhost, dan *.vercel.app
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+];
+
+if (process.env.FRONTEND_URL) {
+  process.env.FRONTEND_URL.split(',').forEach((url) => {
+    const trimmed = url.trim();
+    if (trimmed && !allowedOrigins.includes(trimmed)) {
+      allowedOrigins.push(trimmed);
+    }
+  });
+}
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Izinkan request tanpa origin (seperti curl, mobile apps, Postman)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permissive agar preview deploy Vercel tidak terblokir
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+
+// Health Check Endpoint untuk Render / Railway / Uptime monitoring
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    service: 'UPT Resor LAA 1.9 Jatinegara Backend',
+  });
+});
 
 // API Info endpoint
 app.get('/api', (req, res) => {
@@ -17,6 +61,7 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     description: 'REST API untuk SCADA & Monitoring Listrik Aliran Atas KAI',
     endpoints: {
+      health: '/api/health',
       stats: '/api/stats',
       stations: '/api/stations',
       switches: '/api/switches',

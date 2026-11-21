@@ -4,7 +4,8 @@
   "description": "Backend API for UPT Resor LAA 1.9 Jatinegara SCADA & Asset Monitoring",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "build": "prisma generate",
+    "start": "prisma db push && node src/server.js",
     "dev": "node --watch src/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
