@@ -5644,19 +5644,22 @@ export default function SchematicViewer({
     };
   }, []);
 
-  // Zoom handlers (Desktop: 100% - 1000%, Mobile: 100% - 1500%)
-  const maxZoomLimit = isMobile ? 15.0 : 10.0;
+  // Zoom range constants (Min 100% - Max 1500% across Desktop & Mobile)
+  const MIN_ZOOM = 1.0;
+  const MAX_ZOOM = 15.0;
+
+  // Zoom handlers (100% - 1500% with adaptive proportional stepping)
   const handleZoomIn = () =>
     setZoom((prev) => {
-      const step = isMobile ? (prev >= 4.0 ? 1.0 : 0.5) : 0.25;
-      return Math.min(prev + step, maxZoomLimit);
+      const step = prev >= 4.0 ? 1.0 : (prev >= 2.0 ? 0.5 : 0.25);
+      return Math.min(parseFloat((prev + step).toFixed(2)), MAX_ZOOM);
     });
 
   const handleZoomOut = () =>
     setZoom((prev) => {
-      const step = isMobile ? (prev > 4.0 ? 1.0 : 0.5) : 0.25;
-      const next = Math.max(prev - step, 1.0);
-      if (next === 1.0) {
+      const step = prev > 4.0 ? 1.0 : (prev > 2.0 ? 0.5 : 0.25);
+      const next = Math.max(parseFloat((prev - step).toFixed(2)), MIN_ZOOM);
+      if (next <= 1.0) {
         setPosition({ x: 0, y: 0 });
         setActiveStation('ALL');
       }
@@ -5723,7 +5726,7 @@ export default function SchematicViewer({
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Mobile Touch Gestures (Single finger Pan & 2-finger Pinch Zoom)
+  // Mobile Touch Gestures (Single finger Pan & 2-finger Pinch Zoom up to 1500%)
   const handleTouchStart = (e) => {
     if (e.target.closest('button')) return;
 
@@ -5745,6 +5748,9 @@ export default function SchematicViewer({
       pinchRef.current = {
         distance: dist,
         initialZoom: zoom,
+        initialPos: { ...position },
+        midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
       };
     }
   };
@@ -5766,11 +5772,28 @@ export default function SchematicViewer({
         e.touches[0].clientY - e.touches[1].clientY
       );
       const factor = dist / pinchRef.current.distance;
-      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, 1.0), maxZoomLimit);
-      setZoom(nextZoom);
-      if (nextZoom <= 1.0) {
+      const nextZoom = Math.min(Math.max(pinchRef.current.initialZoom * factor, MIN_ZOOM), MAX_ZOOM);
+      const roundedZoom = parseFloat(nextZoom.toFixed(2));
+      setZoom(roundedZoom);
+
+      if (roundedZoom <= 1.0) {
         setPosition({ x: 0, y: 0 });
         setActiveStation('ALL');
+      } else if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const curMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const curMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const focalX = curMidX - rect.left - rect.width / 2;
+        const focalY = curMidY - rect.top - rect.height / 2;
+        const scaleRatio = roundedZoom / pinchRef.current.initialZoom;
+
+        const origFocalX = pinchRef.current.midX - rect.left - rect.width / 2;
+        const origFocalY = pinchRef.current.midY - rect.top - rect.height / 2;
+
+        setPosition({
+          x: Math.round(focalX - (origFocalX - pinchRef.current.initialPos.x) * scaleRatio),
+          y: Math.round(focalY - (origFocalY - pinchRef.current.initialPos.y) * scaleRatio),
+        });
       }
     }
   };
@@ -5789,21 +5812,43 @@ export default function SchematicViewer({
     }
   };
 
-  // Wheel zoom (Min 100% - Max 1000%)
+  // Wheel zoom (Min 100% - Max 1500%) with smooth proportional 1.15x scaling and cursor focal tracking
   const handleWheel = (e) => {
     e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 0.2 : -0.2;
-    setZoom((prev) => {
-      const next = Math.min(Math.max(prev + zoomFactor, 1.0), 10.0);
-      if (next === 1.0) setPosition({ x: 0, y: 0 });
-      return next;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const cursorX = e.clientX - rect.left - rect.width / 2;
+    const cursorY = e.clientY - rect.top - rect.height / 2;
+
+    setZoom((prevZoom) => {
+      const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      const nextZoom = Math.min(Math.max(parseFloat((prevZoom * factor).toFixed(2)), MIN_ZOOM), MAX_ZOOM);
+
+      if (nextZoom <= 1.0) {
+        setPosition({ x: 0, y: 0 });
+        setActiveStation('ALL');
+      } else if (nextZoom !== prevZoom) {
+        const scaleRatio = nextZoom / prevZoom;
+        setPosition((prevPos) => ({
+          x: Math.round(cursorX - (cursorX - prevPos.x) * scaleRatio),
+          y: Math.round(cursorY - (cursorY - prevPos.y) * scaleRatio),
+        }));
+      }
+
+      return nextZoom;
     });
   };
+
+  const handleWheelRef = useRef(handleWheel);
+  handleWheelRef.current = handleWheel;
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
+    const onWheel = (e) => handleWheelRef.current(e);
+    el.addEventListener('wheel', onWheel, { passive: false });
 
     // Prevent mobile pull-to-refresh / unwanted outer page scrolling when panning the map
     const handleNativeTouchMove = (e) => {
@@ -5814,7 +5859,7 @@ export default function SchematicViewer({
     el.addEventListener('touchmove', handleNativeTouchMove, { passive: false });
 
     return () => {
-      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('wheel', onWheel);
       el.removeEventListener('touchmove', handleNativeTouchMove);
     };
   }, []);
@@ -6098,13 +6143,13 @@ export default function SchematicViewer({
 
             <button
               onClick={handleZoomIn}
-              disabled={zoom >= 10.0}
+              disabled={zoom >= MAX_ZOOM}
               className={`p-1.5 rounded-lg transition ${
-                zoom >= 10.0
+                zoom >= MAX_ZOOM
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
-              title="Perbesar (+) [Maks 1000%]"
+              title="Perbesar (+) [Maks 1500%]"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
@@ -6163,9 +6208,9 @@ export default function SchematicViewer({
         <div className="md:hidden absolute right-2.5 bottom-14 z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
           <button
             onClick={handleZoomIn}
-            disabled={zoom >= maxZoomLimit}
+            disabled={zoom >= MAX_ZOOM}
             className={`w-8.5 h-8.5 flex items-center justify-center rounded-xl transition ${
-              zoom >= maxZoomLimit
+              zoom >= MAX_ZOOM
                 ? 'text-slate-300 cursor-not-allowed'
                 : 'text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 cursor-pointer'
             }`}
