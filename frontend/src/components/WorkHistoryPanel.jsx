@@ -284,10 +284,10 @@ export default function WorkHistoryPanel({
       // Category tab filter
       if (suggestCategory === 'JALUR' && !item.title.includes('Jalur') && !item.title.includes('ST.')) return false;
       if (suggestCategory === 'NASPAN' && !item.title.includes('NASPAN') && !item.code.includes('NASPAN')) return false;
-      if (suggestCategory === 'WESEL' && !item.title.includes('Wesel') && !item.title.includes('Crossing')) return false;
+      if (suggestCategory === 'WESEL' && !item.title.toUpperCase().includes('WESEL') && !item.title.toUpperCase().includes('CROSSING') && !item.title.toUpperCase().includes('CROSSTREK') && item.category !== 'TITIK WESEL' && item.category !== 'TITIK CROSSING') return false;
       if (suggestCategory === 'DS' && item.category !== 'DISCONNECTING SWITCH (DS)') return false;
       if (suggestCategory === 'FRP' && item.category !== 'SECTION INSULATOR (FRP)') return false;
-      if (suggestCategory === 'AS_AJ' && item.category !== 'PEMISAH SEKSI (AS/AJ)') return false;
+      if (suggestCategory === 'AS_AJ' && item.category !== 'OVERLAP (AS/AJ)' && item.category !== 'PEMISAH SEKSI (AS/AJ)') return false;
 
       // Search query filter
       if (!q) return true;
