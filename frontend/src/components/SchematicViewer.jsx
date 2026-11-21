@@ -17,6 +17,7 @@ import {
   ClipboardList,
   FileText,
   FileSpreadsheet,
+  Train,
 } from 'lucide-react';
 import { LEGACY_TARGET_MAP } from '../data/legacyTargetMap';
 
@@ -5549,6 +5550,20 @@ export const computeLinesWithLogs = (logs = []) => {
   return list;
 };
 
+// =========================================================================
+// QUICK_STATIONS: Navigasi Cepat Stasiun pada Layar Mobile
+// Koordinat pusat stasiun pada kanvas native AutoCAD Model 2 (3275 x 1835 px)
+// =========================================================================
+const QUICK_STATIONS = [
+  { id: 'ALL', label: 'Semua', isAll: true },
+  { id: 'JNG', label: 'Jatinegara', x: 1100, y: 680 },
+  { id: 'KLD', label: 'Klender', x: 2200, y: 836 },
+  { id: 'BUA', label: 'Buaran', x: 2740, y: 836 },
+  { id: 'CUK', label: 'Cakung', x: 2575, y: 1300 },
+  { id: 'KRI', label: 'Kranji', x: 2065, y: 1318 },
+  { id: 'BKS', label: 'Bekasi', x: 1100, y: 1270 },
+];
+
 export default function SchematicViewer({
   logs = [],
   selectedLocation,
@@ -5563,6 +5578,7 @@ export default function SchematicViewer({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [activeStation, setActiveStation] = useState('ALL');
 
   
   const [hoveredLine, setHoveredLine] = useState(null);
@@ -5618,18 +5634,41 @@ export default function SchematicViewer({
   const handleZoomOut = () =>
     setZoom((prev) => {
       const next = Math.max(prev - 0.25, 1.0);
-      if (next === 1.0) setPosition({ x: 0, y: 0 });
+      if (next === 1.0) {
+        setPosition({ x: 0, y: 0 });
+        setActiveStation('ALL');
+      }
       return next;
     });
   const handleResetZoom = () => {
     setZoom(1.0);
     setPosition({ x: 0, y: 0 });
+    setActiveStation('ALL');
+  };
+
+  // Navigasi Cepat Loncat ke Stasiun (Mobile Station Jump)
+  const handleQuickStationJump = (st) => {
+    setActiveStation(st.id);
+    if (st.isAll) {
+      setZoom(1.0);
+      setPosition({ x: 0, y: 0 });
+      return;
+    }
+    const targetZoom = 2.4;
+    const dx = (st.x - 1637.5) * (viewportBase.width / 3275);
+    const dy = (st.y - 917.5) * (viewportBase.height / 1835);
+    setZoom(targetZoom);
+    setPosition({
+      x: Math.round(-targetZoom * dx),
+      y: Math.round(-targetZoom * dy),
+    });
   };
 
   // Drag handlers
   const handleMouseDown = (e) => {
     if (e.target.closest('button')) return;
     setIsDragging(true);
+    setActiveStation(null);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
@@ -5657,6 +5696,7 @@ export default function SchematicViewer({
 
     if (e.touches.length === 1) {
       setIsDragging(true);
+      setActiveStation(null);
       hasMovedRef.current = false;
       touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       setDragStart({
@@ -5805,16 +5845,114 @@ export default function SchematicViewer({
         isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full'
       }`}
     >
-      {/* Top Toolbar White Mode */}
-      <div className="bg-white/95 border-b border-slate-200 px-2 sm:px-5 py-1.5 sm:py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 z-20 backdrop-blur-md">
+      {/* ========================================================
+          1. MOBILE TOOLBAR (< md) - ANTI-CLIPPING 3-COLUMN FULL-WIDTH GRID
+          ======================================================== */}
+      <div className="md:hidden bg-white/95 border-b border-slate-200 px-2 py-1.5 flex flex-col gap-1.5 z-20 backdrop-blur-md">
+        {/* Row 1: Strip Tipis Penanda Selebar Layar */}
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-1.5 text-[10px] text-slate-700 font-medium">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span>
+              Pemisah seksi: <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, <strong className="text-orange-700 font-bold">DS</strong>
+            </span>
+          </div>
+
+          {linesWithLogs.length > 0 && (
+            <div
+              className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[9.5px] font-bold shadow-2xs shrink-0"
+              title="Garis lintasan dengan tanda merah kedip menandakan ada riwayat pekerjaan"
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-600"></span>
+              </span>
+              <span>{linesWithLogs.length} Lokasi</span>
+            </div>
+          )}
+        </div>
+
+        {/* Row 2: Grid 3 Kolom Penuh (Anti Terpotong) */}
+        <div className="grid grid-cols-3 gap-1.5 w-full">
+          {/* Kolom 1: Total Pekerjaan */}
+          {onOpenAllLogs && (
+            <button
+              onClick={onOpenAllLogs}
+              className="bg-slate-50/90 hover:bg-orange-50/80 active:bg-orange-100 border border-slate-200/90 hover:border-orange-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
+              title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
+            >
+              <div className="w-6 h-6 rounded-lg bg-orange-100/90 text-orange-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <ClipboardList className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
+                  TOTAL
+                </div>
+                <div className="font-mono font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
+                  <span className="text-orange-600">{totalLogsCount}</span>
+                  <span className="font-sans font-semibold text-[8.5px] text-slate-600">Kerja</span>
+                </div>
+              </div>
+            </button>
+          )}
+
+          {/* Kolom 2: Export PDF */}
+          {onOpenExportPdf && (
+            <button
+              onClick={onOpenExportPdf}
+              className="bg-slate-50/90 hover:bg-rose-50/80 active:bg-rose-100 border border-slate-200/90 hover:border-rose-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
+              title="Buka Menu Export PDF & Cetak Peta Ultra HD"
+            >
+              <div className="w-6 h-6 rounded-lg bg-rose-100/90 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
+                  CETAK
+                </div>
+                <div className="font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
+                  <span className="text-rose-600">Export</span>
+                  <span className="font-sans font-semibold text-[8.5px] text-slate-600">PDF</span>
+                </div>
+              </div>
+            </button>
+          )}
+
+          {/* Kolom 3: Unduh Excel */}
+          <a
+            href="/MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
+            download="MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
+            className="bg-slate-50/90 hover:bg-emerald-50/80 active:bg-emerald-100 border border-slate-200/90 hover:border-emerald-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left no-underline"
+            title="Unduh Master Data Seluruh Jalur & Peralatan dalam format Excel (.xlsx)"
+          >
+            <div className="w-6 h-6 rounded-lg bg-emerald-100/90 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
+                DATA
+              </div>
+              <div className="font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
+                <span className="text-emerald-600">Unduh</span>
+                <span className="font-sans font-semibold text-[8.5px] text-slate-600">Excel</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      {/* ========================================================
+          2. DESKTOP TOOLBAR (>= md) - 100% UNCHANGED ORIGINAL LAYOUT
+          ======================================================== */}
+      <div className="hidden md:flex md:items-center md:justify-between bg-white/95 border-b border-slate-200 px-5 py-2.5 z-20 backdrop-blur-md">
         
         {/* Left Instruction & Active Work Status */}
-        <div className="flex items-center justify-between sm:justify-start space-x-2 sm:space-x-3 shrink-0 flex-wrap sm:flex-nowrap gap-y-1">
+        <div className="flex items-center space-x-3 shrink-0">
           <div className="flex items-center space-x-1.5 shrink-0">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <p className="text-[10.5px] sm:text-sm text-slate-700 font-medium leading-tight">
+            <p className="text-sm text-slate-700 font-medium leading-tight">
               <span>
                 Pemisah seksi: <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, <strong className="text-orange-700 font-bold">DS</strong>
               </span>
@@ -5823,7 +5961,7 @@ export default function SchematicViewer({
 
           {linesWithLogs.length > 0 && (
             <div
-              className="flex items-center space-x-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[10px] sm:text-xs font-bold shadow-2xs animate-in fade-in"
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-2xs animate-in fade-in"
               title="Garis lintasan dengan tanda merah kedip menandakan ada riwayat pekerjaan yang tercatat"
             >
               <span className="relative flex h-2 w-2">
@@ -5835,26 +5973,26 @@ export default function SchematicViewer({
           )}
         </div>
 
-        {/* Right Tools: Total Work, Export PDF & Zoom Controls (Horizontal Scrollable Strip on Mobile) */}
-        <div className="flex items-center justify-start sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5 sm:pb-0">
+        {/* Right Tools: Total Work, Export PDF & Zoom Controls */}
+        <div className="flex items-center space-x-2 shrink-0">
           
           {/* Total Work Clickable Badge */}
           {onOpenAllLogs && (
             <button
               onClick={onOpenAllLogs}
-              className="h-8.5 sm:h-10 bg-slate-50/90 hover:bg-orange-50/60 border border-slate-200/90 hover:border-orange-300 rounded-lg sm:rounded-xl px-2 sm:px-3 flex items-center space-x-1.5 sm:space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+              className="h-10 bg-slate-50/90 hover:bg-orange-50/60 border border-slate-200/90 hover:border-orange-300 rounded-xl px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
               title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
             >
-              <div className="w-5.5 h-5.5 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-orange-100/90 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-                <ClipboardList className="w-3 h-3 sm:w-4 sm:h-4" />
+              <div className="w-7 h-7 rounded-lg bg-orange-100/90 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+                <ClipboardList className="w-4 h-4" />
               </div>
 
               <div>
-                <div className="text-[8.5px] sm:text-[9px] text-slate-500 group-hover:text-orange-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+                <div className="text-[9px] text-slate-500 group-hover:text-orange-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
                   <span>TOTAL PEKERJAAN</span>
                   <ChevronRight className="w-2.5 h-2.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                 </div>
-                <div className="font-mono font-black text-slate-900 text-[10.5px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+                <div className="font-mono font-black text-slate-900 text-xs flex items-center gap-1 mt-0.5 leading-none">
                   <span className="text-orange-600">{totalLogsCount}</span>
                   <span className="font-semibold text-slate-700 font-sans">Dicatat</span>
                 </div>
@@ -5866,17 +6004,17 @@ export default function SchematicViewer({
           {onOpenExportPdf && (
             <button
               onClick={onOpenExportPdf}
-              className="h-8.5 sm:h-10 bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200/90 hover:border-rose-300 rounded-lg sm:rounded-xl px-2 sm:px-3 flex items-center space-x-1.5 sm:space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
+              className="h-10 bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200/90 hover:border-rose-300 rounded-xl px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left"
               title="Buka Menu Export PDF & Cetak Peta Ultra HD"
             >
-              <div className="w-5.5 h-5.5 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-rose-100/90 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+              <div className="w-7 h-7 rounded-lg bg-rose-100/90 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+                <FileText className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[8.5px] sm:text-[9px] text-slate-500 group-hover:text-rose-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+                <div className="text-[9px] text-slate-500 group-hover:text-rose-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
                   <span>CETAK PETA</span>
                 </div>
-                <div className="font-black text-slate-900 text-[10.5px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+                <div className="font-black text-slate-900 text-xs flex items-center gap-1 mt-0.5 leading-none">
                   <span className="text-rose-600">Export</span>
                   <span className="font-semibold text-slate-700 font-sans">PDF</span>
                 </div>
@@ -5888,17 +6026,17 @@ export default function SchematicViewer({
           <a
             href="/MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
             download="MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
-            className="h-8.5 sm:h-10 bg-slate-50/90 hover:bg-emerald-50/60 border border-slate-200/90 hover:border-emerald-300 rounded-lg sm:rounded-xl px-2 sm:px-3 flex items-center space-x-1.5 sm:space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left no-underline"
+            className="h-10 bg-slate-50/90 hover:bg-emerald-50/60 border border-slate-200/90 hover:border-emerald-300 rounded-xl px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left no-underline"
             title="Unduh Master Data Seluruh Jalur & Peralatan dalam format Excel (.xlsx)"
           >
-            <div className="w-5.5 h-5.5 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-emerald-100/90 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-              <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4" />
+            <div className="w-7 h-7 rounded-lg bg-emerald-100/90 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
+              <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[8.5px] sm:text-[9px] text-slate-500 group-hover:text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
+              <div className="text-[9px] text-slate-500 group-hover:text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
                 <span>MASTER DATA</span>
               </div>
-              <div className="font-black text-slate-900 text-[10.5px] sm:text-xs flex items-center gap-1 mt-0.5 leading-none">
+              <div className="font-black text-slate-900 text-xs flex items-center gap-1 mt-0.5 leading-none">
                 <span className="text-emerald-600">Unduh</span>
                 <span className="font-semibold text-slate-700 font-sans">Excel</span>
               </div>
@@ -5906,51 +6044,51 @@ export default function SchematicViewer({
           </a>
 
           {/* Zoom Controls */}
-          <div className="h-8.5 sm:h-10 flex items-center space-x-0.5 sm:space-x-1 bg-slate-100 rounded-lg sm:rounded-xl px-1 sm:px-1.5 border border-slate-200 shadow-2xs shrink-0">
+          <div className="h-10 flex items-center space-x-1 bg-slate-100 rounded-xl px-1.5 border border-slate-200 shadow-2xs shrink-0">
             <button
               onClick={handleZoomOut}
               disabled={zoom <= 1.0}
-              className={`p-1 sm:p-1.5 rounded-md sm:rounded-lg transition ${
+              className={`p-1.5 rounded-lg transition ${
                 zoom <= 1.0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
               title="Perkecil (-) [Min 100%]"
             >
-              <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <ZoomOut className="w-4 h-4" />
             </button>
 
-            <span className="text-[10px] sm:text-xs font-mono font-bold px-1 sm:px-2 text-slate-800 min-w-10 sm:min-w-14 text-center">
+            <span className="text-xs font-mono font-bold px-2 text-slate-800 min-w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
 
             <button
               onClick={handleZoomIn}
               disabled={zoom >= 10.0}
-              className={`p-1 sm:p-1.5 rounded-md sm:rounded-lg transition ${
+              className={`p-1.5 rounded-lg transition ${
                 zoom >= 10.0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer'
               }`}
               title="Perbesar (+) [Maks 1000%]"
             >
-              <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <ZoomIn className="w-4 h-4" />
             </button>
 
             <button
               onClick={handleResetZoom}
-              className="p-1 sm:p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-md sm:rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Reset Zoom (100%)"
             >
-              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <RotateCcw className="w-4 h-4" />
             </button>
 
             <button
               onClick={toggleFullscreen}
-              className="p-1 sm:p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-md sm:rounded-lg transition cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition cursor-pointer"
               title="Layar Penuh"
             >
-              <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Maximize2 className="w-4 h-4" />
             </button>
           </div>
 
@@ -5972,15 +6110,74 @@ export default function SchematicViewer({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
-        className={`w-full overflow-hidden bg-slate-100/70 cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[calc(100dvh-130px)] sm:h-[calc(100vh-215px)] min-h-[420px] sm:min-h-[480px] max-h-[860px]'
+        className={`w-full overflow-hidden bg-slate-100/70 mobile-cad-canvas cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[calc(100dvh-175px)] min-h-[380px] sm:min-h-[480px] sm:h-[calc(100vh-215px)] sm:max-h-[860px]'
         }`}
       >
-        {/* Floating Quick Hint */}
-        <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl text-[10px] sm:text-xs text-slate-600 backdrop-blur-md flex items-center space-x-1.5 shadow-sm">
-          <Crosshair className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600 shrink-0" />
-          <span className="hidden sm:inline">Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
-          <span className="sm:hidden">Geser 1 jari untuk navigasi • Cubit 2 jari untuk zoom</span>
+        {/* Floating Quick Hint (Desktop vs. Mobile) */}
+        <div className="hidden sm:flex absolute bottom-4 left-4 z-20 pointer-events-none bg-white/95 border border-slate-200 px-3.5 py-2 rounded-xl text-xs text-slate-600 backdrop-blur-md items-center space-x-1.5 shadow-sm">
+          <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+          <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
+        </div>
+
+        <div className="sm:hidden absolute bottom-14 left-2.5 z-20 pointer-events-none bg-slate-900/75 text-white px-2 py-0.5 rounded-full text-[9px] font-medium backdrop-blur-xs flex items-center gap-1 shadow-sm">
+          <Crosshair className="w-2.5 h-2.5 text-blue-300 shrink-0" />
+          <span>Geser 1 jari • Cubit zoom</span>
+        </div>
+
+        {/* Mobile Floating Zoom Controls (Google Maps / Figma Mobile Capsule) */}
+        <div className="md:hidden absolute right-2.5 bottom-14 z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
+          <button
+            onClick={handleZoomIn}
+            disabled={zoom >= 10.0}
+            className="w-8.5 h-8.5 flex items-center justify-center rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 transition cursor-pointer"
+            title="Perbesar (+)"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="w-8.5 h-8.5 flex items-center justify-center rounded-xl text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 transition cursor-pointer"
+            title="Reset Fit Peta (100%)"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleZoomOut}
+            disabled={zoom <= 1.0}
+            className={`w-8.5 h-8.5 flex items-center justify-center rounded-xl transition ${
+              zoom <= 1.0
+                ? 'text-slate-300 cursor-not-allowed'
+                : 'text-slate-700 hover:text-blue-700 hover:bg-blue-50 active:scale-90 cursor-pointer'
+            }`}
+            title="Perkecil (-)"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Mobile Quick Station Jump Navigation Bar (Horizontal Chip Bar) */}
+        <div className="md:hidden absolute bottom-2 inset-x-2 z-25 flex items-center gap-1 overflow-x-auto whitespace-nowrap px-2 py-1 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md scrollbar-none">
+          <div className="flex items-center gap-1 text-[9px] font-extrabold text-slate-400 pr-1 shrink-0 uppercase tracking-tight">
+            <Train className="w-3 h-3 text-blue-600" />
+            <span>Stasiun:</span>
+          </div>
+          {QUICK_STATIONS.map((st) => (
+            <button
+              key={st.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleQuickStationJump(st);
+              }}
+              className={`px-2 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shrink-0 active:scale-95 ${
+                activeStation === st.id
+                  ? 'bg-blue-600 text-white shadow-2xs font-black'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
+            >
+              {st.label}
+            </button>
+          ))}
         </div>
 
         {/* ========================================================
@@ -6148,7 +6345,7 @@ export default function SchematicViewer({
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
             transformOrigin: 'center center',
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
           className="relative flex items-center justify-center shrink-0 p-1 sm:p-4"
         >

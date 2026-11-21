@@ -49,30 +49,30 @@ export default function Header({
       {/* Top Accent Gradient Ribbon */}
       <div className="h-1 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-teal-500 to-amber-500" />
 
-      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 py-2 sm:py-2.5">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 py-1.5 sm:py-2.5">
         
         {/* ========================================================
-            1. MOBILE VIEW (< md) - SPACIOUS 2-ROW HEADER (84px - 96px)
+            1. MOBILE VIEW (< md) - CLEAN 2-ROW COMPACT HEADER
             ======================================================== */}
-        <div className="md:hidden flex flex-col space-y-2">
-          {/* Baris 1: Branding Logo Danantara (Kiri) & KAI (Kanan) */}
-          <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+        <div className="md:hidden flex flex-col space-y-1.5">
+          {/* Baris 1: Branding Logo Danantara (Kiri) & KAI (Kanan) - Bersih Tanpa Box/Shadow */}
+          <div className="flex items-center justify-between pb-1 border-b border-slate-100">
             {/* Danantara Logo */}
-            <div className="bg-white rounded-xl px-2.5 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-8 w-28 shrink-0 overflow-hidden">
+            <div className="flex items-center justify-start h-6 shrink-0">
               <img
                 src="/danantara-logo.png"
                 alt="Danantara Indonesia"
-                className="max-h-5 max-w-full object-contain"
+                className="h-5 sm:h-5.5 w-auto max-w-[125px] object-contain"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
 
             {/* KAI Logo */}
-            <div className="bg-white rounded-xl px-2.5 py-1 border border-slate-200/90 shadow-2xs flex items-center justify-center h-8 w-22 shrink-0 overflow-hidden">
+            <div className="flex items-center justify-end h-6 shrink-0">
               <img
                 src="/kai-logo.png"
                 alt="KAI"
-                className="max-h-5 max-w-full object-contain"
+                className="h-5 sm:h-5.5 w-auto max-w-[65px] object-contain"
                 onError={(e) => { e.target.src = '/kai-logo.webp'; }}
               />
             </div>
