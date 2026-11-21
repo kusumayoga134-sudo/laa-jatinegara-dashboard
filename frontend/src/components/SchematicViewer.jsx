@@ -5144,161 +5144,171 @@ export const ALL_TRACK_LINES = [
 export const allTrackLines = ALL_TRACK_LINES;
 
 // Smart line-to-log matching function (Strict 1-to-1 Isolation, Direction Guard, Track Number Guard & Device Isolation)
+// =========================================================================
+// SINGLE SOURCE OF TRUTH: DETERMINISTIC 1-TO-1 LOG TO TRACK MATCHER
+// Guarantees that 1 work order maps strictly to 1 physical line/asset on the map.
+// Completely eliminates duplicate / multi-radar beacon flare-ups across the system.
+// =========================================================================
+export const findBestLineForLog = (log, allLines = ALL_TRACK_LINES) => {
+  if (!log) return null;
+  const tc = (log.targetCode || '').trim();
+  const tid = (log.targetId || '').trim();
+  if (!tc && !tid) return null;
+
+  const cleanTc = tc.toLowerCase().replace(/\s+/g, ' ');
+  const alphaTc = cleanTc.replace(/[^a-z0-9]/g, '');
+
+  // 1. Tier 1: Target ID exact match (Highest Priority)
+  if (tid) {
+    const byId = allLines.find((l) => (l.id || '').toLowerCase() === tid.toLowerCase());
+    if (byId) return byId;
+  }
+
+  // 2. Tier 2: Exact Title Match (Highest Priority among text matches)
+  for (const line of allLines) {
+    const lt = (line.title || '').toLowerCase().replace(/\s+/g, ' ');
+    if (lt && cleanTc === lt) return line;
+  }
+
+  // Tier 2b: Exact Code Match
+  for (const line of allLines) {
+    const lc = (line.code || '').toLowerCase().replace(/\s+/g, ' ');
+    if (lc && cleanTc === lc) return line;
+  }
+
+  // Tier 2c: Exact ID Match
+  for (const line of allLines) {
+    const lid = (line.id || '').toLowerCase();
+    if (lid && cleanTc === lid) return line;
+  }
+
+  // 3. Tier 3: Exact Alphanumeric Match (immune to punctuation/bracket differences)
+  if (alphaTc) {
+    for (const line of allLines) {
+      const alt = (line.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (alt && alphaTc === alt) return line;
+    }
+    for (const line of allLines) {
+      const alc = (line.code || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (alc && alphaTc === alc) return line;
+    }
+    for (const line of allLines) {
+      const alid = (line.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (alid && alphaTc === alid) return line;
+    }
+  }
+
+  // 4. Tier 4: Fuzzy / Regex Scoring with Strict Disqualification Guards
+  let bestLine = null;
+  let bestScore = 0;
+
+  const tcIsHi = /\b(hi|hilir)\b/i.test(cleanTc);
+  const tcIsHu = /\b(hu|hulu)\b/i.test(cleanTc);
+  const tcJalur = cleanTc.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
+  const tcKm = cleanTc.match(/KM\s*(\d+\+?\d*)/i);
+
+  for (const line of allLines) {
+    const lineId = (line.id || '').toLowerCase();
+    const lineCode = (line.code || '').toLowerCase();
+    const lineTitle = (line.title || '').toLowerCase();
+    const lineCat = (line.category || '').toUpperCase();
+    const lineKm = (line.km || '').toLowerCase();
+    const combined = `${lineTitle} ${lineCode} ${lineId} ${lineCat} ${lineKm}`.toLowerCase();
+
+    // Station Guard: Cakung, Bekasi, Jatinegara cannot cross-match
+    if (cleanTc.includes('cakung') || cleanTc.includes('cuk')) {
+      if (!combined.includes('cakung') && !lineId.includes('cuk')) continue;
+    }
+    if (cleanTc.includes('bekasi') || cleanTc.includes('bks')) {
+      if (!combined.includes('bekasi') && !lineId.includes('bks') && !lineId.includes('bkt')) continue;
+    }
+    if (cleanTc.includes('jatinegara') || cleanTc.includes('jng')) {
+      if (!combined.includes('jatinegara') && !lineId.includes('jng')) continue;
+    }
+
+    // Direction Guard: HI vs HU
+    const lineIsHi = /\b(hi|hilir)\b/i.test(combined) || lineId.endsWith('_hi');
+    const lineIsHu = /\b(hu|hulu)\b/i.test(combined) || lineId.endsWith('_hu');
+    if (tcIsHi && lineIsHu && !lineIsHi) continue;
+    if (tcIsHu && lineIsHi && !lineIsHu) continue;
+
+    // Track Number Guard (Jalur 1 vs Jalur 2 etc.)
+    const lineJalur = combined.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
+    if (tcJalur && lineJalur && tcJalur[1] !== lineJalur[1]) continue;
+
+    let score = 0;
+    const isSwitch = lineCat.includes('DISCONNECTING SWITCH') || lineCat.includes('(DS)') || lineId.startsWith('ds_');
+    const isInsulator = lineCat.includes('SECTION INSULATOR') || lineCat.includes('(FRP)') || lineId.startsWith('frp_');
+    const isTurnout = lineCat.includes('WESEL') || lineId.startsWith('wesel_') || lineId.startsWith('titik_wesel_');
+
+    if (isSwitch) {
+      const dsM = lineCode.match(/DS\s*(\d+[A-Z]?)/i) || lineId.match(/ds_?(\d+[A-Z]?)/i);
+      if (dsM) {
+        const num = dsM[1].toLowerCase();
+        if (new RegExp(`(^|\\b)ds\\s*-?\\s*${num}\\b`, 'i').test(cleanTc)) {
+          score = 350;
+          if (cleanTc.includes('(no)') && combined.includes('(no)')) score += 20;
+          if (cleanTc.includes('(nc)') && combined.includes('(nc)')) score += 20;
+        }
+      }
+    } else if (isInsulator) {
+      const frpM = lineCode.match(/FRP[^\s)]*/i) || lineId.match(/frp[^\s)]*/i);
+      if (frpM) {
+        const frpCode = frpM[0].toLowerCase();
+        if (cleanTc.includes(frpCode)) score = 350;
+      }
+    } else if (isTurnout) {
+      if (/\b(wesel|w\d{2})\b/i.test(cleanTc)) {
+        const wM = lineCode.match(/W\d{2}[A-Z0-9]*/i) || lineId.match(/w\d{2}[a-z0-9]*/i);
+        if (wM) {
+          const wCode = wM[0].toLowerCase();
+          if (new RegExp(`(^|\\b|wesel\\s*)${wCode}\\b`, 'i').test(cleanTc)) {
+            const tcIsCrossover = cleanTc.includes('crossover') || cleanTc.includes('/');
+            const lineIsCrossover = line.isCrossing && !line.isDot;
+            if (tcIsCrossover && lineIsCrossover) {
+              score = 380;
+            } else if (!tcIsCrossover && line.isDot) {
+              score = 350;
+            } else {
+              score = 300;
+            }
+            if (tcKm && lineKm && lineKm.includes(tcKm[1].toLowerCase())) {
+              score += 30;
+            }
+          }
+        }
+      }
+    } else {
+      const lt = lineTitle.replace(/\s+/g, ' ');
+      const lc = lineCode.replace(/\s+/g, ' ');
+      if (lc && cleanTc.includes(lc)) {
+        score = 250;
+      } else if (lt && cleanTc.includes(lt)) {
+        score = 220;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestLine = line;
+    }
+  }
+
+  return bestLine;
+};
+
 export const matchLineLogs = (lineOrCode, logs = []) => {
   if (!lineOrCode || !logs || !Array.isArray(logs) || logs.length === 0) return [];
-  const lineObj = typeof lineOrCode === 'object' ? lineOrCode : null;
-  const lineCode = (typeof lineOrCode === 'string' ? lineOrCode : (lineObj?.code || '')).trim();
-  const lineTitle = (lineObj?.title || '').trim();
-  const lineId = (lineObj?.id || '').trim();
-  const lineCat = (lineObj?.category || '').toUpperCase();
-  const combinedLine = `${lineTitle} ${lineCode} ${lineId}`.toLowerCase();
+  const lineObj = typeof lineOrCode === 'object'
+    ? lineOrCode
+    : ALL_TRACK_LINES.find((l) => l.code === lineOrCode || l.id === lineOrCode || l.title === lineOrCode);
+  if (!lineObj) return [];
 
-  const isSwitchLine = lineCat.includes('DISCONNECTING SWITCH') || lineCat.includes('(DS)') || lineId.startsWith('ds_');
-  const isInsulatorLine = lineCat.includes('SECTION INSULATOR') || lineCat.includes('(FRP)') || lineId.startsWith('frp_');
-  const isAirJointLine = lineCat.includes('AIR JOINT') || lineCat.includes('(AJ)') || lineId.startsWith('aj_') || lineId.startsWith('overlap_aj_');
-  const isAirSectionLine = lineCat.includes('AIR SECTION') || lineCat.includes('(AS)') || lineId.startsWith('as_') || lineId.startsWith('overlap_as_');
-  const isTurnoutLine = lineCat.includes('WESEL') || lineId.startsWith('wesel_') || lineId.startsWith('titik_wesel_');
-  const isAuxiliaryDevice = isSwitchLine || isInsulatorLine || isAirJointLine || isAirSectionLine || isTurnoutLine;
-
+  // A log matches this line IF AND ONLY IF this line is the designated owner for that log
   return logs.filter((log) => {
     if (!log) return false;
-    const tc = (log.targetCode || '').trim();
-    if (!tc) return false;
-
-    // 1. Direct ID match (highest priority)
-    if (log.targetId && lineId && log.targetId.toLowerCase() === lineId.toLowerCase()) {
-      return true;
-    }
-
-    const normTc = tc.toLowerCase();
-    const normLineCode = lineCode.toLowerCase();
-    const normLineTitle = lineTitle.toLowerCase();
-    const normLineId = lineId.toLowerCase();
-
-    const cleanTc = normTc.replace(/\s+/g, ' ');
-    const cleanLineCode = normLineCode.replace(/\s+/g, ' ');
-    const cleanLineTitle = normLineTitle.replace(/\s+/g, ' ');
-    const cleanLineId = normLineId.replace(/\s+/g, ' ');
-
-    // 2. Direct exact string match (case-insensitive & space-normalized)
-    if (
-      (cleanLineCode && cleanTc === cleanLineCode) ||
-      (cleanLineTitle && cleanTc === cleanLineTitle) ||
-      (cleanLineId && cleanTc === cleanLineId)
-    ) {
-      return true;
-    }
-
-    // 2b. Exact Alphanumeric Match (immune to punctuation/bracket differences)
-    const alphaTc = normTc.replace(/[^a-z0-9]/g, '');
-    const alphaLineTitle = normLineTitle.replace(/[^a-z0-9]/g, '');
-    const alphaLineCode = normLineCode.replace(/[^a-z0-9]/g, '');
-    const alphaLineId = normLineId.replace(/[^a-z0-9]/g, '');
-
-    if (alphaTc && (alphaTc === alphaLineTitle || alphaTc === alphaLineCode || alphaTc === alphaLineId)) {
-      return true;
-    }
-
-    // 3. Legacy compatibility mappings (prevent multi-track flare-up from historical generic logs)
-    if (normTc === 'naspan 9 empl cuk') {
-      return lineId === 'cuk_jalur_1_empl';
-    }
-    if (normTc === 'st. bekasi') {
-      return lineId === 'bks_jalur_1_platform';
-    }
-
-    // 4. Auxiliary Device Guard (DS, FRP, AJ, AS, Wesel)
-    const logIsTrack = /^(naspan|jalur|petak|st\.|stasiun)/i.test(tc);
-    if (logIsTrack && isAuxiliaryDevice) {
-      return false;
-    }
-
-    if (isSwitchLine) {
-      const dsMatch = lineCode.match(/DS\s*(\d+[A-Z]?)/i) || lineId.match(/ds_?(\d+[A-Z]?)/i);
-      if (dsMatch) {
-        const num = dsMatch[1];
-        const regex = new RegExp(`(^|\\b)DS\\s*-?\\s*${num}\\b`, 'i');
-        return regex.test(tc);
-      }
-      return false;
-    }
-
-    if (isInsulatorLine) {
-      const frpMatch = lineCode.match(/FRP[^\s)]*/i) || lineId.match(/frp[^\s)]*/i);
-      if (frpMatch) {
-        return normTc.includes(frpMatch[0].toLowerCase());
-      }
-      return false;
-    }
-
-    if (isTurnoutLine) {
-      const wMatch = lineCode.match(/W\d{2}[A-Z0-9]*/i) || lineId.match(/w\d{2}[a-z0-9]*/i);
-      if (wMatch) {
-        const wCode = wMatch[0].toLowerCase();
-        const regex = new RegExp(`(^|\\b|wesel\\s*)${wCode}\\b`, 'i');
-        if (regex.test(normTc)) {
-          if (normTc.includes('cakung') && !combinedLine.includes('cakung') && !lineId.includes('cuk')) return false;
-          if (normTc.includes('bekasi') && !combinedLine.includes('bekasi') && !lineId.includes('bks') && !lineId.includes('bkt')) return false;
-          if (normTc.includes('jatinegara') && !combinedLine.includes('jatinegara') && !lineId.includes('jng')) return false;
-          return true;
-        }
-      }
-      return false;
-    }
-
-    if (isAirJointLine || isAirSectionLine) {
-      const logKmMatch = tc.match(/KM\s*(\d+\+?\d*)/i);
-      const lineKmMatch = (lineObj?.km || lineTitle).match(/KM\s*(\d+\+?\d*)/i);
-      if (logKmMatch && lineKmMatch && logKmMatch[1] !== lineKmMatch[1]) {
-        return false;
-      }
-    }
-
-    // 5. Strict Track Number Guard (Jalur 1 vs Jalur 2 vs Jalur 3 vs Jalur 4 vs Jalur 8 etc.)
-    const logJalurMatch = tc.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
-    const lineJalurMatch = `${lineTitle} ${lineCode}`.match(/\b(?:jalur|jl\.?)\s*(\d+)\b/i);
-    if (logJalurMatch && lineJalurMatch && logJalurMatch[1] !== lineJalurMatch[1]) {
-      return false;
-    }
-
-    // 6. Strict Direction Guard (HI/Hilir vs HU/Hulu)
-    const logIsHi = /\b(hi|hilir)\b/i.test(tc);
-    const logIsHu = /\b(hu|hulu)\b/i.test(tc);
-    const lineIsHi = /\b(hi|hilir)\b/i.test(`${lineTitle} ${lineCode}`) || lineId.endsWith('_hi');
-    const lineIsHu = /\b(hu|hulu)\b/i.test(`${lineTitle} ${lineCode}`) || lineId.endsWith('_hu');
-    if (logIsHi && lineIsHu && !lineIsHi) return false;
-    if (logIsHu && lineIsHi && !lineIsHu) return false;
-
-    // 7. Strict Station Guard (Cakung, Bekasi, Jatinegara, etc.)
-    const stations = ['cakung', 'bekasi', 'jatinegara', 'kranji', 'klender baru', 'buaran', 'pondok jati', 'klender'];
-    for (const st of stations) {
-      if (normTc.includes(st) && !combinedLine.includes(st)) {
-        return false;
-      }
-    }
-
-    // 8. Specific Peron vs Emplasemen / Stabling Guard
-    if (normTc.includes('peron') && combinedLine.includes('emplasemen') && !combinedLine.includes('peron')) {
-      return false;
-    }
-    if (normTc.includes('emplasemen') && combinedLine.includes('peron') && !combinedLine.includes('emplasemen')) {
-      return false;
-    }
-    if (normTc.includes('stabling') && !combinedLine.includes('stabling') && !combinedLine.includes('langsir')) {
-      return false;
-    }
-
-    // 10. Intelligent Station + Jalur Matching for natural user inputs
-    // e.g. "ST. BEKASI (Jalur 1)" or "Jalur 1 St. Bekasi" matching "ST. BEKASI (Jalur 1 Peron Utama Hulu)"
-    if (logJalurMatch && lineJalurMatch && logJalurMatch[1] === lineJalurMatch[1]) {
-      for (const st of stations) {
-        if (normTc.includes(st) && combinedLine.includes(st)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    const best = findBestLineForLog(log, ALL_TRACK_LINES);
+    return best && best.id === lineObj.id;
   });
 };
 
@@ -5413,20 +5423,34 @@ export const getLineCenter = (line) => {
 
 // Pre-calculate all lines that have active maintenance work logs
 export const computeLinesWithLogs = (logs = []) => {
-  const list = [];
-  ALL_TRACK_LINES.forEach((line) => {
-    const lineLogs = matchLineLogs(line, logs);
-    if (lineLogs.length > 0) {
-      const center = getLineCenter(line);
-      if (center) {
-        list.push({
-          line,
-          logs: lineLogs,
-          center,
-        });
+  if (!logs || !Array.isArray(logs) || logs.length === 0) return [];
+
+  // Group each log strictly to its SINGLE BEST matching line (Prevents any multi-radar duplicates)
+  const lineLogsMap = new Map();
+
+  logs.forEach((log) => {
+    if (!log) return;
+    const bestLine = findBestLineForLog(log, ALL_TRACK_LINES);
+    if (bestLine) {
+      if (!lineLogsMap.has(bestLine.id)) {
+        lineLogsMap.set(bestLine.id, { line: bestLine, logs: [] });
       }
+      lineLogsMap.get(bestLine.id).logs.push(log);
     }
   });
+
+  const list = [];
+  lineLogsMap.forEach(({ line, logs: lineLogs }) => {
+    const center = getLineCenter(line);
+    if (center) {
+      list.push({
+        line,
+        logs: lineLogs,
+        center,
+      });
+    }
+  });
+
   return list;
 };
 
