@@ -24,25 +24,33 @@ if (process.env.FRONTEND_URL) {
   });
 }
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Izinkan request tanpa origin (seperti curl, mobile apps, Postman)
-      if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        process.env.NODE_ENV !== 'production'
-      ) {
-        return callback(null, true);
-      }
-      return callback(null, true); // Permissive agar preview deploy Vercel tidak terblokir
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Izinkan request tanpa origin (seperti curl, mobile apps, Postman)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      process.env.NODE_ENV !== 'production'
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Permissive agar preview deploy Vercel tidak terblokir
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight OPTIONS
 
 app.use(express.json());
+
+// Redirect root to /api
+app.get('/', (req, res) => {
+  res.redirect('/api');
+});
 
 // Health Check Endpoint untuk Render / Railway / Uptime monitoring
 app.get('/api/health', (req, res) => {

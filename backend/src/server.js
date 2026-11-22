@@ -11,15 +11,11 @@ async function checkAndAutoSeed() {
     const stationCount = await prisma.station.count();
     if (stationCount === 0) {
       console.log('🌱 Database kosong terdeteksi. Memulai auto-seed data master UPT Resor LAA 1.9...');
-      const { spawn } = require('child_process');
-      const seedProcess = spawn('node', ['prisma/seed.js'], { stdio: 'inherit' });
-      seedProcess.on('close', (code) => {
-        if (code === 0) {
-          console.log('✅ Auto-seed data master selesai dengan sukses!');
-        } else {
-          console.warn(`⚠️ Auto-seed keluar dengan kode ${code}`);
-        }
-      });
+      const { seedDatabase } = require('../prisma/seed');
+      if (typeof seedDatabase === 'function') {
+        await seedDatabase();
+        console.log('✅ Auto-seed data master selesai dengan sukses!');
+      }
     } else {
       console.log(`📦 Database siap: ${stationCount} stasiun terdata.`);
     }
