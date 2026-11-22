@@ -1,6 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const app = require('./app');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./db');
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';

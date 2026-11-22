@@ -1,20 +1,13 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const app = require('../src/app');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../src/db');
 
-let prisma;
 let seedPromise = null;
-
-function getPrisma() {
-  if (!prisma) {
-    prisma = new PrismaClient();
-  }
-  return prisma;
-}
 
 async function checkAndAutoSeed() {
   try {
-    const client = getPrisma();
-    const stationCount = await client.station.count();
+    const stationCount = await prisma.station.count();
     if (stationCount === 0) {
       console.log('🌱 [Vercel Serverless] Database kosong terdeteksi. Memulai auto-seed data master UPT Resor LAA 1.9...');
       const { seedDatabase } = require('../prisma/seed');
