@@ -5683,6 +5683,8 @@ export default function SchematicViewer({
 
   useEffect(() => {
     checkStationScroll();
+    window.addEventListener('resize', checkStationScroll);
+    return () => window.removeEventListener('resize', checkStationScroll);
   }, []);
 
   const handleStationMouseDown = (e) => {
@@ -6310,7 +6312,7 @@ export default function SchematicViewer({
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`w-full flex-1 min-h-0 overflow-hidden bg-slate-100/70 mobile-cad-canvas cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-full sm:min-h-[480px] sm:h-[calc(100vh-215px)] sm:max-h-[860px]'
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'flex-1 min-h-0 sm:min-h-[480px] sm:h-[calc(100vh-215px)] sm:max-h-[860px]'
         }`}
       >
         {/* Floating Quick Hint (Desktop vs. Mobile) */}
@@ -6319,13 +6321,13 @@ export default function SchematicViewer({
           <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
         </div>
 
-        <div className="sm:hidden absolute bottom-14 left-2.5 z-20 pointer-events-none bg-slate-900/75 text-white px-2 py-0.5 rounded-full text-[9px] font-medium backdrop-blur-xs flex items-center gap-1 shadow-sm">
+        <div className="sm:hidden absolute bottom-[68px] left-2.5 z-20 pointer-events-none bg-slate-900/75 text-white px-2 py-0.5 rounded-full text-[9px] font-medium backdrop-blur-xs flex items-center gap-1 shadow-sm">
           <Crosshair className="w-2.5 h-2.5 text-blue-300 shrink-0" />
           <span>Geser 1 jari • Cubit zoom</span>
         </div>
 
-        {/* Mobile Floating Zoom Controls (Google Maps / Figma Mobile Capsule) */}
-        <div className="md:hidden absolute right-2.5 bottom-14 z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
+        {/* Mobile Floating Zoom Controls (Google Maps / Figma Mobile Capsule - Positioned with safe gap above station bar) */}
+        <div className="md:hidden absolute right-2.5 bottom-[68px] z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
           <button
             onClick={handleZoomIn}
             disabled={zoom >= MAX_ZOOM}
@@ -6364,7 +6366,7 @@ export default function SchematicViewer({
 
         {/* Mobile Quick Station Jump Navigation Bar (Horizontal Chip Bar with Free Smooth Swipe & Drag) */}
         <div
-          className="md:hidden absolute bottom-2 inset-x-2 z-25 flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md p-1 pointer-events-auto"
+          className="md:hidden absolute bottom-2.5 sm:bottom-3 inset-x-2.5 z-25 flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md p-1 pointer-events-auto"
           onTouchStart={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
