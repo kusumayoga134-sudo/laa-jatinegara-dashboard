@@ -932,36 +932,36 @@ export default function WorkHistoryPanel({
       )}
 
       {/* ========================================================
-          ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN (ELEGAN & MODERN)
+          ADMIN MODAL FORM: INPUT / EDIT RIWAYAT PEKERJAAN (KOMPAK & MODERN HP)
           ======================================================== */}
       {isFormOpen && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-md animate-in fade-in duration-200 select-none">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-[440px] sm:max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[88vh]">
             
             {/* Top Color Accent Ribbon */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 via-emerald-500 to-amber-500" />
+            <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 via-emerald-500 to-amber-500" />
 
             {/* Form Header */}
-            <div className="p-4 sm:p-5 flex items-start justify-between border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
-              <div className="flex items-center space-x-3.5">
-                <div className={`p-2.5 rounded-2xl text-white shadow-md ${
+            <div className="px-3.5 py-2.5 sm:px-5 sm:py-3.5 flex items-center justify-between border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white shrink-0">
+              <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 pr-2">
+                <div className={`p-1.5 sm:p-2 rounded-xl text-white shadow-xs shrink-0 ${
                   editingLogId 
                     ? 'bg-gradient-to-br from-blue-600 to-indigo-700' 
                     : 'bg-gradient-to-br from-emerald-600 to-teal-700'
                 }`}>
-                  {editingLogId ? <Edit3 className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
+                  {editingLogId ? <Edit3 className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <PlusCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
                 </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                <div className="min-w-0">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
                       UPT RESOR LAA 1.9
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    <span className="text-[9.5px] text-slate-400 font-bold uppercase tracking-wider">
                       • MODE ADMIN
                     </span>
                   </div>
-                  <h3 className="text-base font-black text-slate-900 mt-0.5">
-                    {editingLogId ? 'Edit Catatan Riwayat Pekerjaan' : 'Catat Riwayat Pekerjaan Baru'}
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 mt-0.5 truncate">
+                    {editingLogId ? 'Edit Catatan Pekerjaan' : 'Catat Pekerjaan Baru'}
                   </h3>
                 </div>
               </div>
@@ -969,24 +969,24 @@ export default function WorkHistoryPanel({
               <button
                 type="button"
                 onClick={handleCloseForm}
-                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer shrink-0"
                 title="Tutup (Esc)"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Form Fields */}
-            <form onSubmit={handleFormSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+            <form onSubmit={handleFormSubmit} className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 overflow-y-auto flex-1 scrollbar-thin">
               
               {/* Target Seksi / Line */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Train className="w-3.5 h-3.5 text-blue-600" />
-                    Target Line / Seksi / Naspan / Wesel / DS / FRP:
+                    <Train className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    Lokasi / Seksi Target:
                   </span>
-                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
                 <div ref={suggestWrapperRef} className="relative">
                   <div className="relative">
@@ -1000,15 +1000,15 @@ export default function WorkHistoryPanel({
                         setSuggestSearchQuery(e.target.value);
                         setIsSuggestOpen(true);
                       }}
-                      placeholder="Ketik atau pilih line, naspan, wesel, DS, FRP..."
-                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-16"
+                      placeholder="Ketik / pilih seksi atau simbol..."
+                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-14"
                     />
 
                     {/* Right Action Icons: Live Color Dot & Toggle Chevron */}
-                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center space-x-1.5">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
                       {formData.targetCode && (
                         <span
-                          className="w-3.5 h-3.5 rounded-full shadow-xs border border-white shrink-0"
+                          className="w-3 h-3 rounded-full shadow-2xs border border-white shrink-0"
                           style={{ backgroundColor: getLineColorInfo(formData.targetCode, formData.description, formData.targetId).color }}
                           title={getLineColorInfo(formData.targetCode, formData.description, formData.targetId).label}
                         />
@@ -1031,10 +1031,10 @@ export default function WorkHistoryPanel({
                   {isSuggestOpen && (
                     <div
                       data-suggest-dropdown="true"
-                      className="absolute left-0 right-0 top-full mt-1.5 z-70 bg-white/98 border border-slate-200 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+                      className="absolute left-0 right-0 top-full mt-1 z-70 bg-white/98 border border-slate-200 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
                     >
                       {/* Category Filter Tabs */}
-                      <div className="bg-slate-50/90 border-b border-slate-200/90 p-1.5 flex items-center space-x-1 overflow-x-auto text-[10.5px] font-bold scrollbar-none">
+                      <div className="bg-slate-50/90 border-b border-slate-200/90 p-1 flex items-center space-x-1 overflow-x-auto text-[10px] font-bold scrollbar-none">
                         {[
                           { id: 'ALL', label: `Semua (${ALL_MAP_LOCATIONS.length})` },
                           { id: 'JALUR', label: 'Jalur / Stasiun' },
@@ -1056,7 +1056,7 @@ export default function WorkHistoryPanel({
                               e.stopPropagation();
                               setSuggestCategory(tab.id);
                             }}
-                            className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer ${
+                            className={`px-2 py-0.5 rounded-lg transition whitespace-nowrap cursor-pointer ${
                               suggestCategory === tab.id
                                 ? 'bg-blue-600 text-white shadow-2xs font-extrabold'
                                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
@@ -1068,7 +1068,7 @@ export default function WorkHistoryPanel({
                       </div>
 
                       {/* Search Filter Header */}
-                      <div className="px-3 py-1.5 bg-slate-100/70 border-b border-slate-200/60 flex items-center justify-between text-[11px]">
+                      <div className="px-2.5 py-1 bg-slate-100/70 border-b border-slate-200/60 flex items-center justify-between text-[10.5px]">
                         <div className="flex items-center space-x-1.5 text-slate-500 font-semibold flex-1">
                           <Search className="w-3 h-3 text-slate-400 shrink-0" />
                           <input
@@ -1076,7 +1076,7 @@ export default function WorkHistoryPanel({
                             value={suggestSearchQuery}
                             onChange={(e) => setSuggestSearchQuery(e.target.value)}
                             placeholder="Cari jalur, stasiun, seksi, wesel..."
-                            className="w-full bg-transparent text-slate-800 text-base sm:text-[11px] font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
+                            className="w-full bg-transparent text-slate-800 text-xs font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                           />
                         </div>
                         {suggestSearchQuery && (
@@ -1087,7 +1087,7 @@ export default function WorkHistoryPanel({
                               e.stopPropagation();
                               setSuggestSearchQuery('');
                             }}
-                            className="text-[10px] text-slate-400 hover:text-slate-700 px-1 py-0.5 rounded bg-slate-200/80 font-bold ml-2 shrink-0 cursor-pointer"
+                            className="text-[9.5px] text-slate-400 hover:text-slate-700 px-1 py-0.2 rounded bg-slate-200/80 font-bold ml-1.5 shrink-0 cursor-pointer"
                           >
                             Reset
                           </button>
@@ -1095,10 +1095,10 @@ export default function WorkHistoryPanel({
                       </div>
 
                       {/* Suggestion Items List */}
-                      <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 p-1">
+                      <div className="max-h-48 sm:max-h-56 overflow-y-auto divide-y divide-slate-100 p-0.5">
                         {filteredSuggestions.length === 0 ? (
-                          <div className="p-4 text-center text-xs text-slate-400 italic">
-                            Tidak ada lokasi terdaftar yang cocok dengan pencarian. Anda dapat tetap mengetik lokasi custom.
+                          <div className="p-3 text-center text-xs text-slate-400 italic">
+                            Tidak ada lokasi terdaftar yang cocok. Anda dapat tetap mengetik lokasi custom.
                           </div>
                         ) : (
                           filteredSuggestions.map((item) => (
@@ -1124,24 +1124,24 @@ export default function WorkHistoryPanel({
                                 }));
                                 setIsSuggestOpen(false);
                               }}
-                              className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50/80 transition flex items-center justify-between gap-2.5 group cursor-pointer"
+                              className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-blue-50/80 transition flex items-center justify-between gap-2 group cursor-pointer"
                             >
-                              <div className="flex items-center space-x-2.5 min-w-0">
+                              <div className="flex items-center space-x-2 min-w-0">
                                 <span
-                                  className="w-3 h-3 rounded-full shrink-0 border border-slate-300 shadow-2xs group-hover:scale-110 transition-transform"
+                                  className="w-2.5 h-2.5 rounded-full shrink-0 border border-slate-300 shadow-2xs group-hover:scale-110 transition-transform"
                                   style={{ backgroundColor: item.color }}
                                 />
                                 <div className="min-w-0">
                                   <div className="text-xs font-bold text-slate-800 group-hover:text-blue-700 truncate leading-snug">
                                     {item.title}
                                   </div>
-                                  <div className="text-[10.5px] font-mono text-slate-400 group-hover:text-slate-600 truncate">
+                                  <div className="text-[10px] font-mono text-slate-400 group-hover:text-slate-600 truncate">
                                     {item.km}
                                   </div>
                                 </div>
                               </div>
 
-                              <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80 uppercase tracking-wider shrink-0">
+                              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200/80 uppercase tracking-wider shrink-0">
                                 {item.category.replace(/ST\. JATINEGARA.*|PETAK /g, '').slice(0, 16)}
                               </span>
                             </button>
@@ -1150,94 +1150,94 @@ export default function WorkHistoryPanel({
                       </div>
 
                       {/* Footer Info */}
-                      <div className="bg-slate-50 px-3 py-1.5 border-t border-slate-200/80 flex items-center justify-between text-[10.5px] text-slate-400 font-medium">
-                        <span>{filteredSuggestions.length} lokasi terdeteksi</span>
-                        <span className="italic">Klik untuk memilih langsung</span>
+                      <div className="bg-slate-50 px-2.5 py-1 border-t border-slate-200/80 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                        <span>{filteredSuggestions.length} lokasi</span>
+                        <span className="italic">Klik untuk memilih</span>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Jenis Pekerjaan (Custom Text Input - Wajib Diisi) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              {/* Jenis Tindakan / Pekerjaan */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Wrench className="w-3.5 h-3.5 text-indigo-600" />
+                    <Wrench className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                     Jenis Tindakan / Pekerjaan:
                   </span>
-                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.actionType}
                   onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-                  placeholder="Ketik jenis tindakan / pekerjaan (contoh: PENGUKURAN KAWAT KONTAK)..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="Contoh: Pengukuran Kawat Kontak..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
-              {/* Pelaksana / Teknisi (Custom Text Input - Wajib Diisi) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              {/* Pelaksana / Teknisi */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <HardHat className="w-3.5 h-3.5 text-amber-500" />
-                    Pelaksana / Teknisi Bertugas:
+                    <HardHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    Pelaksana / Teknisi:
                   </span>
-                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.technician}
                   onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
-                  placeholder="Ketik nama pelaksana / teknisi regu..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="Ketik nama pelaksana / teknisi..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
 
-              {/* Tanggal & Waktu Pelaksanaan */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-600" />
-                  Waktu Pelaksanaan Pekerjaan (WIB):
+              {/* Waktu Pelaksanaan */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  Waktu Pelaksanaan (WIB):
                 </label>
                 <input
                   type="datetime-local"
                   required
                   value={formData.timestamp}
                   onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-medium px-4 py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-800"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-medium px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-800"
                 />
               </div>
 
               {/* Uraian Pekerjaan & Nilai Pengukuran */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <ClipboardList className="w-3.5 h-3.5 text-emerald-600" />
-                    Uraian Hasil Pekerjaan & Nilai Pengukuran:
+                    <ClipboardList className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    Uraian Hasil & Nilai Ukur:
                   </span>
-                  <span className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wider">Wajib Diisi</span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Jelaskan detail tindakan teknis, nilai ukur (mm/volt/ohm), kondisi komponen, serta window kerja malam..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400"
+                  placeholder="Jelaskan detail tindakan, nilai ukur (mm/volt/ohm), kondisi komponen..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400 resize-y"
                 />
               </div>
 
-              {/* Status Pekerjaan (Modern Elegant Pills) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              {/* Status Pekerjaan */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   Status Pekerjaan:
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {[
                     { id: 'COMPLETED', label: 'SELESAI', color: 'border-emerald-500 text-emerald-800 bg-emerald-50' },
                     { id: 'IN_PROGRESS', label: 'PROSES', color: 'border-amber-500 text-amber-800 bg-amber-50' },
@@ -1247,9 +1247,9 @@ export default function WorkHistoryPanel({
                       key={st.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, status: st.id })}
-                      className={`py-2 px-2 text-center rounded-xl text-xs font-black transition cursor-pointer border ${
+                      className={`py-1.5 px-2 text-center rounded-xl text-xs font-extrabold transition cursor-pointer border ${
                         formData.status === st.id
-                          ? `${st.color} shadow-xs ring-2 ring-slate-400/20`
+                          ? `${st.color} shadow-2xs ring-1 ring-slate-400/20`
                           : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -1260,18 +1260,18 @@ export default function WorkHistoryPanel({
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center space-x-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center space-x-2 pt-2 sm:pt-2.5 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={handleCloseForm}
-                  className="w-1/3 py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
+                  className="w-1/3 py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`w-2/3 py-2.5 px-3 rounded-xl text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50 ${
+                  className={`w-2/3 py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm active:scale-98 transition cursor-pointer disabled:opacity-50 ${
                     editingLogId
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
                       : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
@@ -1279,12 +1279,12 @@ export default function WorkHistoryPanel({
                 >
                   {submitting ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       <span>Menyimpan...</span>
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" />
+                      <Save className="w-3.5 h-3.5" />
                       <span>{editingLogId ? 'Simpan Perubahan' : 'Catat Pekerjaan Baru'}</span>
                     </>
                   )}
