@@ -159,7 +159,7 @@ export default function App() {
   }, [isExportPdfOpen, logs]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="h-[100dvh] md:h-auto md:min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white overflow-hidden md:overflow-visible">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -199,7 +199,7 @@ export default function App() {
       />
 
       {/* Main AutoCAD Map Workspace (White Mode, Responsive Fit, Zero Side-Clipping) */}
-      <main className="flex-1 max-w-[1720px] w-full mx-auto px-1.5 py-1.5 sm:px-6 sm:py-4">
+      <main className="flex-1 min-h-0 max-w-[1720px] w-full mx-auto p-0 sm:px-6 sm:py-4 flex flex-col overflow-hidden md:overflow-visible">
         <SchematicViewer
           logs={logs}
           selectedLocation={selectedLocation}
@@ -248,15 +248,14 @@ export default function App() {
         linesWithLogs={exportLinesWithLogs}
       />
 
-      {/* Minimalist White Footer */}
-      <footer className="bg-white border-t border-slate-200 py-1.5 px-2.5 sm:py-3.5 sm:px-6 text-[9.5px] sm:text-xs text-slate-500 mt-auto shrink-0 select-none">
-        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-0.5 sm:gap-1.5 text-center sm:text-left">
+      {/* Minimalist White Footer (Disembunyikan di HP agar 100% full-screen pas tanpa scroll) */}
+      <footer className="hidden md:block bg-white border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 mt-auto shrink-0 select-none">
+        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
           <div>
-            <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — <span className="hidden sm:inline">Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA</span><span className="sm:hidden">Sistem Monitoring LAA</span>
+            <strong className="text-slate-700 font-bold">UPT RESOR LAA 1.9 JATINEGARA</strong> — <span>Sistem Monitoring Riwayat Pekerjaan Lintas Jaringan LAA</span>
           </div>
           <div>
-            <span className="hidden sm:inline">PT Kereta Api Indonesia (Persero) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}</span>
-            <span className="sm:hidden">KAI & Danantara © {new Date().getFullYear()}</span>
+            <span>PT Kereta Api Indonesia (Persero) & Danantara Indonesia Sovereign Fund © {new Date().getFullYear()}</span>
           </div>
         </div>
       </footer>

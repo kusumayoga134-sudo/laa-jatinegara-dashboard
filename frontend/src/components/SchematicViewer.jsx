@@ -5920,14 +5920,14 @@ export default function SchematicViewer({
   return (
     <div
       ref={viewerWrapperRef}
-      className={`bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg relative flex flex-col transition-all ${
+      className={`bg-white border-0 sm:border border-slate-200 rounded-none sm:rounded-3xl overflow-hidden shadow-none sm:shadow-lg relative flex flex-col flex-1 min-h-0 w-full transition-all ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full'
       }`}
     >
       {/* ========================================================
-          1. MOBILE TOOLBAR (< md) - ANTI-CLIPPING 3-COLUMN FULL-WIDTH GRID
+          1. MOBILE TOOLBAR (< md) - COMPACT 2-COLUMN FULL-WIDTH GRID
           ======================================================== */}
-      <div className="md:hidden bg-white/95 border-b border-slate-200 px-2 py-1.5 flex flex-col gap-1.5 z-20 backdrop-blur-md">
+      <div className="md:hidden bg-white/95 border-b border-slate-200 px-2 py-1.5 flex flex-col gap-1.5 z-20 backdrop-blur-md shrink-0">
         {/* Row 1: Strip Tipis Penanda Selebar Layar */}
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-1.5 text-[10px] text-slate-700 font-medium">
@@ -5951,25 +5951,25 @@ export default function SchematicViewer({
           )}
         </div>
 
-        {/* Row 2: Grid 3 Kolom Penuh (Anti Terpotong) */}
-        <div className="grid grid-cols-3 gap-1.5 w-full">
+        {/* Row 2: Grid 2 Kolom Penuh Seimbang (Total Kerja & Export PDF) */}
+        <div className="grid grid-cols-2 gap-2 w-full">
           {/* Kolom 1: Total Pekerjaan */}
           {onOpenAllLogs && (
             <button
               onClick={onOpenAllLogs}
-              className="bg-slate-50/90 hover:bg-orange-50/80 active:bg-orange-100 border border-slate-200/90 hover:border-orange-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
+              className="bg-slate-50/90 hover:bg-orange-50/80 active:bg-orange-100 border border-slate-200/90 hover:border-orange-300 rounded-xl px-2.5 py-1.5 flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
               title="Klik untuk membuka Rekapitulasi & Daftar Lengkap Seluruh Pekerjaan"
             >
-              <div className="w-6 h-6 rounded-lg bg-orange-100/90 text-orange-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <div className="w-6.5 h-6.5 rounded-lg bg-orange-100/90 text-orange-600 flex items-center justify-center shrink-0 shadow-2xs">
                 <ClipboardList className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
                   TOTAL
                 </div>
-                <div className="font-mono font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
+                <div className="font-mono font-black text-slate-900 text-[11px] flex items-center gap-1 mt-0.5 leading-none truncate">
                   <span className="text-orange-600">{totalLogsCount}</span>
-                  <span className="font-sans font-semibold text-[8.5px] text-slate-600">Kerja</span>
+                  <span className="font-sans font-semibold text-[9px] text-slate-600">Pekerjaan</span>
                 </div>
               </div>
             </button>
@@ -5979,44 +5979,23 @@ export default function SchematicViewer({
           {onOpenExportPdf && (
             <button
               onClick={onOpenExportPdf}
-              className="bg-slate-50/90 hover:bg-rose-50/80 active:bg-rose-100 border border-slate-200/90 hover:border-rose-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
+              className="bg-slate-50/90 hover:bg-rose-50/80 active:bg-rose-100 border border-slate-200/90 hover:border-rose-300 rounded-xl px-2.5 py-1.5 flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left"
               title="Buka Menu Export PDF & Cetak Peta Ultra HD"
             >
-              <div className="w-6 h-6 rounded-lg bg-rose-100/90 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <div className="w-6.5 h-6.5 rounded-lg bg-rose-100/90 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
                 <FileText className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
                   CETAK
                 </div>
-                <div className="font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
+                <div className="font-black text-slate-900 text-[11px] flex items-center gap-1 mt-0.5 leading-none truncate">
                   <span className="text-rose-600">Export</span>
-                  <span className="font-sans font-semibold text-[8.5px] text-slate-600">PDF</span>
+                  <span className="font-sans font-semibold text-[9px] text-slate-600">PDF</span>
                 </div>
               </div>
             </button>
           )}
-
-          {/* Kolom 3: Unduh Excel */}
-          <a
-            href="/MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
-            download="MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
-            className="bg-slate-50/90 hover:bg-emerald-50/80 active:bg-emerald-100 border border-slate-200/90 hover:border-emerald-300 rounded-xl px-1.5 py-1.5 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer group active:scale-95 text-left no-underline"
-            title="Unduh Master Data Seluruh Jalur & Peralatan dalam format Excel (.xlsx)"
-          >
-            <div className="w-6 h-6 rounded-lg bg-emerald-100/90 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[8px] font-extrabold text-slate-400 uppercase tracking-tight leading-none truncate">
-                DATA
-              </div>
-              <div className="font-black text-slate-900 text-[10.5px] flex items-center gap-0.5 mt-0.5 leading-none truncate">
-                <span className="text-emerald-600">Unduh</span>
-                <span className="font-sans font-semibold text-[8.5px] text-slate-600">Excel</span>
-              </div>
-            </div>
-          </a>
         </div>
       </div>
 
@@ -6101,27 +6080,6 @@ export default function SchematicViewer({
             </button>
           )}
 
-          {/* Unduh Master Data Excel Button */}
-          <a
-            href="/MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
-            download="MASTER_DATA_ALL_TRACK_LINES_UPT_1.9.xlsx"
-            className="h-10 bg-slate-50/90 hover:bg-emerald-50/60 border border-slate-200/90 hover:border-emerald-300 rounded-xl px-3 flex items-center space-x-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer group active:scale-98 shrink-0 text-left no-underline"
-            title="Unduh Master Data Seluruh Jalur & Peralatan dalam format Excel (.xlsx)"
-          >
-            <div className="w-7 h-7 rounded-lg bg-emerald-100/90 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-2xs">
-              <FileSpreadsheet className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-[9px] text-slate-500 group-hover:text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-0.5 leading-none">
-                <span>MASTER DATA</span>
-              </div>
-              <div className="font-black text-slate-900 text-xs flex items-center gap-1 mt-0.5 leading-none">
-                <span className="text-emerald-600">Unduh</span>
-                <span className="font-semibold text-slate-700 font-sans">Excel</span>
-              </div>
-            </div>
-          </a>
-
           {/* Zoom Controls */}
           <div className="h-10 flex items-center space-x-1 bg-slate-100 rounded-xl px-1.5 border border-slate-200 shadow-2xs shrink-0">
             <button
@@ -6189,8 +6147,8 @@ export default function SchematicViewer({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
-        className={`w-full overflow-hidden bg-slate-100/70 mobile-cad-canvas cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
-          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-[calc(100dvh-175px)] min-h-[380px] sm:min-h-[480px] sm:h-[calc(100vh-215px)] sm:max-h-[860px]'
+        className={`w-full flex-1 min-h-0 overflow-hidden bg-slate-100/70 mobile-cad-canvas cursor-grab active:cursor-grabbing relative select-none flex items-center justify-center touch-none ${
+          isFullscreen ? 'h-[calc(100vh-55px)]' : 'h-full sm:min-h-[480px] sm:h-[calc(100vh-215px)] sm:max-h-[860px]'
         }`}
       >
         {/* Floating Quick Hint (Desktop vs. Mobile) */}

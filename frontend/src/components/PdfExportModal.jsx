@@ -92,8 +92,8 @@ export default function PdfExportModal({
     });
   }, [linesWithLogs, customPositions, showCallouts]);
 
-  // Minimum & Maximum Preview Zoom (Up to 1500% for ultra-deep inspection & easy dragging)
-  const MIN_PREVIEW_ZOOM = 0.5;
+  // Minimum & Maximum Preview Zoom (Strictly clamped between 100% and 1500%)
+  const MIN_PREVIEW_ZOOM = 1.0;
   const MAX_PREVIEW_ZOOM = 15.0;
 
   const pinchRef = useRef({ distance: 0, initialZoom: 1 });
@@ -926,43 +926,43 @@ export default function PdfExportModal({
             )}
           </div>
 
-          {/* Action Buttons: Full suite cleanly available on mobile */}
-          <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
+          {/* Action Buttons: 3 Kotak Berukuran Sama (Cetak, PNG HD, Download PDF) */}
+          <div className="grid grid-cols-3 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:gap-2.5">
             <button
               onClick={handlePrintPdf}
               disabled={isExporting}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
+              className="h-9 w-full sm:w-34 flex items-center justify-center gap-1.5 px-2 sm:px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
               title="Cetak Langsung atau Simpan sebagai PDF via Browser Print"
             >
-              <Printer className="w-3.5 h-3.5 text-blue-400" />
-              <span>Cetak</span>
+              <Printer className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="truncate">Cetak</span>
             </button>
 
             <button
               onClick={handleDownloadPng}
               disabled={isExporting}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
+              className="h-9 w-full sm:w-34 flex items-center justify-center gap-1.5 px-2 sm:px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
               title="Download Gambar Ultra HD Resolusi Penuh (PNG 600 DPI)"
             >
-              <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>PNG HD</span>
+              <ImageIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <span className="truncate">PNG HD</span>
             </button>
 
             <button
               onClick={handleDownloadPdf}
               disabled={isExporting}
-              className="flex-1 sm:flex-none px-3.5 sm:px-5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-[11px] sm:text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-red-900/30 active:scale-95 shrink-0"
+              className="h-9 w-full sm:w-34 flex items-center justify-center gap-1.5 px-2 sm:px-3 rounded-xl bg-red-600 hover:bg-red-500 text-white border border-red-500 font-extrabold text-[11px] sm:text-xs transition cursor-pointer shadow-md shadow-red-900/30 active:scale-95"
               title="Download Dokumen PDF Standar CAD Ultra HD 600 DPI"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Proses...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                  <span className="truncate">Proses...</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download PDF</span>
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Download PDF</span>
                 </>
               )}
             </button>
