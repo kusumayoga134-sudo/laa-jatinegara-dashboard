@@ -5624,20 +5624,6 @@ export const computeLinesWithLogs = (logs = []) => {
   return list;
 };
 
-// =========================================================================
-// QUICK_STATIONS: Navigasi Cepat Stasiun pada Layar Mobile
-// Koordinat pusat stasiun pada kanvas native AutoCAD Model 2 (3275 x 1835 px)
-// =========================================================================
-const QUICK_STATIONS = [
-  { id: 'ALL', label: 'Semua', isAll: true },
-  { id: 'JNG', label: 'Jatinegara', x: 1100, y: 680 },
-  { id: 'KLD', label: 'Klender', x: 2200, y: 836 },
-  { id: 'BUA', label: 'Buaran', x: 2740, y: 836 },
-  { id: 'CUK', label: 'Cakung', x: 2575, y: 1300 },
-  { id: 'KRI', label: 'Kranji', x: 2065, y: 1318 },
-  { id: 'BKS', label: 'Bekasi', x: 1100, y: 1270 },
-];
-
 export default function SchematicViewer({
   logs = [],
   selectedLocation,
@@ -5652,9 +5638,7 @@ export default function SchematicViewer({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [activeStation, setActiveStation] = useState('ALL');
 
-  
   const [hoveredLine, setHoveredLine] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -5664,75 +5648,6 @@ export default function SchematicViewer({
   const pinchRef = useRef({ distance: 0, initialZoom: 1 });
   const touchStartPos = useRef({ x: 0, y: 0 });
   const hasMovedRef = useRef(false);
-
-  // Mobile Bottom Station Bar Smooth Scroll & Drag State
-  const stationScrollRef = useRef(null);
-  const isStationDraggingRef = useRef(false);
-  const stationStartXRef = useRef(0);
-  const stationScrollStartRef = useRef(0);
-  const hasStationMovedRef = useRef(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkStationScroll = () => {
-    const el = stationScrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  };
-
-  useEffect(() => {
-    checkStationScroll();
-    window.addEventListener('resize', checkStationScroll);
-    return () => window.removeEventListener('resize', checkStationScroll);
-  }, []);
-
-  const handleStationMouseDown = (e) => {
-    e.stopPropagation();
-    const el = stationScrollRef.current;
-    if (!el) return;
-    isStationDraggingRef.current = true;
-    hasStationMovedRef.current = false;
-    stationStartXRef.current = e.pageX - el.offsetLeft;
-    stationScrollStartRef.current = el.scrollLeft;
-  };
-
-  const handleStationMouseMove = (e) => {
-    e.stopPropagation();
-    if (!isStationDraggingRef.current) return;
-    const el = stationScrollRef.current;
-    if (!el) return;
-    e.preventDefault();
-    const x = e.pageX - el.offsetLeft;
-    const walk = (x - stationStartXRef.current) * 1.5;
-    if (Math.abs(walk) > 4) {
-      hasStationMovedRef.current = true;
-    }
-    el.scrollLeft = stationScrollStartRef.current - walk;
-    checkStationScroll();
-  };
-
-  const handleStationMouseUp = (e) => {
-    e.stopPropagation();
-    isStationDraggingRef.current = false;
-    checkStationScroll();
-  };
-
-  const handleStationWheel = (e) => {
-    e.stopPropagation();
-    const el = stationScrollRef.current;
-    if (el && e.deltaY) {
-      el.scrollLeft += e.deltaY;
-      checkStationScroll();
-    }
-  };
-
-  const scrollStation = (direction) => {
-    const el = stationScrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: direction === 'left' ? -120 : 120, behavior: 'smooth' });
-    setTimeout(checkStationScroll, 250);
-  };
 
   const [viewportBase, setViewportBase] = useState({ width: 1420, height: 796 });
   const [isMobile, setIsMobile] = useState(
@@ -5804,7 +5719,6 @@ export default function SchematicViewer({
       const next = Math.max(parseFloat((prev - step).toFixed(2)), MIN_ZOOM);
       if (next <= 1.0) {
         setPosition({ x: 0, y: 0 });
-        setActiveStation('ALL');
       }
       return next;
     });
@@ -5812,42 +5726,12 @@ export default function SchematicViewer({
   const handleResetZoom = () => {
     setZoom(1.0);
     setPosition({ x: 0, y: 0 });
-    setActiveStation('ALL');
-  };
-
-  // Navigasi Cepat Loncat ke Stasiun (Mobile Station Jump)
-  const handleQuickStationJump = (st) => {
-    setActiveStation(st.id);
-    if (st.isAll) {
-      setZoom(1.0);
-      setPosition({ x: 0, y: 0 });
-      return;
-    }
-    const targetZoom = isMobile ? 3.0 : 2.4;
-    setZoom(targetZoom);
-    if (isMobile) {
-      const effectiveScale = mobileFitScale * targetZoom;
-      const dx = st.x - 1637.5;
-      const dy = st.y - 917.5;
-      setPosition({
-        x: Math.round(-effectiveScale * dx),
-        y: Math.round(-effectiveScale * dy),
-      });
-    } else {
-      const dx = (st.x - 1637.5) * (viewportBase.width / 3275);
-      const dy = (st.y - 917.5) * (viewportBase.height / 1835);
-      setPosition({
-        x: Math.round(-targetZoom * dx),
-        y: Math.round(-targetZoom * dy),
-      });
-    }
   };
 
   // Drag handlers
   const handleMouseDown = (e) => {
     if (e.target.closest('button')) return;
     setIsDragging(true);
-    setActiveStation(null);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
@@ -5875,7 +5759,6 @@ export default function SchematicViewer({
 
     if (e.touches.length === 1) {
       setIsDragging(true);
-      setActiveStation(null);
       hasMovedRef.current = false;
       touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       setDragStart({
@@ -5921,7 +5804,6 @@ export default function SchematicViewer({
 
       if (roundedZoom <= 1.0) {
         setPosition({ x: 0, y: 0 });
-        setActiveStation('ALL');
       } else if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         const curMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -5971,7 +5853,6 @@ export default function SchematicViewer({
 
       if (nextZoom <= 1.0) {
         setPosition({ x: 0, y: 0 });
-        setActiveStation('ALL');
       } else if (nextZoom !== prevZoom) {
         const scaleRatio = nextZoom / prevZoom;
         setPosition((prevPos) => ({
@@ -6321,13 +6202,13 @@ export default function SchematicViewer({
           <span>Scroll mouse untuk Zoom • Tahan klik kiri untuk geser peta</span>
         </div>
 
-        <div className="sm:hidden absolute bottom-[68px] left-2.5 z-20 pointer-events-none bg-slate-900/75 text-white px-2 py-0.5 rounded-full text-[9px] font-medium backdrop-blur-xs flex items-center gap-1 shadow-sm">
-          <Crosshair className="w-2.5 h-2.5 text-blue-300 shrink-0" />
+        <div className="sm:hidden absolute bottom-3.5 left-3 z-20 pointer-events-none bg-slate-900/75 text-white px-2.5 py-1 rounded-full text-[9.5px] font-medium backdrop-blur-xs flex items-center gap-1.5 shadow-sm">
+          <Crosshair className="w-3 h-3 text-blue-300 shrink-0" />
           <span>Geser 1 jari • Cubit zoom</span>
         </div>
 
-        {/* Mobile Floating Zoom Controls (Google Maps / Figma Mobile Capsule - Positioned with safe gap above station bar) */}
-        <div className="md:hidden absolute right-2.5 bottom-[68px] z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
+        {/* Mobile Floating Zoom Controls (Google Maps / Figma Mobile Capsule) */}
+        <div className="md:hidden absolute right-3 bottom-3.5 z-30 flex flex-col bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-0.5 gap-0.5">
           <button
             onClick={handleZoomIn}
             disabled={zoom >= MAX_ZOOM}
@@ -6362,92 +6243,6 @@ export default function SchematicViewer({
           >
             <ZoomOut className="w-4 h-4" />
           </button>
-        </div>
-
-        {/* Mobile Quick Station Jump Navigation Bar (Horizontal Chip Bar with Free Smooth Swipe & Drag) */}
-        <div
-          className="md:hidden absolute bottom-2.5 sm:bottom-3 inset-x-2.5 z-25 flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md p-1 pointer-events-auto"
-          onTouchStart={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
-          onTouchEnd={(e) => e.stopPropagation()}
-          onTouchCancel={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-          onMouseMove={(e) => e.stopPropagation()}
-          onMouseUp={(e) => e.stopPropagation()}
-        >
-          {/* Left Label */}
-          <div className="flex items-center gap-1 text-[9px] font-extrabold text-slate-400 pl-1.5 pr-1 shrink-0 uppercase tracking-tight select-none">
-            <Train className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span>Stasiun:</span>
-          </div>
-
-          {/* Left Scroll Arrow Button */}
-          {canScrollLeft && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                scrollStation('left');
-              }}
-              className="w-5.5 h-6 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-blue-100 text-slate-600 shrink-0 mr-0.5 shadow-2xs transition active:scale-90 cursor-pointer"
-              title="Geser stasiun ke kiri"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {/* Scrollable Container with Native Touch Pan, Wheel, & Mouse Drag */}
-          <div
-            ref={stationScrollRef}
-            onScroll={checkStationScroll}
-            onWheel={handleStationWheel}
-            onMouseDown={handleStationMouseDown}
-            onMouseMove={handleStationMouseMove}
-            onMouseUp={handleStationMouseUp}
-            onMouseLeave={handleStationMouseUp}
-            style={{
-              touchAction: 'pan-x',
-              WebkitOverflowScrolling: 'touch',
-            }}
-            className="flex-1 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none px-1 py-0.5"
-          >
-            {QUICK_STATIONS.map((st) => (
-              <button
-                key={st.id}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (hasStationMovedRef.current) return;
-                  handleQuickStationJump(st);
-                  // Auto scroll chip into view
-                  e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                  setTimeout(checkStationScroll, 200);
-                }}
-                className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold transition-all cursor-pointer shrink-0 active:scale-95 ${
-                  activeStation === st.id
-                    ? 'bg-blue-600 text-white shadow-2xs font-black'
-                    : 'bg-slate-100/90 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                {st.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Right Scroll Arrow Button */}
-          {canScrollRight && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                scrollStation('right');
-              }}
-              className="w-5.5 h-6 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-blue-100 text-slate-600 shrink-0 ml-0.5 shadow-2xs transition active:scale-90 cursor-pointer"
-              title="Geser stasiun ke kanan"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
 
         {/* ========================================================
