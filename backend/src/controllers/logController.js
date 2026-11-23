@@ -31,7 +31,7 @@ exports.getAllLogs = async (req, res) => {
 
 exports.createLog = async (req, res) => {
   try {
-    const { targetType, targetCode, actionType, technician, description, status = 'COMPLETED', timestamp } = req.body;
+    const { targetType, targetCode, targetId, actionType, technician, description, status = 'COMPLETED', timestamp } = req.body;
 
     if (!targetCode || !actionType || !technician || !description) {
       return res.status(400).json({ success: false, message: 'Harap lengkapi semua field log' });
@@ -42,6 +42,7 @@ exports.createLog = async (req, res) => {
         timestamp: timestamp ? new Date(timestamp) : new Date(),
         targetType: targetType || 'LINE',
         targetCode,
+        targetId: targetId || null,
         actionType,
         technician,
         description,
@@ -59,7 +60,7 @@ exports.createLog = async (req, res) => {
 exports.updateLog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { targetType, targetCode, actionType, technician, description, status, timestamp } = req.body;
+    const { targetType, targetCode, targetId, actionType, technician, description, status, timestamp } = req.body;
 
     const existing = await prisma.maintenanceLog.findUnique({
       where: { id: parseInt(id) },
@@ -74,6 +75,7 @@ exports.updateLog = async (req, res) => {
       data: {
         ...(targetType && { targetType }),
         ...(targetCode && { targetCode }),
+        ...(targetId !== undefined && { targetId }),
         ...(actionType && { actionType }),
         ...(technician && { technician }),
         ...(description && { description }),
