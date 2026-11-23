@@ -5246,9 +5246,76 @@ export const findBestLineForLog = (log, allLines = ALL_TRACK_LINES) => {
   const alphaTc = cleanTc.replace(/[^a-z0-9]/g, '');
 
   // 1. Tier 1: Target ID exact match (Highest Priority)
+  // STRICT 1-TO-1 EXACT BINDING:
+  // If targetId is provided, match ONLY with the line that has this exact ID.
+  // DO NOT fall back to title if targetId is specified (prevents leaking across same-title segments).
   if (tid) {
     const byId = allLines.find((l) => (l.id || '').toLowerCase() === tid.toLowerCase());
-    if (byId) return byId;
+    return byId || null;
+  }
+
+  // 1b. Disambiguation for segments with duplicate titles when targetId is not specified (Legacy Data)
+  const desc = (log.description || '').toLowerCase();
+  const combText = `${cleanTc} ${desc}`;
+
+  // Kasus 1: ST. JATINEGARA (JALUR 3)
+  if (cleanTc === 'st. jatinegara (jalur 3)' || cleanTc === 'jalur 3 jng' || alphaTc === 'stjatinegarajalur3') {
+    if (combText.includes('1+049') || combText.includes('barat') || combText.includes('oranye') || combText.includes('cokelat') || combText.includes('rust')) {
+      const line = allLines.find((l) => l.id === 'jng_jalur_mid_rust');
+      if (line) return line;
+    }
+    if (combText.includes('12+384') || combText.includes('timur') || combText.includes('ext')) {
+      const line = allLines.find((l) => l.id === 'jng_jalur_3_ext');
+      if (line) return line;
+    }
+    // Default utama stasiun: Jalur 3 Kuning (Peron Stasiun Jatinegara KM 11+600 - KM 11+900)
+    const line = allLines.find((l) => l.id === 'jng_jalur_3');
+    if (line) return line;
+  }
+
+  // Kasus 2: ST. JATINEGARA (JALUR 4)
+  if (cleanTc === 'st. jatinegara (jalur 4)' || cleanTc === 'jalur 4 jng' || alphaTc === 'stjatinegarajalur4') {
+    if (combText.includes('12+089') || combText.includes('12+235') || combText.includes('w23c') || combText.includes('hijau') || combText.includes('green')) {
+      const line = allLines.find((l) => l.id === 'jng_jalur_mid_green');
+      if (line) return line;
+    }
+    // Default utama: Jalur 4 Oranye (KM 1+049 - KM 12+089)
+    const line = allLines.find((l) => l.id === 'jng_jalur_4');
+    if (line) return line;
+  }
+
+  // Kasus 3: ST. BEKASI (JALUR 7)
+  if (cleanTc === 'st. bekasi (jalur 7)' || cleanTc === 'jalur 7 bks' || alphaTc === 'stbekasijalur7') {
+    if (combText.includes('frp') || combText.includes('73')) {
+      const line = allLines.find((l) => l.id === 'wesel_frp_73_bks');
+      if (line) return line;
+    }
+    const line = allLines.find((l) => l.id === 'bks_jalur_simpan_1012');
+    if (line) return line;
+  }
+
+  // Kasus 4: BKS-BKT (JALUR HULU)
+  if (cleanTc === 'bks-bkt (jalur hulu)' || cleanTc === 'bks-bkt hu' || alphaTc === 'bksbktjalurhulu') {
+    if (combText.includes('merah') || combText.includes('red')) {
+      const line = allLines.find((l) => l.id === 'bks_timur_1228_red');
+      if (line) return line;
+    }
+    if (combText.includes('27+000') || combText.includes('timur')) {
+      const line = allLines.find((l) => l.id === 'bks_timur_1228_grn');
+      if (line) return line;
+    }
+    const line = allLines.find((l) => l.id === 'bks_jalur_1_end');
+    if (line) return line;
+  }
+
+  // Kasus 5: BKT-BKS (JALUR HILIR)
+  if (cleanTc === 'bkt-bks (jalur hilir)' || cleanTc === 'bkt-bks hi' || alphaTc === 'bktbksjalurhilir') {
+    if (combText.includes('east') || combText.includes('1277')) {
+      const line = allLines.find((l) => l.id === 'bks_timur_1277_red');
+      if (line) return line;
+    }
+    const line = allLines.find((l) => l.id === 'bks_jalur_2_west');
+    if (line) return line;
   }
 
   // 2. Tier 2: Exact Title Match (Highest Priority among text matches)
@@ -5400,11 +5467,17 @@ export const matchLineLogs = (lineOrCode, logs = []) => {
     : ALL_TRACK_LINES.find((l) => l.code === lineOrCode || l.id === lineOrCode || l.title === lineOrCode);
   if (!lineObj) return [];
 
+  const lineId = (lineObj.id || '').toLowerCase();
+
   // A log matches this line IF AND ONLY IF this line is the designated owner for that log
   return logs.filter((log) => {
     if (!log) return false;
+    const tid = (log.targetId || '').trim().toLowerCase();
+    if (tid) {
+      return tid === lineId;
+    }
     const best = findBestLineForLog(log, ALL_TRACK_LINES);
-    return best && best.id === lineObj.id;
+    return best && (best.id || '').toLowerCase() === lineId;
   });
 };
 

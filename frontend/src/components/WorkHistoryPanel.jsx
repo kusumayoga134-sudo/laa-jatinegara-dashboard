@@ -18,7 +18,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
-import { matchLineLogs } from './SchematicViewer';
+import { matchLineLogs, findBestLineForLog, ALL_TRACK_LINES } from './SchematicViewer';
 
 // ========================================================
 // COLOR RESOLVER: Pemetaan Warna Asli Garis AutoCAD DWG
@@ -57,16 +57,32 @@ export function getColorBadgeClass(hex) {
   return 'bg-slate-50 text-slate-800 border-slate-300';
 }
 
-export function getLineColorInfo(targetCode = '', description = '') {
+export function getLineColorInfo(targetCode = '', description = '', targetId = '') {
   const rawCode = (targetCode || '').trim();
   const rawDesc = (description || '').trim();
+  const rawId = (targetId || '').trim();
 
-  if (!rawCode && !rawDesc) {
+  if (!rawCode && !rawDesc && !rawId) {
     return {
       color: '#2563eb',
       label: 'Lintas LAA 1.9',
       badgeClass: 'bg-blue-50 text-blue-800 border-blue-300',
     };
+  }
+
+  // 0. Strict Target ID Match in Master ALL_MAP_LOCATIONS (Highest Priority)
+  if (rawId) {
+    const byId = ALL_MAP_LOCATIONS.find((loc) => loc && (loc.id || '').toLowerCase() === rawId.toLowerCase());
+    if (byId && byId.color) {
+      const colorName = getColorName(byId.color);
+      const displayTitle = byId.title || byId.code || rawCode;
+      const label = colorName ? `${displayTitle} (${colorName})` : displayTitle;
+      return {
+        color: byId.color,
+        label,
+        badgeClass: getColorBadgeClass(byId.color),
+      };
+    }
   }
 
   const normTc = rawCode.toLowerCase();
@@ -97,9 +113,12 @@ export function getLineColorInfo(targetCode = '', description = '') {
     });
   }
 
-  // 3. Match via Smart SchematicViewer matchLineLogs (single source of truth with map radar beacons)
-  if (!matched && typeof matchLineLogs === 'function') {
-    const dummyLog = { targetCode: rawCode, description: rawDesc };
+  // 3. Match via Smart SchematicViewer findBestLineForLog / matchLineLogs (single source of truth with map radar beacons)
+  if (!matched && typeof findBestLineForLog === 'function') {
+    const dummyLog = { targetCode: rawCode, description: rawDesc, targetId: rawId };
+    matched = findBestLineForLog(dummyLog, ALL_TRACK_LINES);
+  } else if (!matched && typeof matchLineLogs === 'function') {
+    const dummyLog = { targetCode: rawCode, description: rawDesc, targetId: rawId };
     matched = ALL_MAP_LOCATIONS.find((loc) => {
       try {
         const matches = matchLineLogs(loc, [dummyLog]);
@@ -338,26 +357,30 @@ export default function WorkHistoryPanel({
 
     // 2. Specific Location Mode: Synchronized 1-to-1 with map radar dots & popup card
     if (locationData) {
-      // First priority: use master matchLineLogs helper
-      const masterMatched = matchLineLogs(locationData, logs);
-      if (masterMatched && masterMatched.length > 0) {
-        return masterMatched;
-      }
-
-      // Robust fallback: match by title, code, id, or normalized string
-      const lCode = (locationData.code || '').trim().toLowerCase();
-      const lTitle = (locationData.title || '').trim().toLowerCase();
       const lId = (locationData.id || '').trim().toLowerCase();
+      const lCode = (locationData.code || '').trim().toLowerCase();
 
       return logs.filter((log) => {
-        if (!log || !log.targetCode) return false;
-        const tc = log.targetCode.trim().toLowerCase();
+        if (!log || (!log.targetCode && !log.targetId)) return false;
         const tid = (log.targetId || '').trim().toLowerCase();
 
-        if (lId && tid && lId === tid) return true;
-        if (lTitle && (tc === lTitle || tc.includes(lTitle) || lTitle.includes(tc))) return true;
-        if (lCode && (tc === lCode || tc.includes(lCode) || lCode.includes(tc))) return true;
-        if (lId && (tc === lId || tc.includes(lId) || lId.includes(tc))) return true;
+        // 1. Strict 1-to-1 Exact ID Binding (Highest Priority):
+        // If the log has targetId, it MUST match this element's ID exactly!
+        if (tid) {
+          return lId && tid === lId;
+        }
+
+        // 2. For legacy logs without targetId:
+        // Use findBestLineForLog to find the exact intended segment
+        const best = findBestLineForLog(log, ALL_TRACK_LINES);
+        if (best && lId) {
+          return (best.id || '').toLowerCase() === lId;
+        }
+
+        // 3. Exact code or id match only (NO fuzzy title includes!)
+        const tc = (log.targetCode || '').trim().toLowerCase();
+        if (lId && tc === lId) return true;
+        if (lCode && tc === lCode) return true;
 
         return false;
       });
@@ -414,9 +437,14 @@ export default function WorkHistoryPanel({
   const handleOpenEdit = (log) => {
     setEditingLogId(log.id);
     const dateStr = log.timestamp ? new Date(log.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
+    let resolvedTargetId = log.targetId || '';
+    if (!resolvedTargetId) {
+      const best = findBestLineForLog(log, ALL_TRACK_LINES);
+      if (best && best.id) resolvedTargetId = best.id;
+    }
     setFormData({
       targetCode: log.targetCode || '',
-      targetId: log.targetId || '',
+      targetId: resolvedTargetId,
       actionType: log.actionType || '',
       technician: log.technician || '',
       description: log.description || '',
@@ -432,12 +460,23 @@ export default function WorkHistoryPanel({
     e.preventDefault();
     if (!formData.targetCode?.trim() || !formData.actionType?.trim() || !formData.technician?.trim() || !formData.description?.trim()) return;
 
+    let finalTargetId = formData.targetId;
+    if (!finalTargetId) {
+      const best = findBestLineForLog({ targetCode: formData.targetCode, description: formData.description }, ALL_TRACK_LINES);
+      if (best && best.id) finalTargetId = best.id;
+    }
+
+    const payload = {
+      ...formData,
+      targetId: finalTargetId || null,
+    };
+
     setSubmitting(true);
     try {
       if (editingLogId) {
-        if (onUpdateLog) await onUpdateLog(editingLogId, formData);
+        if (onUpdateLog) await onUpdateLog(editingLogId, payload);
       } else {
-        if (onAddLog) await onAddLog(formData);
+        if (onAddLog) await onAddLog(payload);
       }
       setIsFormOpen(false);
       setEditingLogId(null);
@@ -650,7 +689,7 @@ export default function WorkHistoryPanel({
               });
 
               // Resolve authentic AutoCAD map color
-              const lineInfo = getLineColorInfo(log.targetCode, log.description);
+              const lineInfo = getLineColorInfo(log.targetCode, log.description, log.targetId);
 
               return (
                 <div
@@ -877,8 +916,8 @@ export default function WorkHistoryPanel({
                       {formData.targetCode && (
                         <span
                           className="w-3.5 h-3.5 rounded-full shadow-xs border border-white shrink-0"
-                          style={{ backgroundColor: getLineColorInfo(formData.targetCode).color }}
-                          title={getLineColorInfo(formData.targetCode).label}
+                          style={{ backgroundColor: getLineColorInfo(formData.targetCode, formData.description, formData.targetId).color }}
+                          title={getLineColorInfo(formData.targetCode, formData.description, formData.targetId).label}
                         />
                       )}
                       <button
