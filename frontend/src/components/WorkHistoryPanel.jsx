@@ -16,6 +16,8 @@ import {
   Filter,
   CalendarDays,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
 import { matchLineLogs, findBestLineForLog, ALL_TRACK_LINES } from './SchematicViewer';
@@ -275,6 +277,69 @@ export default function WorkHistoryPanel({
   const [suggestSearchQuery, setSuggestSearchQuery] = useState('');
   const suggestWrapperRef = useRef(null);
 
+  // Station Filter Bar Smooth Scroll & Drag State
+  const stationFilterScrollRef = useRef(null);
+  const isFilterDraggingRef = useRef(false);
+  const filterStartXRef = useRef(0);
+  const filterScrollStartRef = useRef(0);
+  const hasFilterMovedRef = useRef(false);
+  const [canScrollFilterLeft, setCanScrollFilterLeft] = useState(false);
+  const [canScrollFilterRight, setCanScrollFilterRight] = useState(true);
+
+  const checkFilterScroll = () => {
+    const el = stationFilterScrollRef.current;
+    if (!el) return;
+    setCanScrollFilterLeft(el.scrollLeft > 4);
+    setCanScrollFilterRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    checkFilterScroll();
+  }, [isAllLogsMode]);
+
+  const handleFilterMouseDown = (e) => {
+    const el = stationFilterScrollRef.current;
+    if (!el) return;
+    isFilterDraggingRef.current = true;
+    hasFilterMovedRef.current = false;
+    filterStartXRef.current = e.pageX - el.offsetLeft;
+    filterScrollStartRef.current = el.scrollLeft;
+  };
+
+  const handleFilterMouseMove = (e) => {
+    if (!isFilterDraggingRef.current) return;
+    const el = stationFilterScrollRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - filterStartXRef.current) * 1.5;
+    if (Math.abs(walk) > 4) {
+      hasFilterMovedRef.current = true;
+    }
+    el.scrollLeft = filterScrollStartRef.current - walk;
+    checkFilterScroll();
+  };
+
+  const handleFilterMouseUp = () => {
+    isFilterDraggingRef.current = false;
+    checkFilterScroll();
+  };
+
+  const handleFilterWheel = (e) => {
+    const el = stationFilterScrollRef.current;
+    if (el && e.deltaY) {
+      el.scrollLeft += e.deltaY;
+      checkFilterScroll();
+    }
+  };
+
+  const scrollFilter = (direction) => {
+    const el = stationFilterScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction === 'left' ? -120 : 120, behavior: 'smooth' });
+    setTimeout(checkFilterScroll, 250);
+  };
+
   // Close auto-suggest when clicked outside (safe check against detached DOM nodes)
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -521,46 +586,46 @@ export default function WorkHistoryPanel({
         {/* ========================================================
             DRAWER HEADER
             ======================================================== */}
-        <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 sm:p-5 border-b border-slate-200 flex items-start justify-between relative">
-          <div className="flex items-start space-x-3.5 relative z-10 min-w-0 pr-2">
+        <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 p-3.5 sm:p-5 border-b border-slate-200 flex items-start justify-between relative">
+          <div className="flex items-start space-x-2.5 sm:space-x-3.5 relative z-10 min-w-0 pr-2">
             
             {/* Header Icon */}
-            <div className={`p-3 rounded-2xl text-white shadow-md mt-0.5 shrink-0 ${
+            <div className={`p-2 sm:p-2.5 rounded-xl text-white shadow-sm mt-0.5 shrink-0 ${
               isAllLogsMode
                 ? 'bg-gradient-to-br from-amber-500 to-orange-600'
                 : 'bg-gradient-to-br from-blue-600 to-cyan-600'
             }`}>
               {isAllLogsMode ? (
-                <ClipboardList className="w-5 h-5" />
+                <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <Train className="w-5 h-5" />
+                <Train className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
 
             <div className="min-w-0">
               {/* Badges: ONLY displayed in single line mode */}
               {!isAllLogsMode && (
-                <div className="flex items-center space-x-2 flex-wrap gap-y-1 mb-1">
-                  <span className="px-2.5 py-0.5 text-xs font-black rounded-full border uppercase bg-blue-50 text-blue-800 border-blue-200">
+                <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 mb-1">
+                  <span className="px-2 py-0.5 text-[10.5px] font-black rounded-full border uppercase bg-blue-50 text-blue-800 border-blue-200">
                     {locationData.category || 'SEKSI NASPAN LAA'}
                   </span>
                   {locationData.km && (
-                    <span className="text-xs font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <span className="text-[10.5px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                       {locationData.km}
                     </span>
                   )}
                 </div>
               )}
 
-              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-snug truncate">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug truncate">
                 {isAllLogsMode
                   ? 'Daftar Riwayat Pekerjaan LAA'
                   : locationTitle}
               </h2>
 
-              <p className="text-xs text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
                 {isAllLogsMode
-                  ? `Total ${logs.length} catatan pekerjaan pemeliharaan pada lintas Resor LAA 1.9 Jatinegara`
+                  ? `Total ${logs.length} catatan pekerjaan pemeliharaan LAA 1.9`
                   : 'Riwayat inspeksi, pemeliharaan teknis, dan pencatatan pekerjaan seksi'}
               </p>
             </div>
@@ -570,20 +635,20 @@ export default function WorkHistoryPanel({
             {isAdmin && (
               <button
                 onClick={handleOpenAdd}
-                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center space-x-1 shadow-sm transition cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-xl flex items-center space-x-1 shadow-xs transition cursor-pointer"
                 title="Catat Pekerjaan Baru"
               >
-                <PlusCircle className="w-4 h-4" />
+                <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Catat Pekerjaan</span>
               </button>
             )}
 
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+              className="text-slate-400 hover:text-slate-800 p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
               title="Tutup Panel (Esc)"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -592,47 +657,91 @@ export default function WorkHistoryPanel({
             FILTER NAMA STASIUN KESELURUHAN (HANYA STASIUN SAJA)
             ======================================================== */}
         {isAllLogsMode && (
-          <div className="px-4 sm:px-5 py-2.5 bg-white border-b border-slate-200 overflow-x-auto flex items-center space-x-1.5 scrollbar-none">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+          <div className="px-2.5 sm:px-4 py-2 bg-white border-b border-slate-200 flex items-center gap-1.5 relative select-none">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 pl-1 flex items-center gap-1">
               <Filter className="w-3.5 h-3.5 text-blue-600" />
-              Stasiun:
+              <span className="hidden xs:inline">Stasiun:</span>
             </span>
-            {[
-              { id: 'ALL', label: 'Semua Stasiun' },
-              { id: 'PND', label: 'St. Pondok Jati' },
-              { id: 'JNG', label: 'St. Jatinegara' },
-              { id: 'KLD', label: 'St. Klender' },
-              { id: 'BUA', label: 'St. Buaran' },
-              { id: 'KLDB', label: 'St. Klender Baru' },
-              { id: 'CUK', label: 'St. Cakung' },
-              { id: 'KRI', label: 'St. Kranji' },
-              { id: 'BKS', label: 'St. Bekasi' },
-            ].map((st) => (
+
+            {/* Left Scroll Arrow */}
+            {canScrollFilterLeft && (
               <button
-                key={st.id}
-                onClick={() => setStationFilter(st.id)}
-                className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition cursor-pointer border ${
-                  stationFilter === st.id
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                    : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                }`}
+                type="button"
+                onClick={() => scrollFilter('left')}
+                className="shrink-0 p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-2xs z-10 transition active:scale-95 cursor-pointer"
+                title="Geser Kiri"
               >
-                {st.label}
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-            ))}
+            )}
+
+            {/* Scrollable Container with touch pan-x & mouse drag */}
+            <div
+              ref={stationFilterScrollRef}
+              onScroll={checkFilterScroll}
+              onWheel={handleFilterWheel}
+              onMouseDown={handleFilterMouseDown}
+              onMouseMove={handleFilterMouseMove}
+              onMouseUp={handleFilterMouseUp}
+              onMouseLeave={handleFilterMouseUp}
+              style={{
+                touchAction: 'pan-x',
+                WebkitOverflowScrolling: 'touch',
+              }}
+              className="flex-1 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none py-0.5"
+            >
+              {[
+                { id: 'ALL', label: 'Semua' },
+                { id: 'PND', label: 'Pondok Jati' },
+                { id: 'JNG', label: 'Jatinegara' },
+                { id: 'KLD', label: 'Klender' },
+                { id: 'BUA', label: 'Buaran' },
+                { id: 'KLDB', label: 'Klender Baru' },
+                { id: 'CUK', label: 'Cakung' },
+                { id: 'KRI', label: 'Kranji' },
+                { id: 'BKS', label: 'Bekasi' },
+              ].map((st) => (
+                <button
+                  key={st.id}
+                  onClick={() => {
+                    if (hasFilterMovedRef.current) return;
+                    setStationFilter(st.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer border ${
+                    stationFilter === st.id
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                      : 'bg-slate-100/90 text-slate-700 border-slate-200 hover:bg-slate-200'
+                  }`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Right Scroll Arrow */}
+            {canScrollFilterRight && (
+              <button
+                type="button"
+                onClick={() => scrollFilter('right')}
+                className="shrink-0 p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-2xs z-10 transition active:scale-95 cursor-pointer"
+                title="Geser Kanan"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         )}
 
         {/* Quick Search Bar */}
-        <div className="px-4 sm:px-5 py-2.5 bg-slate-50 border-b border-slate-200">
+        <div className="px-3 sm:px-5 py-2 bg-slate-50 border-b border-slate-200">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari lokasi/naspan, teknisi, jenis pekerjaan..."
-              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-base sm:text-xs pl-10 pr-8 py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
+              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-xs pl-8.5 pr-8 py-1.5 sm:py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
             />
             {searchQuery && (
               <button
@@ -646,7 +755,7 @@ export default function WorkHistoryPanel({
           {searchQuery && (
             <div className="text-[10.5px] text-slate-500 mt-1 px-1 flex items-center justify-between">
               <span>Ditemukan <strong>{filteredLogs.length}</strong> catatan cocok</span>
-              <button onClick={() => setSearchQuery('')} className="text-blue-600 font-bold hover:underline">
+              <button onClick={() => setSearchQuery('')} className="text-blue-600 font-bold hover:underline cursor-pointer">
                 Reset
               </button>
             </div>
@@ -656,9 +765,9 @@ export default function WorkHistoryPanel({
         {/* ========================================================
             DRAWER SCROLL BODY: DAFTAR RIWAYAT PEKERJAAN
             ======================================================== */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-slate-50/50">
-          <div className="flex items-center justify-between text-xs text-slate-500 pb-1">
-            <span className="font-extrabold text-slate-800 uppercase tracking-wider text-xs flex items-center gap-1.5">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-slate-50/50">
+          <div className="flex items-center justify-between text-xs text-slate-500 pb-0.5">
+            <span className="font-extrabold text-slate-800 uppercase tracking-wider text-[11px] sm:text-xs flex items-center gap-1.5">
               <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
               {isAllLogsMode
                 ? `Daftar Riwayat Pekerjaan Seluruh Lintas (${filteredLogs.length} Catatan)`
@@ -667,8 +776,8 @@ export default function WorkHistoryPanel({
           </div>
 
           {filteredLogs.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center text-xs text-slate-500 space-y-2 shadow-xs">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500 space-y-2 shadow-2xs">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
               <p className="font-bold text-slate-800 text-sm">Tidak ada catatan pekerjaan yang cocok.</p>
               <p className="text-xs text-slate-500 max-w-xs mx-auto">
                 Silakan pilih stasiun lain atau reset kata kunci pencarian.
@@ -694,127 +803,111 @@ export default function WorkHistoryPanel({
               return (
                 <div
                   key={log.id}
-                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 space-y-2.5 relative overflow-hidden group"
+                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all space-y-2 relative overflow-hidden group"
                 >
                   {/* Glowing Left Accent Strip matching exact AutoCAD line color on map */}
                   <div
-                    className="absolute top-0 bottom-0 left-0 w-2 group-hover:w-2.5 transition-all"
+                    className="absolute top-0 bottom-0 left-0 w-1.5 group-hover:w-2 transition-all"
                     style={{
                       backgroundColor: lineInfo.color,
-                      boxShadow: `0 0 10px ${lineInfo.color}80`,
+                      boxShadow: `0 0 8px ${lineInfo.color}80`,
                     }}
                   />
 
-                  {/* Header Bar: Waktu & Lokasi dengan Warna Garis Asli */}
-                  <div className="flex items-center justify-between text-xs pl-2 flex-wrap gap-1.5">
-                    <div className="flex items-center space-x-1.5 text-blue-700 font-mono font-bold text-xs">
-                      <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                  {/* Header Row: Timestamp on left, Target Badge + Status on right */}
+                  <div className="flex items-center justify-between text-xs pl-1.5 flex-wrap gap-1">
+                    <div className="flex items-center space-x-1 text-slate-600 font-mono font-semibold text-[11px]">
+                      <Clock className="w-3 h-3 text-orange-500 shrink-0" />
                       <span>{formattedDate}</span>
                       <span>•</span>
                       <span>{formattedTime} WIB</span>
                     </div>
 
-                    {/* Lokasi / Line Badge dengan Warna Garis Peta */}
                     <div className="flex items-center space-x-1.5">
                       <span
-                        className="px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-extrabold flex items-center space-x-1.5 shadow-2xs"
+                        className="px-2 py-0.5 rounded-md text-[10.5px] font-mono font-extrabold flex items-center space-x-1 shadow-2xs"
                         style={{
                           backgroundColor: `${lineInfo.color}15`,
                           color: '#0f172a',
-                          border: `1.5px solid ${lineInfo.color}60`,
+                          border: `1px solid ${lineInfo.color}60`,
                         }}
                       >
                         <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                          className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
                           style={{
                             backgroundColor: lineInfo.color,
-                            boxShadow: `0 0 5px ${lineInfo.color}`,
+                            boxShadow: `0 0 4px ${lineInfo.color}`,
                           }}
                         />
-                        <span>{log.targetCode || 'LAA 1.9'}</span>
+                        <span className="truncate max-w-[150px]">{log.targetCode || 'LAA 1.9'}</span>
                       </span>
 
-                      <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
-                        <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
+                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5 text-emerald-600" />
                         {log.status || 'SELESAI'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Identifikasi Nama Garis / Warna Seksi Pada Peta */}
-                  <div className="pl-2">
-                    <div className="flex items-center space-x-1.5">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                        SEKSI PETA:
-                      </span>
-                      <span
-                        className="text-[11px] font-bold px-2 py-0.2 rounded-md"
-                        style={{
-                          backgroundColor: `${lineInfo.color}12`,
-                          color: lineInfo.color === '#f8d731' ? '#854d0e' : lineInfo.color,
-                        }}
-                      >
-                        {lineInfo.label}
-                      </span>
-                    </div>
-
-                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 mt-1 flex items-center gap-1.5">
+                  {/* Action & Seksi Row */}
+                  <div className="pl-1.5 flex items-center justify-between flex-wrap gap-1">
+                    <h4 className="text-xs sm:text-[13px] font-extrabold text-slate-900 flex items-center gap-1.5">
                       <Wrench
                         className="w-3.5 h-3.5 shrink-0"
                         style={{ color: lineInfo.color === '#f8d731' ? '#ca8a04' : lineInfo.color }}
                       />
                       <span>{formatActionName(log.actionType)}</span>
                     </h4>
+
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-md truncate max-w-[200px]"
+                      style={{
+                        backgroundColor: `${lineInfo.color}12`,
+                        color: lineInfo.color === '#f8d731' ? '#854d0e' : lineInfo.color,
+                        border: `1px solid ${lineInfo.color}25`,
+                      }}
+                      title={lineInfo.label}
+                    >
+                      {lineInfo.label}
+                    </span>
                   </div>
 
-                  {/* Deskripsi Hasil Pekerjaan & Nilai Ukur */}
-                  <div className="pl-2">
-                    <div className="bg-slate-50/90 p-3 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-normal">
+                  {/* Description Box */}
+                  <div className="pl-1.5">
+                    <div className="bg-slate-50/90 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-normal break-words">
                       {log.description}
                     </div>
                   </div>
 
-                  {/* Pelaksana & Tag Target */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100 pl-2 flex-wrap gap-1">
-                    <span className="flex items-center space-x-1.5">
+                  {/* Footer Row: Technician on left, Admin Edit/Delete on right */}
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1.5 border-t border-slate-100 pl-1.5 flex-wrap gap-1">
+                    <span className="flex items-center space-x-1.5 text-[11px]">
                       <HardHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                       <span>Pelaksana:</span>
                       <strong className="text-slate-800 font-semibold">{log.technician}</strong>
                     </span>
 
-                    <span
-                      className="font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-md"
-                      style={{
-                        backgroundColor: `${lineInfo.color}10`,
-                        color: '#334155',
-                        border: `1px solid ${lineInfo.color}30`,
-                      }}
-                    >
-                      {log.targetCode}
-                    </span>
+                    {isAdmin && (
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={() => handleOpenEdit(log)}
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                          title="Edit Catatan Pekerjaan"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(log.id)}
+                          className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                          title="Hapus Catatan Pekerjaan"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Hapus</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Admin Action Buttons (Edit & Delete) */}
-                  {isAdmin && (
-                    <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 pl-2">
-                      <button
-                        onClick={() => handleOpenEdit(log)}
-                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-1 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                        title="Edit Catatan Pekerjaan"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirmId(log.id)}
-                        className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 py-1 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                        title="Hapus Catatan Pekerjaan"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Hapus</span>
-                      </button>
-                    </div>
-                  )}
 
                 </div>
               );
@@ -823,13 +916,13 @@ export default function WorkHistoryPanel({
         </div>
 
         {/* Drawer Footer */}
-        <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-          <span className="text-xs font-semibold text-slate-600">
+        <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-600">
             UPT RESOR LAA 1.9 JATINEGARA
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition cursor-pointer"
           >
             Tutup
           </button>
