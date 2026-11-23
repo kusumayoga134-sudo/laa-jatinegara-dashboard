@@ -215,7 +215,8 @@ export const api = {
   async getLogs(limit = 500) {
     try {
       const res = await fetch(`${BASE_URL}/logs?limit=${limit}`);
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         const json = await res.json();
         if (json?.data && json.data.length > 0) {
           return json;
@@ -233,7 +234,8 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         return await res.json();
       }
     } catch {}
@@ -263,7 +265,8 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         return await res.json();
       }
     } catch {}
