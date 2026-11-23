@@ -54,48 +54,49 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 w-full max-w-[360px] sm:max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
         
         {/* Top Accent Ribbon */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-amber-500 to-emerald-500" />
+        <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-blue-700 via-indigo-600 via-amber-500 to-emerald-500" />
 
         {/* Header */}
-        <div className="p-5 pb-4 flex items-start justify-between border-b border-slate-100 bg-slate-50/60">
-          <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-sm">
-              <ShieldCheck className="w-5 h-5" />
+        <div className="p-3.5 sm:p-5 pb-3 sm:pb-4 flex items-start justify-between border-b border-slate-100 bg-slate-50/70">
+          <div className="flex items-center space-x-2.5 sm:space-x-3">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xs shrink-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="text-base font-extrabold text-slate-900">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
                 Login Administrator LAA 1.9
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                Sistem Pengaman Pengelolaan Riwayat Pekerjaan
+              <p className="text-[10.5px] sm:text-xs text-slate-500 mt-0.5 font-medium leading-none truncate">
+                Pengelolaan Riwayat Pekerjaan
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200/60 transition cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200/60 transition cursor-pointer shrink-0"
+            title="Tutup"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Body Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-3.5 sm:p-6 space-y-3 sm:space-y-4">
           
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start space-x-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="p-2.5 sm:p-3 rounded-xl bg-rose-50 border border-rose-200 text-[11px] sm:text-xs text-rose-700 flex items-start space-x-2">
+              <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* User Input */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          <div className="space-y-1 sm:space-y-1.5">
+            <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-blue-600" />
               <span>User ID:</span>
             </label>
@@ -106,14 +107,14 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan User ID"
                 autoFocus
-                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400"
+                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs sm:text-sm font-semibold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:text-xs"
               />
             </div>
           </div>
 
           {/* Password Input */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          <div className="space-y-1 sm:space-y-1.5">
+            <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-blue-600" />
               <span>Password:</span>
             </label>
@@ -123,41 +124,41 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan Password"
-                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs sm:text-sm font-bold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-300 focus:border-blue-600 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal placeholder:text-xs"
               />
             </div>
           </div>
 
           {/* Information box */}
-          <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-3 text-[11px] text-blue-800 space-y-1">
-            <div className="font-bold flex items-center gap-1">
-              <KeyRound className="w-3.5 h-3.5 text-blue-600" />
+          <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-2.5 sm:p-3 text-[10.5px] sm:text-[11px] text-blue-800 space-y-0.5">
+            <div className="font-bold flex items-center gap-1 text-[11px] sm:text-xs">
+              <KeyRound className="w-3 h-3 text-blue-600 shrink-0" />
               <span>Akses Khusus Administrator:</span>
             </div>
-            <p className="text-slate-600 text-[10.5px] leading-relaxed">
-              Masuk menggunakan kredensial resmi untuk mengelola pencatatan, pengeditan, dan penghapusan data riwayat pekerjaan.
+            <p className="text-slate-600 text-[10px] sm:text-[10.5px] leading-relaxed">
+              Masuk menggunakan kredensial resmi untuk mengelola pencatatan, pengeditan, dan penghapusan data.
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2 pt-2">
+          <div className="flex items-center space-x-2 pt-1 sm:pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="w-1/3 py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
+              className="w-1/3 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-2/3 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50"
+              className="w-2/3 py-2 sm:py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md active:scale-98 transition cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <span>Memverifikasi...</span>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Masuk Mode Admin</span>
                 </>
               )}
