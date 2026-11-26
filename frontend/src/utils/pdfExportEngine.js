@@ -21,11 +21,11 @@ export const VIRTUAL_CANVAS = {
   LANE_BOTTOM_H: 0,
   CAD_BASE_W: 3275,
   CAD_BASE_H: 1835,
-  CARD_W: 208, // Landscape proportional width (never shrinks to narrow square)
-  MIN_CARD_W: 190,
-  CARD_H: 96, // Default fallback card height
-  GAP: 12,
-  MARGIN_X: 40,
+  CARD_W: 162, // Compact proportional width (152-168px) without empty right whitespace
+  MIN_CARD_W: 152,
+  CARD_H: 90, // Default fallback card height
+  GAP: 10,
+  MARGIN_X: 36,
 };
 
 // Helper to format timestamps in Indonesian
@@ -118,27 +118,30 @@ export function estimateWrappedLineCount(text, maxCharsPerLine = 30, maxLines = 
 }
 
 /**
- * Compute per-log wrapped line counts & exact dynamic card height
+ * Compute per-log wrapped line counts & exact dynamic card height (including 1–2 line header)
  */
 function computeCardMetrics(line, displayLogs, totalLogs) {
-  const HEADER_H = 24;
-  const PADDING_TOP = 6;
-  const PADDING_BOT = 6;
+  const titleText = String(line?.title || line?.code || '').trim();
+  const titleLines = estimateWrappedLineCount(titleText, 22, 2);
+  const headerH = titleLines > 1 ? 30 : 22;
+
+  const PADDING_TOP = 5;
+  const PADDING_BOT = 5;
   const ITEM_GAP = 4;
-  const FOOTER_H = totalLogs > 3 ? 14 : 0;
+  const FOOTER_H = totalLogs > 3 ? 13 : 0;
 
   let bodyH = 0;
   const logLayouts = displayLogs.map((log, idx) => {
     const details = getCleanLogDetails(log, line);
     const subLine = [details.timeLabel, details.kilometer].filter(Boolean).join(' • ');
 
-    const lines1 = estimateWrappedLineCount(details.actionName, 27, 2);
-    const lines2 = estimateWrappedLineCount(subLine, 35, 2);
-    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 37, 2) : 0;
+    const lines1 = estimateWrappedLineCount(details.actionName, 23, 2);
+    const lines2 = estimateWrappedLineCount(subLine, 29, 2);
+    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 31, 2) : 0;
 
-    const h1 = lines1 * 11;
-    const h2 = lines2 > 0 ? 2 + lines2 * 10 : 0;
-    const h3 = lines3 > 0 ? 2 + lines3 * 10 : 0;
+    const h1 = lines1 * 10.5;
+    const h2 = lines2 > 0 ? 1.5 + lines2 * 9.5 : 0;
+    const h3 = lines3 > 0 ? 1.5 + lines3 * 9.5 : 0;
     const itemH = h1 + h2 + h3 + 3;
 
     bodyH += itemH + (idx > 0 ? ITEM_GAP : 0);
@@ -153,8 +156,8 @@ function computeCardMetrics(line, displayLogs, totalLogs) {
     };
   });
 
-  const totalH = Math.max(66, HEADER_H + PADDING_TOP + bodyH + FOOTER_H + PADDING_BOT);
-  return { cardH: totalH, logLayouts };
+  const totalH = Math.ceil(Math.max(64, headerH + PADDING_TOP + bodyH + FOOTER_H + PADDING_BOT));
+  return { headerH, cardH: totalH, logLayouts };
 }
 
 /**
@@ -179,7 +182,7 @@ export function computeCalloutLayout({
 
   if (!linesWithLogs || linesWithLogs.length === 0) return [];
 
-  const safeCardW = Math.max(MIN_CARD_W || 190, CARD_W || 208);
+  const safeCardW = Math.max(MIN_CARD_W || 152, CARD_W || 162);
 
   // Directly map CAD base coords (3275 x 1835) 1:1
   const items = linesWithLogs.map(({ line, logs, center }) => {
@@ -190,7 +193,7 @@ export function computeCalloutLayout({
     const radarY = Math.round(rawY);
 
     const displayLogs = logs.slice(0, 3);
-    const { cardH, logLayouts } = computeCardMetrics(line, displayLogs, logs.length);
+    const { headerH, cardH, logLayouts } = computeCardMetrics(line, displayLogs, logs.length);
 
     return {
       id: line.id,
@@ -204,6 +207,7 @@ export function computeCalloutLayout({
       rawY,
       w: safeCardW,
       h: cardH,
+      headerH,
       x: 0,
       y: 0,
       isUpper: true,
@@ -671,7 +675,7 @@ function drawCalloutBox(ctx, card, scale) {
 
   const cardRadius = 6 * scale;
   const trackColor = line.color || '#334155';
-  const headerHeight = 24 * scale;
+  const headerHeight = (card.headerH || 24) * scale;
 
   // 1. Drop Shadow
   ctx.save();
@@ -718,70 +722,50 @@ function drawCalloutBox(ctx, card, scale) {
   ctx.stroke();
 
   // ==========================================
-  // Header Information & Badges
+  // Header Information (Dot + Nama Lokasi penuh, tanpa badge Pkj & tanpa GripVertical)
   // ==========================================
-  const headerDotX = cardX + 11 * scale;
+  const headerDotX = cardX + 10.5 * scale;
   const headerDotY = cardY + headerHeight / 2;
 
   // Track color circle
   ctx.fillStyle = trackColor;
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 3.5 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 3.2 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 1.2 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 1.1 * scale, 0, Math.PI * 2);
   ctx.fill();
 
-  // Track Title (Single row, never collides with Pkj badge)
+  // Track Title (1–2 wrapped lines utilizing full header width)
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  const badgeW = 42 * scale;
-  const maxTitleW = cardW - badgeW - 28 * scale;
-  const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
-  ctx.fillText(titleText, cardX + 18 * scale, headerDotY);
-
-  // Job Count Badge Pill (NO drag handle rendered in PNG/PDF export)
-  const badgeH = 14 * scale;
-  const badgeX = cardX + cardW - badgeW - 6 * scale;
-  const badgeY = cardY + (headerHeight - badgeH) / 2;
-
-  ctx.fillStyle = '#f1f5f9';
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
-  ctx.fill();
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 0.8 * scale;
-  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 7 * scale);
-  ctx.stroke();
-
-  ctx.fillStyle = '#2563eb';
-  ctx.beginPath();
-  ctx.arc(badgeX + 5 * scale, badgeY + badgeH / 2, 1.8 * scale, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#1e293b';
-  ctx.font = `bold ${7 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`${logs.length} Pkj`, badgeX + (badgeW + 4 * scale) / 2, badgeY + badgeH / 2);
+  const maxTitleW = cardW - 24 * scale;
+  const wrappedTitle = wrapCanvasText(ctx, line.title || line.code, maxTitleW, 2);
+  const titleLineH = 10.5 * scale;
+  const totalTitleH = wrappedTitle.length * titleLineH;
+  const firstTitleY = cardY + (headerHeight - totalTitleH) / 2 + titleLineH / 2;
+  wrappedTitle.forEach((txtLine, idx) => {
+    ctx.fillText(txtLine, cardX + 17 * scale, firstTitleY + idx * titleLineH);
+  });
 
   // ==========================================
   // Work Log Items (Wrapped cleanly max 2 lines per field)
   // ==========================================
-  let currentLogY = cardY + headerHeight + 6 * scale;
-  const itemContentX = cardX + 12 * scale;
-  const itemContentW = cardW - 20 * scale;
+  let currentLogY = cardY + headerHeight + 5 * scale;
+  const itemContentX = cardX + 10.5 * scale;
+  const itemContentW = cardW - 17 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
       ctx.strokeStyle = '#f1f5f9';
       ctx.lineWidth = 0.8 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 8 * scale, currentLogY - 2 * scale);
-      ctx.lineTo(cardX + cardW - 8 * scale, currentLogY - 2 * scale);
+      ctx.moveTo(cardX + 7 * scale, currentLogY - 2 * scale);
+      ctx.lineTo(cardX + cardW - 7 * scale, currentLogY - 2 * scale);
       ctx.stroke();
       currentLogY += 2 * scale;
     }
@@ -794,22 +778,22 @@ function drawCalloutBox(ctx, card, scale) {
 
     // Baris 1: Jenis Pekerjaan (Wrapped up to 2 lines, bold Slate-900)
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${8.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${8.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 2);
     wrappedAction.forEach((txtLine) => {
-      ctx.fillText(txtLine, itemContentX, currentLogY + 5.5 * scale);
-      currentLogY += 11 * scale;
+      ctx.fillText(txtLine, itemContentX, currentLogY + 5.25 * scale);
+      currentLogY += 10.5 * scale;
     });
 
     // Baris 2: BULAN TAHUN • KILOMETER (Wrapped up to 2 lines, Slate-600)
     if (subLine) {
       currentLogY += 1.5 * scale;
       ctx.fillStyle = '#475569';
-      ctx.font = `500 ${7.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `500 ${7.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       const wrappedSub = wrapCanvasText(ctx, subLine, itemContentW, 2);
       wrappedSub.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 5 * scale);
-        currentLogY += 10 * scale;
+        ctx.fillText(txtLine, itemContentX, currentLogY + 4.75 * scale);
+        currentLogY += 9.5 * scale;
       });
     }
 
@@ -817,11 +801,11 @@ function drawCalloutBox(ctx, card, scale) {
     if (hasDescription) {
       currentLogY += 1.5 * scale;
       ctx.fillStyle = '#1d4ed8';
-      ctx.font = `600 ${7.0 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `600 ${6.9 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 2);
       wrappedDesc.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 5 * scale);
-        currentLogY += 10 * scale;
+        ctx.fillText(txtLine, itemContentX, currentLogY + 4.75 * scale);
+        currentLogY += 9.5 * scale;
       });
     }
 
