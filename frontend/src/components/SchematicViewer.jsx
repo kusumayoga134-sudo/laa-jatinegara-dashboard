@@ -21,6 +21,12 @@ import {
   Train,
 } from 'lucide-react';
 import { LEGACY_TARGET_MAP } from '../data/legacyTargetMap';
+import {
+  resolveLogTime,
+  resolveLogKilometer,
+  resolveLogDescription,
+  hasRealDescription,
+} from '../utils/workLogHelpers';
 
 // =========================================================================
 // ALL_TRACK_LINES: MASTER DATA SEMUA JALUR, NASPAN, WESEL, DS, FRP, AS/AJ
@@ -6335,43 +6341,41 @@ export default function SchematicViewer({
                 </div>
               ) : (
                 hoveredLogs.slice(0, 2).map((log, idx) => {
-                  const dateStr = new Date(log.timestamp).toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  });
-                  const timeStr = new Date(log.timestamp).toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
+                  const { label: timeLabel } = resolveLogTime(log);
+                  const kmLabel = resolveLogKilometer(log, hoveredLine);
+                  const descText = resolveLogDescription(log);
+                  const showDesc = hasRealDescription(log);
 
                   return (
                     <div
                       key={idx}
-                      className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 text-xs space-y-1.5"
+                      className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 text-xs space-y-1"
                     >
-                      <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span className="flex items-center text-blue-700 font-mono font-bold">
-                          <Clock className="w-3 h-3 mr-1 text-orange-500" />
-                          {dateStr} • {timeStr} WIB
+                      <div className="flex items-center justify-between gap-1.5 text-[11px]">
+                        <span className="flex items-center text-blue-700 font-mono font-bold shrink-0">
+                          <Clock className="w-3 h-3 mr-1 text-orange-500 shrink-0" />
+                          {timeLabel}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
-                          {log.status || 'SELESAI'}
-                        </span>
+                        {kmLabel && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold truncate max-w-[165px]">
+                            {kmLabel}
+                          </span>
+                        )}
                       </div>
 
-                      <div className="font-bold text-slate-900 text-xs">
+                      <div className="font-bold text-slate-900 text-xs leading-snug">
                         {formatAction(log.actionType)}
                       </div>
 
-                      <div className="text-slate-600 text-xs leading-snug line-clamp-2">
-                        {log.description}
+                      <div className="text-[10.5px] text-slate-500 font-semibold truncate">
+                        {log.targetCode || hoveredLine.title}
                       </div>
 
-                      <div className="flex items-center text-xs text-slate-500 pt-0.5">
-                        <HardHat className="w-3 h-3 mr-1 text-amber-500" />
-                        <span>Pelaksana: <strong className="text-slate-800">{log.technician}</strong></span>
-                      </div>
+                      {showDesc && (
+                        <div className="text-slate-700 text-[11px] leading-snug bg-white px-2 py-1 rounded-lg border border-slate-200/80 line-clamp-2">
+                          {descText}
+                        </div>
+                      )}
                     </div>
                   );
                 })

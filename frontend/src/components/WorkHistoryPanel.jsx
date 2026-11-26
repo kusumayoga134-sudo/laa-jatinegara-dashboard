@@ -11,7 +11,7 @@ import {
   X,
   Train,
   ClipboardList,
-  HardHat,
+  MapPin,
   Search,
   Filter,
   CalendarDays,
@@ -21,6 +21,16 @@ import {
 } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
 import { matchLineLogs, findBestLineForLog, ALL_TRACK_LINES } from './SchematicViewer';
+import {
+  MONTH_NAMES_ID,
+  YEAR_OPTIONS,
+  getDefaultYear,
+  getDefaultMonth,
+  resolveLogTime,
+  resolveLogKilometer,
+  resolveLogDescription,
+  hasRealDescription,
+} from '../utils/workLogHelpers';
 
 // ========================================================
 // COLOR RESOLVER: Pemetaan Warna Asli Garis AutoCAD DWG
@@ -262,13 +272,13 @@ export default function WorkHistoryPanel({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
+    tahun: getDefaultYear(),
+    bulan: getDefaultMonth(),
+    actionType: '',
     targetCode: '',
     targetId: '',
-    actionType: '',
-    technician: '',
+    kilometer: '',
     description: '',
-    status: 'COMPLETED',
-    timestamp: new Date().toISOString().slice(0, 16),
   });
 
   // Custom Elegant Auto-Suggest States for all map locations
@@ -457,10 +467,13 @@ export default function WorkHistoryPanel({
   const filteredLogs = matchingLogs.filter((log) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
+    const { label: timeLabel } = resolveLogTime(log);
+    const kmLabel = resolveLogKilometer(log);
     return (
       (log.targetCode && log.targetCode.toLowerCase().includes(q)) ||
       (log.actionType && log.actionType.toLowerCase().includes(q)) ||
-      (log.technician && log.technician.toLowerCase().includes(q)) ||
+      (kmLabel && kmLabel.toLowerCase().includes(q)) ||
+      (timeLabel && timeLabel.toLowerCase().includes(q)) ||
       (log.description && log.description.toLowerCase().includes(q))
     );
   });
@@ -479,20 +492,28 @@ export default function WorkHistoryPanel({
     }
   };
 
-  // Open Form to Add New Work Log (Prefilled with exact unique track/apparatus name)
+  // Open Form to Add New Work Log (Prefilled with exact unique track/apparatus name & default KM)
   const handleOpenAdd = () => {
     setEditingLogId(null);
     const initialTarget = isOnlyForm && isAllLogsMode
       ? 'ST. JATINEGARA (Jalur 1)'
       : (locationTitle || locationCode || 'ST. JATINEGARA (Jalur 1)');
+    const initialId = isOnlyForm && isAllLogsMode
+      ? 'jng_jalur_1'
+      : (locationData?.id || '');
+    const matchedLoc = ALL_MAP_LOCATIONS.find(
+      (loc) => (initialId && loc.id === initialId) || loc.title === initialTarget
+    );
+    const initialKm = (isOnlyForm && isAllLogsMode ? matchedLoc?.km : locationData?.km) || matchedLoc?.km || '';
+
     setFormData({
-      targetCode: initialTarget,
-      targetId: locationData?.id || '',
+      tahun: getDefaultYear(),
+      bulan: getDefaultMonth(),
       actionType: '',
-      technician: '',
+      targetCode: initialTarget,
+      targetId: matchedLoc?.id || initialId,
+      kilometer: initialKm,
       description: '',
-      status: 'COMPLETED',
-      timestamp: new Date().toISOString().slice(0, 16),
     });
     setSuggestSearchQuery('');
     setIsFormOpen(true);
@@ -501,20 +522,26 @@ export default function WorkHistoryPanel({
   // Open Form to Edit Existing Work Log
   const handleOpenEdit = (log) => {
     setEditingLogId(log.id);
-    const dateStr = log.timestamp ? new Date(log.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
     let resolvedTargetId = log.targetId || '';
+    let bestLine = null;
     if (!resolvedTargetId) {
-      const best = findBestLineForLog(log, ALL_TRACK_LINES);
-      if (best && best.id) resolvedTargetId = best.id;
+      bestLine = findBestLineForLog(log, ALL_TRACK_LINES);
+      if (bestLine && bestLine.id) resolvedTargetId = bestLine.id;
+    } else {
+      bestLine = ALL_TRACK_LINES.find((l) => l.id === resolvedTargetId) || null;
     }
+    const { tahun, bulan } = resolveLogTime(log);
+    const resolvedKm = resolveLogKilometer(log, bestLine);
+    const rawDesc = resolveLogDescription(log);
+
     setFormData({
+      tahun: tahun ? parseInt(tahun, 10) : getDefaultYear(),
+      bulan: bulan || getDefaultMonth(),
+      actionType: log.actionType || '',
       targetCode: log.targetCode || '',
       targetId: resolvedTargetId,
-      actionType: log.actionType || '',
-      technician: log.technician || '',
-      description: log.description || '',
-      status: log.status || 'COMPLETED',
-      timestamp: dateStr,
+      kilometer: resolvedKm,
+      description: rawDesc === '-' ? '' : rawDesc,
     });
     setSuggestSearchQuery('');
     setIsFormOpen(true);
@@ -523,7 +550,15 @@ export default function WorkHistoryPanel({
   // Handle Save
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.targetCode?.trim() || !formData.actionType?.trim() || !formData.technician?.trim() || !formData.description?.trim()) return;
+    if (
+      !formData.tahun ||
+      !formData.bulan ||
+      !formData.actionType?.trim() ||
+      !formData.targetCode?.trim() ||
+      !formData.kilometer?.trim()
+    ) {
+      return;
+    }
 
     let finalTargetId = formData.targetId;
     if (!finalTargetId) {
@@ -531,9 +566,22 @@ export default function WorkHistoryPanel({
       if (best && best.id) finalTargetId = best.id;
     }
 
+    const finalDesc = (formData.description || '').trim() || '-';
+    const yearNum = parseInt(formData.tahun, 10) || getDefaultYear();
+    const monthStr = String(formData.bulan).trim().toUpperCase();
+    const monthIdx = MONTH_NAMES_ID.indexOf(monthStr);
+    const computedTs = new Date(Date.UTC(yearNum, monthIdx >= 0 ? monthIdx : 0, 15, 5, 0, 0)).toISOString();
+
     const payload = {
-      ...formData,
+      tahun: yearNum,
+      bulan: monthStr,
+      actionType: formData.actionType.trim(),
+      targetType: 'LINE',
+      targetCode: formData.targetCode.trim(),
       targetId: finalTargetId || null,
+      kilometer: formData.kilometer.trim(),
+      description: finalDesc,
+      timestamp: computedTs,
     };
 
     setSubmitting(true);
@@ -740,8 +788,8 @@ export default function WorkHistoryPanel({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari lokasi/naspan, teknisi, jenis pekerjaan..."
-              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-xs pl-8.5 pr-8 py-1.5 sm:py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
+              placeholder="Cari jenis pekerjaan, lokasi, KM, waktu..."
+              className="w-full bg-white hover:bg-slate-100/70 focus:bg-white text-base sm:text-xs pl-8.5 pr-8 py-1.5 sm:py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 shadow-2xs"
             />
             {searchQuery && (
               <button
@@ -785,20 +833,13 @@ export default function WorkHistoryPanel({
             </div>
           ) : (
             filteredLogs.map((log) => {
-              const dateObj = new Date(log.timestamp);
-              const formattedDate = dateObj.toLocaleDateString('id-ID', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              });
-              const formattedTime = dateObj.toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-              });
-
-              // Resolve authentic AutoCAD map color
+              // Resolve authentic AutoCAD map color & 5 structured fields
               const lineInfo = getLineColorInfo(log.targetCode, log.description, log.targetId);
+              const matchedLine = (log.targetId && ALL_TRACK_LINES.find((l) => l.id === log.targetId)) || null;
+              const { label: timeLabel } = resolveLogTime(log);
+              const kmLabel = resolveLogKilometer(log, matchedLine);
+              const descText = resolveLogDescription(log);
+              const showDesc = hasRealDescription(log);
 
               return (
                 <div
@@ -814,50 +855,53 @@ export default function WorkHistoryPanel({
                     }}
                   />
 
-                  {/* Header Row: Timestamp on left, Target Badge + Status on right */}
-                  <div className="flex items-center justify-between text-xs pl-1.5 flex-wrap gap-1">
-                    <div className="flex items-center space-x-1 text-slate-600 font-mono font-semibold text-[11px]">
+                  {/* Header Row: Waktu (BULAN TAHUN) on left, Lokasi Badge on right */}
+                  <div className="flex items-center justify-between text-xs pl-1.5 flex-wrap gap-1.5">
+                    <div className="flex items-center space-x-1 text-blue-700 font-mono font-bold text-[11px]">
                       <Clock className="w-3 h-3 text-orange-500 shrink-0" />
-                      <span>{formattedDate}</span>
-                      <span>•</span>
-                      <span>{formattedTime} WIB</span>
+                      <span>{timeLabel}</span>
                     </div>
 
-                    <div className="flex items-center space-x-1.5">
+                    <span
+                      className="px-2 py-0.5 rounded-md text-[10.5px] font-mono font-extrabold flex items-center space-x-1 shadow-2xs"
+                      style={{
+                        backgroundColor: `${lineInfo.color}15`,
+                        color: '#0f172a',
+                        border: `1px solid ${lineInfo.color}60`,
+                      }}
+                    >
                       <span
-                        className="px-2 py-0.5 rounded-md text-[10.5px] font-mono font-extrabold flex items-center space-x-1 shadow-2xs"
+                        className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
                         style={{
-                          backgroundColor: `${lineInfo.color}15`,
-                          color: '#0f172a',
-                          border: `1px solid ${lineInfo.color}60`,
+                          backgroundColor: lineInfo.color,
+                          boxShadow: `0 0 4px ${lineInfo.color}`,
                         }}
-                      >
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
-                          style={{
-                            backgroundColor: lineInfo.color,
-                            boxShadow: `0 0 4px ${lineInfo.color}`,
-                          }}
-                        />
-                        <span className="truncate max-w-[150px]">{log.targetCode || 'LAA 1.9'}</span>
-                      </span>
-
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
-                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5 text-emerald-600" />
-                        {log.status || 'SELESAI'}
-                      </span>
-                    </div>
+                      />
+                      <span className="truncate max-w-[180px]">{log.targetCode || 'LAA 1.9'}</span>
+                    </span>
                   </div>
 
-                  {/* Action & Seksi Row */}
-                  <div className="pl-1.5 flex items-center justify-between flex-wrap gap-1">
-                    <h4 className="text-xs sm:text-[13px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                  {/* Jenis Pekerjaan */}
+                  <div className="pl-1.5">
+                    <h4 className="text-xs sm:text-[13px] font-extrabold text-slate-900 flex items-center gap-1.5 leading-snug">
                       <Wrench
                         className="w-3.5 h-3.5 shrink-0"
                         style={{ color: lineInfo.color === '#f8d731' ? '#ca8a04' : lineInfo.color }}
                       />
                       <span>{formatActionName(log.actionType)}</span>
                     </h4>
+                  </div>
+
+                  {/* Kilometer & Seksi */}
+                  <div className="pl-1.5 flex items-center justify-between flex-wrap gap-1.5">
+                    {kmLabel ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                        <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                        <span>{kmLabel}</span>
+                      </span>
+                    ) : (
+                      <span />
+                    )}
 
                     <span
                       className="text-[10px] font-bold px-2 py-0.5 rounded-md truncate max-w-[200px]"
@@ -872,42 +916,36 @@ export default function WorkHistoryPanel({
                     </span>
                   </div>
 
-                  {/* Description Box */}
-                  <div className="pl-1.5">
-                    <div className="bg-slate-50/90 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-normal break-words">
-                      {log.description}
-                    </div>
-                  </div>
-
-                  {/* Footer Row: Technician on left, Admin Edit/Delete on right */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1.5 border-t border-slate-100 pl-1.5 flex-wrap gap-1">
-                    <span className="flex items-center space-x-1.5 text-[11px]">
-                      <HardHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      <span>Pelaksana:</span>
-                      <strong className="text-slate-800 font-semibold">{log.technician}</strong>
-                    </span>
-
-                    {isAdmin && (
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => handleOpenEdit(log)}
-                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                          title="Edit Catatan Pekerjaan"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(log.id)}
-                          className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                          title="Hapus Catatan Pekerjaan"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          <span>Hapus</span>
-                        </button>
+                  {/* Uraian Box (Hanya ditampilkan jika tidak '-') */}
+                  {showDesc && (
+                    <div className="pl-1.5">
+                      <div className="bg-slate-50/90 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-normal break-words">
+                        {descText}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Admin Action Row (Edit & Delete) */}
+                  {isAdmin && (
+                    <div className="flex items-center justify-end text-xs text-slate-500 pt-1.5 border-t border-slate-100 pl-1.5 space-x-1">
+                      <button
+                        onClick={() => handleOpenEdit(log)}
+                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Edit Catatan Pekerjaan"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirmId(log.id)}
+                        className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 py-0.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Hapus Catatan Pekerjaan"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Hapus</span>
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               );
@@ -976,15 +1014,77 @@ export default function WorkHistoryPanel({
               </button>
             </div>
 
-            {/* Form Fields */}
+            {/* Form Fields (Tepat 5 Item sesuai Tabel Excel RIWAYAT PEKERJAAN) */}
             <form onSubmit={handleFormSubmit} className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 overflow-y-auto flex-1 scrollbar-thin">
-              
-              {/* Target Seksi / Line */}
+
+              {/* 1. WAKTU (1 baris dibagi 2 input sejajar: Tahun & Bulan) */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    WAKTU (Tahun &amp; Bulan):
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    required
+                    aria-label="Tahun"
+                    value={formData.tahun}
+                    onChange={(e) => setFormData({ ...formData, tahun: Number(e.target.value) })}
+                    className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 cursor-pointer"
+                  >
+                    {(!YEAR_OPTIONS.includes(Number(formData.tahun)) && formData.tahun
+                      ? [Number(formData.tahun), ...YEAR_OPTIONS]
+                      : YEAR_OPTIONS
+                    ).map((yr) => (
+                      <option key={yr} value={yr}>
+                        {yr}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    required
+                    aria-label="Bulan"
+                    value={formData.bulan}
+                    onChange={(e) => setFormData({ ...formData, bulan: e.target.value })}
+                    className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 cursor-pointer"
+                  >
+                    {MONTH_NAMES_ID.map((bln) => (
+                      <option key={bln} value={bln}>
+                        {bln}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* 2. JENIS PEKERJAAN (Wajib — input teks) */}
+              <div className="space-y-1">
+                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Wrench className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    JENIS PEKERJAAN:
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.actionType}
+                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+                  placeholder="Contoh: PENGGANTIAN KAWAT OHGW, PEMASANGAN GROUNDING..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                />
+              </div>
+
+              {/* 3. LOKASI (Wajib — dropdown dengan pencarian & indikator warna jalur, Exact ID Binding) */}
               <div className="space-y-1">
                 <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Train className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    Lokasi / Seksi Target:
+                    LOKASI:
                   </span>
                   <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
@@ -1000,8 +1100,8 @@ export default function WorkHistoryPanel({
                         setSuggestSearchQuery(e.target.value);
                         setIsSuggestOpen(true);
                       }}
-                      placeholder="Ketik / pilih seksi atau simbol..."
-                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-14"
+                      placeholder="Ketik / pilih lokasi seksi atau simbol..."
+                      className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-14"
                     />
 
                     {/* Right Action Icons: Live Color Dot & Toggle Chevron */}
@@ -1020,7 +1120,7 @@ export default function WorkHistoryPanel({
                           setIsSuggestOpen((prev) => !prev);
                         }}
                         className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition cursor-pointer"
-                        title="Buka / Tutup Daftar Saran Lokasi"
+                        title="Buka / Tutup Daftar Lokasi"
                       >
                         <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSuggestOpen ? 'rotate-180 text-blue-600' : ''}`} />
                       </button>
@@ -1076,7 +1176,7 @@ export default function WorkHistoryPanel({
                             value={suggestSearchQuery}
                             onChange={(e) => setSuggestSearchQuery(e.target.value)}
                             placeholder="Cari jalur, stasiun, seksi, wesel..."
-                            className="w-full bg-transparent text-slate-800 text-xs font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
+                            className="w-full bg-transparent text-slate-800 text-base sm:text-xs font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                           />
                         </div>
                         {suggestSearchQuery && (
@@ -1112,6 +1212,7 @@ export default function WorkHistoryPanel({
                                   ...prev,
                                   targetCode: item.title,
                                   targetId: item.id,
+                                  kilometer: item.km || prev.kilometer || '',
                                 }));
                                 setIsSuggestOpen(false);
                               }}
@@ -1121,6 +1222,7 @@ export default function WorkHistoryPanel({
                                   ...prev,
                                   targetCode: item.title,
                                   targetId: item.id,
+                                  kilometer: item.km || prev.kilometer || '',
                                 }));
                                 setIsSuggestOpen(false);
                               }}
@@ -1159,104 +1261,41 @@ export default function WorkHistoryPanel({
                 </div>
               </div>
 
-              {/* Jenis Tindakan / Pekerjaan */}
+              {/* 4. KILOMETER (Wajib — auto-terisi dari lokasi, tetap bisa diedit manual) */}
               <div className="space-y-1">
                 <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Wrench className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    Jenis Tindakan / Pekerjaan:
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    KILOMETER:
                   </span>
                   <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
                 <input
                   type="text"
                   required
-                  value={formData.actionType}
-                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-                  placeholder="Contoh: Pengukuran Kawat Kontak..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  value={formData.kilometer}
+                  onChange={(e) => setFormData({ ...formData, kilometer: e.target.value })}
+                  placeholder="Contoh: KM 20+0/1 s.d KM 20+9/0"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-mono font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal placeholder:font-sans"
                 />
               </div>
 
-              {/* Pelaksana / Teknisi */}
+              {/* 5. URAIAN (Opsional — default "-" jika dikosongkan) */}
               <div className="space-y-1">
                 <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <HardHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    Pelaksana / Teknisi:
+                    <ClipboardList className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                    URAIAN:
                   </span>
-                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.technician}
-                  onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
-                  placeholder="Ketik nama pelaksana / teknisi..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
-                />
-              </div>
-
-              {/* Waktu Pelaksanaan */}
-              <div className="space-y-1">
-                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  Waktu Pelaksanaan (WIB):
-                </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.timestamp}
-                  onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs font-medium px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-800"
-                />
-              </div>
-
-              {/* Uraian Pekerjaan & Nilai Pengukuran */}
-              <div className="space-y-1">
-                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <ClipboardList className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    Uraian Hasil & Nilai Ukur:
-                  </span>
-                  <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">(Opsional)</span>
                 </label>
                 <textarea
                   rows={2}
-                  required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Jelaskan detail tindakan, nilai ukur (mm/volt/ohm), kondisi komponen..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400 resize-y"
+                  placeholder="Contoh: 4 TITIK, 2 TITIK, atau kosongkan (-)..."
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 leading-relaxed placeholder:text-slate-400 resize-y"
                 />
-              </div>
-
-              {/* Status Pekerjaan */}
-              <div className="space-y-1">
-                <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  Status Pekerjaan:
-                </label>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                  {[
-                    { id: 'COMPLETED', label: 'SELESAI', color: 'border-emerald-500 text-emerald-800 bg-emerald-50' },
-                    { id: 'IN_PROGRESS', label: 'PROSES', color: 'border-amber-500 text-amber-800 bg-amber-50' },
-                    { id: 'SCHEDULED', label: 'TERJADWAL', color: 'border-blue-500 text-blue-800 bg-blue-50' },
-                  ].map((st) => (
-                    <button
-                      key={st.id}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, status: st.id })}
-                      className={`py-1.5 px-2 text-center rounded-xl text-xs font-extrabold transition cursor-pointer border ${
-                        formData.status === st.id
-                          ? `${st.color} shadow-2xs ring-1 ring-slate-400/20`
-                          : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {st.label}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Submit Buttons */}
