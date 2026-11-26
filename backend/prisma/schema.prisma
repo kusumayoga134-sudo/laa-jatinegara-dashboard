@@ -84,13 +84,16 @@ model InfrastructureAsset {
 model MaintenanceLog {
   id          Int      @id @default(autoincrement())
   timestamp   DateTime @default(now())
-  targetType  String   // "SWITCH", "STATION", "SECTION", "ASSET", "LINE"
-  targetCode  String   // e.g. "DS 4", "ST. JATINEGARA (JALUR 3)"
+  tahun       Int?
+  bulan       String?
+  kilometer   String?
+  targetType  String   @default("LINE") // "SWITCH", "STATION", "SECTION", "ASSET", "LINE"
+  targetCode  String   // LOKASI e.g. "DS 4", "ST. JATINEGARA (JALUR 3)"
   targetId    String?  // Exact Unique Segment ID e.g. "jng_jalur_3"
-  actionType  String   // "TOGGLE", "INSPECTION", "REPAIR", "CALIBRATION"
-  technician  String
-  description String
-  status      String   @default("COMPLETED") // COMPLETED, IN_PROGRESS, SCHEDULED
+  actionType  String   // JENIS PEKERJAAN
+  technician  String?  // Legacy optional
+  description String?  @default("-") // URAIAN (Opsional, default "-")
+  status      String?  @default("COMPLETED") // Legacy optional
   createdAt   DateTime @default(now())
 }
 
