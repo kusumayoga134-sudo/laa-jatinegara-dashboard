@@ -5,6 +5,13 @@
  * Ultra HD (600 DPI CAD Precision), Zero External Dependencies.
  */
 
+import {
+  resolveLogTime,
+  resolveLogKilometer,
+  resolveLogDescription,
+  hasRealDescription,
+} from './workLogHelpers';
+
 export const VIRTUAL_CANVAS = {
   CANVAS_W: 3275,
   CANVAS_H: 1835,
@@ -14,7 +21,7 @@ export const VIRTUAL_CANVAS = {
   LANE_BOTTOM_H: 0,
   CAD_BASE_W: 3275,
   CAD_BASE_H: 1835,
-  CARD_W: 240, // compact 2-line card design
+  CARD_W: 240, // compact card design
   CARD_H: 108, // Default fallback card height
   GAP: 20,
   MARGIN_X: 50,
@@ -41,41 +48,34 @@ export function formatLogTimestamp(timestamp) {
 }
 
 /**
- * Filter and extract ONLY the 3 essential fields:
- * 1) Nama Pekerjaan
- * 2) Pelaksana Pekerjaan (Clean PT/team only)
- * 3) Tahun Pekerjaan (4-digit string)
+ * Extract structured 5-item work log details for callouts & PDF export:
+ * 1) Waktu (BULAN TAHUN)
+ * 2) Jenis Pekerjaan
+ * 3) Lokasi
+ * 4) Kilometer
+ * 5) Uraian (hidden when "-")
  */
-export function getCleanLogDetails(log) {
-  // 1. Nama Pekerjaan
-  const actionName = (log.actionType || log.title || 'Pemeliharaan LAA')
+export function getCleanLogDetails(log, line = null) {
+  const actionName = (log?.actionType || log?.title || 'Pemeliharaan LAA')
     .replace(/_/g, ' ')
     .trim();
 
-  // 2. Tahun (4 digit)
-  let year = '';
-  if (log.year || log.tahun) {
-    year = String(log.year || log.tahun).trim();
-  }
-  const combinedText = [log.technician, log.description, log.rkad].filter(Boolean).join(' ');
-  const yearMatch = combinedText.match(/\b(20\d{2})\b/);
-  if (yearMatch) {
-    year = yearMatch[1];
-  } else if (log.createdAt || log.timestamp) {
-    const d = new Date(log.createdAt || log.timestamp);
-    if (!isNaN(d.getTime())) {
-      year = String(d.getFullYear());
-    }
-  }
-  if (!year) year = String(new Date().getFullYear());
+  const { tahun, bulan, label: timeLabel } = resolveLogTime(log);
+  const kilometer = resolveLogKilometer(log, line);
+  const description = resolveLogDescription(log);
+  const hasDescription = hasRealDescription(log);
+  const lokasi = (log?.targetCode || line?.title || line?.code || 'Lintas LAA 1.9').trim();
 
-  // 3. Pelaksana (hanya nama PT / organisasi)
-  let contractor = (log.technician || log.contractor || log.pelaksana || 'UPT 1.9').trim();
-  contractor = contractor.split('•')[0].split(' - ')[0].trim();
-  contractor = contractor.replace(/\b(RKAD|TAHUN|THN).*/i, '').trim();
-  if (!contractor) contractor = 'UPT 1.9';
-
-  return { actionName, contractor, year };
+  return {
+    actionName,
+    tahun,
+    bulan,
+    timeLabel,
+    lokasi,
+    kilometer,
+    description,
+    hasDescription,
+  };
 }
 
 /**

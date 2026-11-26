@@ -854,32 +854,40 @@ export default function PdfExportModal({
                         </div>
                       </div>
 
-                      {/* Body Work Log Items (2 Tight Lines per Item) */}
+                      {/* Body Work Log Items (Waktu, Jenis Pekerjaan, KM, Uraian jika bukan '-') */}
                       <div className="p-1.5 pl-2.5 flex-1 flex flex-col justify-center space-y-1 bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
-                          const { actionName, contractor, year } = getCleanLogDetails(log);
+                          const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, card.line);
+                          const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
 
                           return (
                             <div
                               key={idx}
                               className={`leading-tight ${idx > 0 ? 'border-t border-slate-100 pt-1' : ''}`}
                             >
-                              {/* Baris 1: Nama Pekerjaan */}
+                              {/* Baris 1: Jenis Pekerjaan */}
                               <div
                                 className="font-bold text-[9px] text-slate-900 truncate"
                                 title={actionName}
                               >
                                 {actionName}
                               </div>
-                              {/* Baris 2: Pelaksana • Tahun */}
+                              {/* Baris 2: BULAN TAHUN • KILOMETER */}
                               <div
-                                className="text-[8px] font-medium text-slate-500 truncate mt-0.5 flex items-center gap-1"
-                                title={`${contractor} • ${year}`}
+                                className="text-[8px] font-medium text-slate-600 truncate mt-0.5"
+                                title={subLine}
                               >
-                                <span>{contractor}</span>
-                                <span className="text-slate-300">•</span>
-                                <span className="font-semibold text-slate-600">{year}</span>
+                                {subLine}
                               </div>
+                              {/* Baris 3: Uraian (Hanya tampil jika bukan '-') */}
+                              {hasDescription && (
+                                <div
+                                  className="text-[7.5px] font-semibold text-blue-700 truncate mt-0.5"
+                                  title={description}
+                                >
+                                  {description}
+                                </div>
+                              )}
                             </div>
                           );
                         })}
