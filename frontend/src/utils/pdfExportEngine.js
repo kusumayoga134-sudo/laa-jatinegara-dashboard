@@ -21,10 +21,11 @@ export const VIRTUAL_CANVAS = {
   LANE_BOTTOM_H: 0,
   CAD_BASE_W: 3275,
   CAD_BASE_H: 1835,
-  CARD_W: 240, // compact card design
-  CARD_H: 108, // Default fallback card height
-  GAP: 20,
-  MARGIN_X: 50,
+  CARD_W: 208, // Landscape proportional width (never shrinks to narrow square)
+  MIN_CARD_W: 190,
+  CARD_H: 96, // Default fallback card height
+  GAP: 12,
+  MARGIN_X: 40,
 };
 
 // Helper to format timestamps in Indonesian
