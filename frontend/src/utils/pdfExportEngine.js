@@ -112,10 +112,13 @@ export function computeCalloutLayout({
     const displayLogs = logs.slice(0, 3);
     const hasExtra = logs.length > 3;
     const HEADER_H = 24;
-    const ITEM_H = 26;
     const PADDING_V = 6;
     const FOOTER_H = 14;
-    const cardH = HEADER_H + displayLogs.length * ITEM_H + PADDING_V + (hasExtra ? FOOTER_H : 0);
+    const itemsH = displayLogs.reduce((acc, log) => {
+      const hasDesc = hasRealDescription(log);
+      return acc + (hasDesc ? 36 : 26);
+    }, 0);
+    const cardH = HEADER_H + itemsH + PADDING_V + (hasExtra ? FOOTER_H : 0);
 
     return {
       id: line.id,
@@ -501,12 +504,11 @@ function drawCalloutBox(ctx, card, scale) {
   ctx.fillText(`${logs.length} Pkj`, badgeX + (badgeW + 4 * scale) / 2, badgeY + badgeH / 2);
 
   // ==========================================
-  // Work Log Items (2 Tight Lines per Item)
+  // Work Log Items (Waktu, Jenis Pekerjaan, KM, Uraian opsional)
   // ==========================================
   let currentLogY = cardY + headerHeight + 2 * scale;
   const itemContentX = cardX + 11 * scale;
   const itemContentW = cardW - 18 * scale;
-  const itemHeight = 26 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
@@ -519,9 +521,10 @@ function drawCalloutBox(ctx, card, scale) {
       currentLogY += 1 * scale;
     }
 
-    const { actionName, contractor, year } = getCleanLogDetails(log);
+    const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, line);
+    const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
 
-    // Baris 1: Nama Pekerjaan (Font Bold, Slate-900)
+    // Baris 1: Jenis Pekerjaan (Font Bold, Slate-900)
     const line1Y = currentLogY + 7.5 * scale;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -529,13 +532,22 @@ function drawCalloutBox(ctx, card, scale) {
     ctx.font = `bold ${8.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(truncateText(ctx, actionName, itemContentW), itemContentX, line1Y);
 
-    // Baris 2: Pelaksana • Tahun (Font Tipis, Slate-500)
-    const line2Y = currentLogY + 18.5 * scale;
-    ctx.fillStyle = '#64748b';
-    ctx.font = `500 ${7.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(truncateText(ctx, `${contractor} • ${year}`, itemContentW), itemContentX, line2Y);
+    // Baris 2: BULAN TAHUN • KILOMETER (Font Medium, Slate-600)
+    const line2Y = currentLogY + 18.0 * scale;
+    ctx.fillStyle = '#475569';
+    ctx.font = `500 ${7.1 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(truncateText(ctx, subLine, itemContentW), itemContentX, line2Y);
 
-    currentLogY += itemHeight;
+    // Baris 3 (jika Uraian != '-'): Uraian
+    if (hasDescription) {
+      const line3Y = currentLogY + 28.5 * scale;
+      ctx.fillStyle = '#1d4ed8';
+      ctx.font = `600 ${6.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillText(truncateText(ctx, description, itemContentW), itemContentX, line3Y);
+      currentLogY += 36 * scale;
+    } else {
+      currentLogY += 26 * scale;
+    }
   });
 
   // Footer: +N pekerjaan lainnya (if logs > 3)
