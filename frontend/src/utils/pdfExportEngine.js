@@ -393,7 +393,7 @@ function drawOrthogonalElbow(ctx, card, scale) {
 
 /**
  * Render Callout Box on Canvas (at given scale)
- * Compact 2-Line Format (Nama Pekerjaan & Pelaksana • Tahun)
+ * Structured Format: Jenis Pekerjaan, BULAN TAHUN • KILOMETER, Uraian (jika != "-")
  */
 function drawCalloutBox(ctx, card, scale) {
   const cardX = card.x * scale;
