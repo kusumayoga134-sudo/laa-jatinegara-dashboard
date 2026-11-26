@@ -826,7 +826,7 @@ export default function PdfExportModal({
                       />
 
                       {/* Header (24px) */}
-                      <div className="h-[24px] bg-slate-50 border-b border-slate-200 flex items-center justify-between px-2 pl-3 shrink-0">
+                      <div className="h-[24px] bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-1.5 px-2 pl-3 shrink-0">
                         <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span
                             className="w-2 h-2 rounded-full shrink-0 border border-white shadow-xs"
@@ -838,24 +838,19 @@ export default function PdfExportModal({
                           >
                             {card.line.title || card.line.code}
                           </span>
-                          {card.line.km && (
-                            <span className="font-mono text-[8px] text-slate-500 shrink-0 font-semibold">
-                              {card.line.km}
-                            </span>
-                          )}
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0 ml-1.5">
-                          <span className="px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[8px] font-bold text-slate-700 flex items-center gap-1">
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[8px] font-bold text-slate-700 flex items-center gap-1 whitespace-nowrap">
                             <span className="w-1 h-1 rounded-full bg-blue-600" />
                             {card.logs.length} Pkj
                           </span>
-                          <GripVertical className="w-3 h-3 text-slate-400" />
+                          <GripVertical className="w-3 h-3 text-slate-400 shrink-0" />
                         </div>
                       </div>
 
-                      {/* Body Work Log Items (Waktu, Jenis Pekerjaan, KM, Uraian jika bukan '-') */}
-                      <div className="p-1.5 pl-2.5 flex-1 flex flex-col justify-center space-y-1 bg-white overflow-hidden">
+                      {/* Body Work Log Items (Wrapped cleanly max 2 lines per field) */}
+                      <div className="px-2 pl-3 py-1.5 flex-1 flex flex-col justify-center gap-1 bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
                           const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, card.line);
                           const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
@@ -863,26 +858,28 @@ export default function PdfExportModal({
                           return (
                             <div
                               key={idx}
-                              className={`leading-tight ${idx > 0 ? 'border-t border-slate-100 pt-1' : ''}`}
+                              className={idx > 0 ? 'border-t border-slate-100 pt-1' : ''}
                             >
                               {/* Baris 1: Jenis Pekerjaan */}
                               <div
-                                className="font-bold text-[9px] text-slate-900 truncate"
+                                className="font-bold text-[8.8px] leading-[11px] text-slate-900 whitespace-normal break-words line-clamp-2"
                                 title={actionName}
                               >
                                 {actionName}
                               </div>
                               {/* Baris 2: BULAN TAHUN • KILOMETER */}
-                              <div
-                                className="text-[8px] font-medium text-slate-600 truncate mt-0.5"
-                                title={subLine}
-                              >
-                                {subLine}
-                              </div>
+                              {subLine && (
+                                <div
+                                  className="text-[7.8px] leading-[10px] font-medium text-slate-600 whitespace-normal break-words line-clamp-2 mt-0.5"
+                                  title={subLine}
+                                >
+                                  {subLine}
+                                </div>
+                              )}
                               {/* Baris 3: Uraian (Hanya tampil jika bukan '-') */}
                               {hasDescription && (
                                 <div
-                                  className="text-[7.5px] font-semibold text-blue-700 truncate mt-0.5"
+                                  className="text-[7.4px] leading-[10px] font-semibold text-blue-700 whitespace-normal break-words line-clamp-2 mt-0.5"
                                   title={description}
                                 >
                                   {description}

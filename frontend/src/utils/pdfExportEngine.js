@@ -80,12 +80,89 @@ export function getCleanLogDetails(log, line = null) {
 }
 
 /**
- * 1D Deterministic Collision-Resolution & Corridor Placement Engine for Callout Cards
- * Computes compact dynamic-height card positions on the 3275 x 1835 Native AutoCAD Model 2 Canvas.
- * Uses 3 Internal Whitespace Zones:
- * - Zona Atas (Y ~ 240): above top tracks (Y <= 720)
- * - Zona Tengah (Y ~ 930 / 1100): wide corridor between upper and lower tracks
- * - Zona Bawah (Y ~ 1620): below bottom tracks (Y > 1360)
+ * Estimate wrapped line count for deterministic card height calculation
+ * Synchronized with Canvas word-wrapping and Preview CSS `break-words line-clamp-2`
+ */
+export function estimateWrappedLineCount(text, maxCharsPerLine = 30, maxLines = 2) {
+  const clean = String(text || '').trim();
+  if (!clean) return 0;
+
+  const words = clean.split(/\s+/);
+  let lines = 1;
+  let curLen = 0;
+
+  for (const word of words) {
+    if (word.length > maxCharsPerLine) {
+      if (curLen > 0) {
+        lines += 1;
+        curLen = 0;
+      }
+      const extraLines = Math.ceil(word.length / maxCharsPerLine) - 1;
+      lines += extraLines;
+      curLen = word.length % maxCharsPerLine || maxCharsPerLine;
+    } else if (curLen === 0) {
+      curLen = word.length;
+    } else if (curLen + 1 + word.length <= maxCharsPerLine) {
+      curLen += 1 + word.length;
+    } else {
+      lines += 1;
+      curLen = word.length;
+    }
+
+    if (lines >= maxLines) {
+      return maxLines;
+    }
+  }
+
+  return Math.min(maxLines, lines);
+}
+
+/**
+ * Compute per-log wrapped line counts & exact dynamic card height
+ */
+function computeCardMetrics(line, displayLogs, totalLogs) {
+  const HEADER_H = 24;
+  const PADDING_TOP = 6;
+  const PADDING_BOT = 6;
+  const ITEM_GAP = 4;
+  const FOOTER_H = totalLogs > 3 ? 14 : 0;
+
+  let bodyH = 0;
+  const logLayouts = displayLogs.map((log, idx) => {
+    const details = getCleanLogDetails(log, line);
+    const subLine = [details.timeLabel, details.kilometer].filter(Boolean).join(' • ');
+
+    const lines1 = estimateWrappedLineCount(details.actionName, 27, 2);
+    const lines2 = estimateWrappedLineCount(subLine, 35, 2);
+    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 37, 2) : 0;
+
+    const h1 = lines1 * 11;
+    const h2 = lines2 > 0 ? 2 + lines2 * 10 : 0;
+    const h3 = lines3 > 0 ? 2 + lines3 * 10 : 0;
+    const itemH = h1 + h2 + h3 + 3;
+
+    bodyH += itemH + (idx > 0 ? ITEM_GAP : 0);
+
+    return {
+      ...details,
+      subLine,
+      lines1,
+      lines2,
+      lines3,
+      itemH,
+    };
+  });
+
+  const totalH = Math.max(66, HEADER_H + PADDING_TOP + bodyH + FOOTER_H + PADDING_BOT);
+  return { cardH: totalH, logLayouts };
+}
+
+/**
+ * Multi-Row Staggered Shelves Collision-Resolution & Corridor Placement Engine for Callout Cards
+ * Uses 3 Internal Whitespace Zones on the 3275 x 1835 Native AutoCAD Model 2 Canvas:
+ * - Zona Atas (multi-row staggered above upper tracks, avoiding Legend & station labels)
+ * - Zona Tengah (2–3 staggered tiers in Y = 922..1158 corridor between upper & lower tracks)
+ * - Zona Bawah (multi-row staggered below lower tracks, Y >= 1536)
  */
 export function computeCalloutLayout({
   linesWithLogs = [],
@@ -95,11 +172,14 @@ export function computeCalloutLayout({
     CANVAS_W,
     CANVAS_H,
     CARD_W,
+    MIN_CARD_W,
     GAP,
     MARGIN_X,
   } = VIRTUAL_CANVAS;
 
   if (!linesWithLogs || linesWithLogs.length === 0) return [];
+
+  const safeCardW = Math.max(MIN_CARD_W || 190, CARD_W || 208);
 
   // Directly map CAD base coords (3275 x 1835) 1:1
   const items = linesWithLogs.map(({ line, logs, center }) => {
@@ -109,28 +189,20 @@ export function computeCalloutLayout({
     const radarX = Math.round(rawX);
     const radarY = Math.round(rawY);
 
-    // Dynamic height based on number of items (max 3 items shown)
     const displayLogs = logs.slice(0, 3);
-    const hasExtra = logs.length > 3;
-    const HEADER_H = 24;
-    const PADDING_V = 6;
-    const FOOTER_H = 14;
-    const itemsH = displayLogs.reduce((acc, log) => {
-      const hasDesc = hasRealDescription(log);
-      return acc + (hasDesc ? 36 : 26);
-    }, 0);
-    const cardH = HEADER_H + itemsH + PADDING_V + (hasExtra ? FOOTER_H : 0);
+    const { cardH, logLayouts } = computeCardMetrics(line, displayLogs, logs.length);
 
     return {
       id: line.id,
       line,
       logs,
       displayLogs,
+      logLayouts,
       radarX,
       radarY,
       rawX,
       rawY,
-      w: CARD_W,
+      w: safeCardW,
       h: cardH,
       x: 0,
       y: 0,
@@ -144,87 +216,209 @@ export function computeCalloutLayout({
   // Sort items by radarX ascending
   items.sort((a, b) => a.radarX - b.radarX);
 
-  // Partition into the 3 Internal Whitespace Zones
-  const topCards = [];
-  const midCards = [];
+  // CAD Static Obstacle Regions (Legend, Banner, Station Titles, Track Bands)
+  const CAD_OBSTACLES = [
+    // Legend Top-Right Box
+    { x: 2825, y: 150, w: 460, h: 300 },
+    // ST. JATINEGARA Station Header
+    { x: 900, y: 382, w: 410, h: 86 },
+    // Jatinegara Tracks Left/Center Band
+    { x: 0, y: 468, w: 1645, h: 452 },
+    // Klender & Buaran Titles + Upper Track Band
+    { x: 1645, y: 715, w: 1630, h: 205 },
+    // Lower Tracks + Station Titles (ST. BEKASI, ST. KRANJI, ST. CAKUNG, ST. KLENDER BARU)
+    { x: 0, y: 1162, w: 3275, h: 368 },
+  ];
+
+  const overlapsRect = (ax, ay, aw, ah, b, padX = GAP, padY = 8) => (
+    ax < b.x + b.w + padX &&
+    ax + aw + padX > b.x &&
+    ay < b.y + b.h + padY &&
+    ay + ah + padY > b.y
+  );
+
+  // Collect all valid non-overlapping X intervals for a card at fixed `y`
+  const findValidXAtY = (card, y, placedCards, obstacles) => {
+    const minValidX = MARGIN_X;
+    const maxValidX = CANVAS_W - MARGIN_X - card.w;
+    if (maxValidX < minValidX) return MARGIN_X;
+
+    const idealX = Math.max(minValidX, Math.min(maxValidX, Math.round(card.radarX - card.w / 2)));
+
+    // Build forbidden X intervals [blockStart, blockEnd]
+    const blocked = [];
+    for (const obs of obstacles) {
+      if (y < obs.y + obs.h + 6 && y + card.h + 6 > obs.y) {
+        blocked.push([obs.x - card.w - 8, obs.x + obs.w + 8]);
+      }
+    }
+    for (const other of placedCards) {
+      if (y < other.y + other.h + 8 && y + card.h + 8 > other.y) {
+        blocked.push([other.x - card.w - GAP, other.x + other.w + GAP]);
+      }
+    }
+
+    blocked.sort((a, b) => a[0] - b[0]);
+
+    // Subtract blocked intervals from [minValidX, maxValidX]
+    let freeIntervals = [[minValidX, maxValidX]];
+    for (const [bStart, bEnd] of blocked) {
+      const next = [];
+      for (const [fStart, fEnd] of freeIntervals) {
+        if (bEnd <= fStart || bStart >= fEnd) {
+          next.push([fStart, fEnd]);
+        } else {
+          if (bStart > fStart) next.push([fStart, bStart]);
+          if (bEnd < fEnd) next.push([bEnd, fEnd]);
+        }
+      }
+      freeIntervals = next;
+    }
+
+    if (freeIntervals.length === 0) return null;
+
+    let bestX = null;
+    let bestDist = Infinity;
+    for (const [start, end] of freeIntervals) {
+      if (start > end) continue;
+      const cand = Math.max(start, Math.min(end, idealX));
+      const dist = Math.abs(cand - idealX);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestX = Math.round(cand);
+      }
+    }
+    return bestX;
+  };
+
+  /**
+   * Place a group of cards across preferred Y shelves with minimum horizontal displacement
+   */
+  const placeOnStaggeredShelves = (cards, getCandidateYs, placedCards, maxPreferredShift = 130) => {
+    cards.forEach((card) => {
+      const candidateYs = getCandidateYs(card);
+      let chosen = null;
+
+      // Pass 1: Pick the first candidate shelf that keeps horizontal shift small
+      for (const y of candidateYs) {
+        const clampedY = Math.max(180, Math.min(CANVAS_H - card.h - 20, Math.round(y)));
+        const validX = findValidXAtY(card, clampedY, placedCards, CAD_OBSTACLES);
+        if (validX !== null) {
+          const idealX = Math.max(MARGIN_X, Math.min(CANVAS_W - MARGIN_X - card.w, Math.round(card.radarX - card.w / 2)));
+          const shift = Math.abs(validX - idealX);
+          if (!chosen || shift < chosen.shift) {
+            chosen = { x: validX, y: clampedY, shift };
+          }
+          if (shift <= maxPreferredShift) {
+            break;
+          }
+        }
+      }
+
+      // Fallback (should rarely happen): scan Zona Y range without obstacle crash
+      if (!chosen) {
+        for (let scanY = 185; scanY <= CANVAS_H - card.h - 25; scanY += 20) {
+          const validX = findValidXAtY(card, scanY, placedCards, CAD_OBSTACLES);
+          if (validX !== null) {
+            chosen = { x: validX, y: scanY, shift: 0 };
+            break;
+          }
+        }
+      }
+
+      if (chosen) {
+        card.x = chosen.x;
+        card.y = chosen.y;
+      } else {
+        card.x = Math.max(MARGIN_X, Math.min(CANVAS_W - MARGIN_X - card.w, Math.round(card.radarX - card.w / 2)));
+        card.y = Math.max(185, Math.min(CANVAS_H - card.h - 25, Math.round(candidateYs[0] || 200)));
+      }
+
+      placedCards.push(card);
+    });
+  };
+
+  // Partition into Zones matching CAD geometry
+  const topLeftCards = [];
+  const topRightCards = [];
+  const midUpperCards = [];
+  const midLowerCards = [];
   const bottomCards = [];
 
   items.forEach((item) => {
-    if (item.radarY <= 720) {
-      // Upper track section (Jalur 8..4, POK) -> Zona Atas
+    if (item.radarY <= 835) {
+      // Zona Atas: St. Jatinegara & Klender/Buaran HILIR (arrows point DOWN)
       item.isUpper = true;
-      item.baseY = 240;
-      topCards.push(item);
-    } else if (item.radarY > 1360) {
-      // Lower track southern section -> Zona Bawah
-      item.isUpper = false;
-      item.baseY = 1620;
-      bottomCards.push(item);
-    } else {
-      // Intermediate tracks (JNG Emplasemen Selatan / CUK-KRI northern) -> Zona Tengah
-      if (item.radarY <= 1000) {
-        item.isUpper = false;
-        item.baseY = 930;
+      if (item.radarX < 1645) {
+        topLeftCards.push(item);
       } else {
-        item.isUpper = true;
-        item.baseY = 1090;
+        topRightCards.push(item);
       }
-      midCards.push(item);
+    } else if (item.radarY > 1320) {
+      // Zona Bawah: Bekasi/Kranji/Cakung Southern Tracks (arrows point UP)
+      item.isUpper = false;
+      bottomCards.push(item);
+    } else if (item.radarY <= 1050) {
+      // Zona Tengah (Baris Atas): Klender/Buaran HULU & Emplasemen Selatan (arrows point UP)
+      item.isUpper = false;
+      midUpperCards.push(item);
+    } else {
+      // Zona Tengah (Baris Bawah): St. Bekasi/Kranji/Cakung Northern Tracks (arrows point DOWN)
+      item.isUpper = true;
+      midLowerCards.push(item);
     }
   });
 
-  // 1D Horizontal Layout Function for a Single Zone
-  const layoutZone = (cards) => {
-    if (cards.length === 0) return;
+  const placedCards = [];
 
-    cards.sort((a, b) => a.radarX - b.radarX);
+  // 1. Zona Atas Left (St. Jatinegara): 2 shelves above Y=382 (185, 290)
+  placeOnStaggeredShelves(
+    topLeftCards,
+    (card) => [286 - Math.min(20, Math.max(0, card.h - 75)), 186],
+    placedCards,
+    110
+  );
 
-    // Compute proportional card width if crowded
-    let curCardW = CARD_W;
-    const maxAvailableW = CANVAS_W - 2 * MARGIN_X;
-    const neededW = cards.length * curCardW + (cards.length - 1) * GAP;
-    if (neededW > maxAvailableW) {
-      curCardW = Math.floor((maxAvailableW - (cards.length - 1) * GAP) / cards.length);
-    }
+  // 2. Zona Atas Right (Klender/Buaran HILIR): large blank space Y=185..705 -> staggered bottom-up from track label
+  placeOnStaggeredShelves(
+    topRightCards,
+    (card) => [
+      705 - card.h, // Closest clean tier above ST. KLENDER / ST. BUARAN (Y ~ 715)
+      595 - Math.round(card.h * 0.5),
+      475,
+      360,
+      250,
+      185,
+    ],
+    placedCards,
+    110
+  );
 
-    cards.forEach((card) => {
-      card.w = curCardW;
-      card.y = card.baseY;
-      card.x = Math.round(card.radarX - curCardW / 2);
-    });
+  // 3. Zona Tengah Upper (points at Y ~ 850..900 -> arrows point UP): staggered shelves from Y=924 downwards
+  placeOnStaggeredShelves(
+    midUpperCards,
+    (card) => [924, 1006, 1084 - Math.min(24, Math.max(0, card.h - 75)), 962, 1042],
+    placedCards,
+    115
+  );
 
-    // Pass 1: Left-to-Right push
-    if (cards[0].x < MARGIN_X) cards[0].x = MARGIN_X;
-    for (let i = 1; i < cards.length; i++) {
-      const minX = cards[i - 1].x + cards[i - 1].w + GAP;
-      if (cards[i].x < minX) {
-        cards[i].x = minX;
-      }
-    }
+  // 4. Zona Tengah Lower (points at Y ~ 1190..1310 -> arrows point DOWN): staggered shelves from bottom Y=1158 upwards
+  placeOnStaggeredShelves(
+    midLowerCards,
+    (card) => [1156 - card.h, 1068 - Math.round(card.h * 0.4), 988, 924],
+    placedCards,
+    115
+  );
 
-    // Pass 2: Right-to-Left push if last card exceeds right margin
-    const lastCard = cards[cards.length - 1];
-    if (lastCard.x + lastCard.w > CANVAS_W - MARGIN_X) {
-      lastCard.x = CANVAS_W - MARGIN_X - lastCard.w;
-      for (let i = cards.length - 2; i >= 0; i--) {
-        const maxX = cards[i + 1].x - GAP - cards[i].w;
-        if (cards[i].x > maxX) {
-          cards[i].x = maxX;
-        }
-      }
-    }
+  // 5. Zona Bawah (points at Y > 1320 -> arrows point UP): 2–3 staggered shelves starting at Y = 1536
+  placeOnStaggeredShelves(
+    bottomCards,
+    (card) => [1538, 1630, 1720],
+    placedCards,
+    120
+  );
 
-    // Pass 3: Hard boundary clamp [MARGIN_X .. CANVAS_W - MARGIN_X - card.w]
-    for (let i = 0; i < cards.length; i++) {
-      cards[i].x = Math.max(MARGIN_X, Math.min(CANVAS_W - MARGIN_X - cards[i].w, cards[i].x));
-    }
-  };
-
-  layoutZone(topCards);
-  layoutZone(midCards);
-  layoutZone(bottomCards);
-
-  const allCards = [...topCards, ...midCards, ...bottomCards];
+  const allCards = placedCards;
 
   // Apply User Manual Drag-and-Drop Overrides (if any)
   allCards.forEach((card) => {
@@ -237,17 +431,22 @@ export function computeCalloutLayout({
     }
   });
 
+  // Sort cleanly by radarX again for deterministic elbow staggering
+  allCards.sort((a, b) => a.radarX - b.radarX);
+
   // Calculate Orthogonal Elbow Anchor Points and Staggered Belokan
   allCards.forEach((card, idx) => {
     card.startX = Math.round(card.x + card.w / 2);
-    const stagger = ((idx % 3) - 1) * 12;
+    const stagger = ((idx % 3) - 1) * 10;
 
     if (card.isUpper) {
       card.startY = card.y + card.h;
-      card.elbowY = Math.round(card.startY + (card.radarY - card.startY) * 0.45 + stagger);
+      const midY = card.startY + (card.radarY - card.startY) * 0.45 + stagger;
+      card.elbowY = Math.round(Math.max(card.startY + 6, Math.min(card.radarY - 12, midY)));
     } else {
       card.startY = card.y;
-      card.elbowY = Math.round(card.startY - (card.startY - card.radarY) * 0.45 + stagger);
+      const midY = card.startY - (card.startY - card.radarY) * 0.45 + stagger;
+      card.elbowY = Math.round(Math.min(card.startY - 6, Math.max(card.radarY + 12, midY)));
     }
   });
 
@@ -308,6 +507,71 @@ function truncateText(ctx, text, maxWidth) {
     str = str.slice(0, -1);
   }
   return str + '...';
+}
+
+/**
+ * Wrap text into at most `maxLines` lines matching Preview word-wrap & line-clamp-2
+ */
+function wrapCanvasText(ctx, text, maxWidth, maxLines = 2) {
+  const clean = String(text || '').trim();
+  if (!clean) return [];
+
+  const words = clean.split(/\s+/);
+  const lines = [];
+  let currentLine = '';
+
+  const pushWrappedWord = (word) => {
+    let remaining = word;
+    while (remaining.length > 0 && lines.length < maxLines) {
+      let fit = remaining;
+      while (fit.length > 1 && ctx.measureText(fit).width > maxWidth) {
+        fit = fit.slice(0, -1);
+      }
+      if (fit.length === remaining.length) {
+        currentLine = fit;
+        remaining = '';
+      } else {
+        lines.push(fit);
+        remaining = remaining.slice(fit.length);
+      }
+    }
+  };
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+    if (ctx.measureText(testLine).width <= maxWidth) {
+      currentLine = testLine;
+    } else if (!currentLine) {
+      pushWrappedWord(word);
+    } else {
+      lines.push(currentLine);
+      currentLine = '';
+      if (lines.length >= maxLines) {
+        break;
+      }
+      if (ctx.measureText(word).width <= maxWidth) {
+        currentLine = word;
+      } else {
+        pushWrappedWord(word);
+      }
+    }
+
+    if (lines.length >= maxLines) {
+      break;
+    }
+  }
+
+  if (currentLine && lines.length < maxLines) {
+    lines.push(currentLine);
+  }
+
+  if (lines.length === maxLines) {
+    lines[maxLines - 1] = truncateText(ctx, lines[maxLines - 1], maxWidth);
+  }
+
+  return lines.slice(0, maxLines);
 }
 
 /**
@@ -470,7 +734,7 @@ function drawCalloutBox(ctx, card, scale) {
   ctx.arc(headerDotX, headerDotY, 1.2 * scale, 0, Math.PI * 2);
   ctx.fill();
 
-  // Track Title & KM (Single row)
+  // Track Title (Single row, never collides with Pkj badge)
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'left';
@@ -480,7 +744,7 @@ function drawCalloutBox(ctx, card, scale) {
   const titleText = truncateText(ctx, line.title || line.code, maxTitleW);
   ctx.fillText(titleText, cardX + 18 * scale, headerDotY);
 
-  // Job Count Badge Pill
+  // Job Count Badge Pill (NO drag handle rendered in PNG/PDF export)
   const badgeH = 14 * scale;
   const badgeX = cardX + cardW - badgeW - 6 * scale;
   const badgeY = cardY + (headerHeight - badgeH) / 2;
@@ -505,57 +769,70 @@ function drawCalloutBox(ctx, card, scale) {
   ctx.fillText(`${logs.length} Pkj`, badgeX + (badgeW + 4 * scale) / 2, badgeY + badgeH / 2);
 
   // ==========================================
-  // Work Log Items (Waktu, Jenis Pekerjaan, KM, Uraian opsional)
+  // Work Log Items (Wrapped cleanly max 2 lines per field)
   // ==========================================
-  let currentLogY = cardY + headerHeight + 2 * scale;
-  const itemContentX = cardX + 11 * scale;
-  const itemContentW = cardW - 18 * scale;
+  let currentLogY = cardY + headerHeight + 6 * scale;
+  const itemContentX = cardX + 12 * scale;
+  const itemContentW = cardW - 20 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
       ctx.strokeStyle = '#f1f5f9';
       ctx.lineWidth = 0.8 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 8 * scale, currentLogY);
-      ctx.lineTo(cardX + cardW - 8 * scale, currentLogY);
+      ctx.moveTo(cardX + 8 * scale, currentLogY - 2 * scale);
+      ctx.lineTo(cardX + cardW - 8 * scale, currentLogY - 2 * scale);
       ctx.stroke();
-      currentLogY += 1 * scale;
+      currentLogY += 2 * scale;
     }
 
     const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, line);
     const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
 
-    // Baris 1: Jenis Pekerjaan (Font Bold, Slate-900)
-    const line1Y = currentLogY + 7.5 * scale;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
+
+    // Baris 1: Jenis Pekerjaan (Wrapped up to 2 lines, bold Slate-900)
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${8.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(truncateText(ctx, actionName, itemContentW), itemContentX, line1Y);
+    ctx.font = `bold ${8.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 2);
+    wrappedAction.forEach((txtLine) => {
+      ctx.fillText(txtLine, itemContentX, currentLogY + 5.5 * scale);
+      currentLogY += 11 * scale;
+    });
 
-    // Baris 2: BULAN TAHUN • KILOMETER (Font Medium, Slate-600)
-    const line2Y = currentLogY + 18.0 * scale;
-    ctx.fillStyle = '#475569';
-    ctx.font = `500 ${7.1 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(truncateText(ctx, subLine, itemContentW), itemContentX, line2Y);
-
-    // Baris 3 (jika Uraian != '-'): Uraian
-    if (hasDescription) {
-      const line3Y = currentLogY + 28.5 * scale;
-      ctx.fillStyle = '#1d4ed8';
-      ctx.font = `600 ${6.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillText(truncateText(ctx, description, itemContentW), itemContentX, line3Y);
-      currentLogY += 36 * scale;
-    } else {
-      currentLogY += 26 * scale;
+    // Baris 2: BULAN TAHUN • KILOMETER (Wrapped up to 2 lines, Slate-600)
+    if (subLine) {
+      currentLogY += 1.5 * scale;
+      ctx.fillStyle = '#475569';
+      ctx.font = `500 ${7.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedSub = wrapCanvasText(ctx, subLine, itemContentW, 2);
+      wrappedSub.forEach((txtLine) => {
+        ctx.fillText(txtLine, itemContentX, currentLogY + 5 * scale);
+        currentLogY += 10 * scale;
+      });
     }
+
+    // Baris 3 (jika Uraian != '-'): Uraian (Wrapped up to 2 lines, Blue-700)
+    if (hasDescription) {
+      currentLogY += 1.5 * scale;
+      ctx.fillStyle = '#1d4ed8';
+      ctx.font = `600 ${7.0 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 2);
+      wrappedDesc.forEach((txtLine) => {
+        ctx.fillText(txtLine, itemContentX, currentLogY + 5 * scale);
+        currentLogY += 10 * scale;
+      });
+    }
+
+    currentLogY += 3 * scale;
   });
 
   // Footer: +N pekerjaan lainnya (if logs > 3)
   if (logs.length > 3) {
-    const footerY = currentLogY + 6 * scale;
+    const footerY = currentLogY + 5 * scale;
     ctx.fillStyle = '#94a3b8';
-    ctx.font = `italic 600 ${6.8 * scale}px sans-serif`;
+    ctx.font = `italic 600 ${7.0 * scale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya`, cardX + cardW / 2, footerY);
