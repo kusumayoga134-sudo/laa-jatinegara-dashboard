@@ -217,11 +217,15 @@ export const api = {
   // Logs (CRUD)
   async getLogs(limit = 500) {
     try {
-      const res = await fetch(`${BASE_URL}/logs?limit=${limit}`);
+      const res = await fetch(`${BASE_URL}/logs?limit=${limit}`, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
       const contentType = res.headers.get('content-type') || '';
       if (res.ok && contentType.includes('application/json')) {
         const json = await res.json();
-        if (json?.data && json.data.length > 0) {
+        if (Array.isArray(json?.data)) {
+          saveLocalLogs(json.data);
           return json;
         }
       }

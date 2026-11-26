@@ -33,18 +33,13 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const filterDeletedLogs = (logList) => {
-    try {
-      const deletedIds = JSON.parse(localStorage.getItem('laa_deleted_log_ids') || '[]');
-      if (!Array.isArray(deletedIds) || deletedIds.length === 0) return logList;
-      return logList.filter((l) => !deletedIds.includes(Number(l.id)) && !deletedIds.includes(String(l.id)));
-    } catch {
-      return logList;
-    }
-  };
-
   const loadInitialData = async () => {
     try {
+      // Clear legacy client-side ID blacklist so DB resets/imports always sync 1:1
+      try {
+        localStorage.removeItem('laa_deleted_log_ids');
+      } catch {}
+
       const [stationsRes, switchesRes, logsRes] = await Promise.all([
         api.getStations().catch(() => ({ data: [] })),
         api.getSwitches().catch(() => ({ data: [] })),
@@ -53,7 +48,7 @@ export default function App() {
 
       if (stationsRes.data) setStations(stationsRes.data);
       if (switchesRes.data) setSwitches(switchesRes.data);
-      if (logsRes.data) setLogs(filterDeletedLogs(logsRes.data));
+      if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
     } catch (err) {
       console.error('Error loading initial data:', err);
     }
@@ -64,7 +59,7 @@ export default function App() {
     const interval = setInterval(async () => {
       try {
         const logsRes = await api.getLogs(500);
-        if (logsRes?.data) setLogs(filterDeletedLogs(logsRes.data));
+        if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
       } catch (err) {}
     }, 10000);
     return () => clearInterval(interval);
@@ -88,7 +83,7 @@ export default function App() {
       await api.createLog(logData);
       showToast('Catatan pekerjaan baru berhasil disimpan!', 'success');
       const logsRes = await api.getLogs(500);
-      if (logsRes.data) setLogs(filterDeletedLogs(logsRes.data));
+      if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
     } catch (err) {
       showToast(err.message || 'Gagal menyimpan catatan pekerjaan', 'error');
       throw err;
@@ -100,7 +95,7 @@ export default function App() {
       await api.updateLog(id, logData);
       showToast('Catatan pekerjaan berhasil diperbarui!', 'success');
       const logsRes = await api.getLogs(500);
-      if (logsRes.data) setLogs(filterDeletedLogs(logsRes.data));
+      if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
     } catch (err) {
       showToast(err.message || 'Gagal memperbarui catatan pekerjaan', 'error');
       throw err;
@@ -112,24 +107,16 @@ export default function App() {
     // 1. Optimistic instant removal from state
     setLogs((prev) => prev.filter((l) => Number(l.id) !== numId && String(l.id) !== String(id)));
 
-    // 2. Persist deleted ID locally so it never resurfaces
-    try {
-      const deletedIds = JSON.parse(localStorage.getItem('laa_deleted_log_ids') || '[]');
-      if (!deletedIds.includes(numId)) {
-        deletedIds.push(numId);
-        localStorage.setItem('laa_deleted_log_ids', JSON.stringify(deletedIds));
-      }
-    } catch (e) {}
-
-    // 3. Call backend API
+    // 2. Call backend API & refresh from single source of truth
     try {
       await api.deleteLog(id);
       showToast('Catatan pekerjaan berhasil dihapus!', 'success');
       const logsRes = await api.getLogs(500);
-      if (logsRes?.data) setLogs(filterDeletedLogs(logsRes.data));
+      if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
     } catch (err) {
-      // Even if network or older server has an issue, UI is updated cleanly
-      showToast('Catatan pekerjaan berhasil dihapus!', 'success');
+      showToast(err.message || 'Gagal menghapus catatan pekerjaan', 'error');
+      const logsRes = await api.getLogs(500).catch(() => null);
+      if (Array.isArray(logsRes?.data)) setLogs(logsRes.data);
     }
   };
 
