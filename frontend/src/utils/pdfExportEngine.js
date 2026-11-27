@@ -21,11 +21,11 @@ export const VIRTUAL_CANVAS = {
   LANE_BOTTOM_H: 0,
   CAD_BASE_W: 3275,
   CAD_BASE_H: 1835,
-  CARD_W: 162, // Compact proportional width (152-168px) without empty right whitespace
-  MIN_CARD_W: 152,
-  CARD_H: 90, // Default fallback card height
-  GAP: 10,
-  MARGIN_X: 36,
+  CARD_W: 136, // Compact CAD proportional width (128-142px)
+  MIN_CARD_W: 128,
+  CARD_H: 52, // Default fallback card height
+  GAP: 8,
+  MARGIN_X: 32,
 };
 
 // Helper to format timestamps in Indonesian
@@ -80,10 +80,10 @@ export function getCleanLogDetails(log, line = null) {
 }
 
 /**
- * Estimate wrapped line count for deterministic card height calculation
- * Synchronized with Canvas word-wrapping and Preview CSS `break-words line-clamp-2`
+ * Estimate wrapped line count for deterministic tight card height calculation
+ * Synchronized 1:1 with Canvas word-wrapping and Preview CSS `whitespace-normal break-words` (no ellipsis)
  */
-export function estimateWrappedLineCount(text, maxCharsPerLine = 30, maxLines = 2) {
+export function estimateWrappedLineCount(text, maxCharsPerLine = 28, maxLines = 4) {
   const clean = String(text || '').trim();
   if (!clean) return 0;
 
@@ -108,41 +108,37 @@ export function estimateWrappedLineCount(text, maxCharsPerLine = 30, maxLines = 
       lines += 1;
       curLen = word.length;
     }
-
-    if (lines >= maxLines) {
-      return maxLines;
-    }
   }
 
-  return Math.min(maxLines, lines);
+  return Math.min(maxLines, Math.max(1, lines));
 }
 
 /**
- * Compute per-log wrapped line counts & exact dynamic card height (including 1–2 line header)
+ * Compute per-log wrapped line counts & tight Compact CAD card height
  */
 function computeCardMetrics(line, displayLogs, totalLogs) {
   const titleText = String(line?.title || line?.code || '').trim();
-  const titleLines = estimateWrappedLineCount(titleText, 22, 2);
-  const headerH = titleLines > 1 ? 30 : 22;
+  const titleLines = estimateWrappedLineCount(titleText, 24, 4);
+  const headerH = Math.ceil(5 + titleLines * 8.2);
 
-  const PADDING_TOP = 5;
-  const PADDING_BOT = 5;
+  const PADDING_TOP = 3;
+  const PADDING_BOT = 3;
   const ITEM_GAP = 4;
-  const FOOTER_H = totalLogs > 3 ? 13 : 0;
+  const FOOTER_H = totalLogs > 3 ? 10 : 0;
 
   let bodyH = 0;
   const logLayouts = displayLogs.map((log, idx) => {
     const details = getCleanLogDetails(log, line);
     const subLine = [details.timeLabel, details.kilometer].filter(Boolean).join(' • ');
 
-    const lines1 = estimateWrappedLineCount(details.actionName, 23, 2);
-    const lines2 = estimateWrappedLineCount(subLine, 29, 2);
-    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 31, 2) : 0;
+    const lines1 = estimateWrappedLineCount(details.actionName, 29, 4);
+    const lines2 = estimateWrappedLineCount(subLine, 35, 4);
+    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 36, 4) : 0;
 
-    const h1 = lines1 * 10.5;
-    const h2 = lines2 > 0 ? 1.5 + lines2 * 9.5 : 0;
-    const h3 = lines3 > 0 ? 1.5 + lines3 * 9.5 : 0;
-    const itemH = h1 + h2 + h3 + 3;
+    const h1 = lines1 * 7.6;
+    const h2 = lines2 > 0 ? 1 + lines2 * 7.0 : 0;
+    const h3 = lines3 > 0 ? 1 + lines3 * 6.8 : 0;
+    const itemH = h1 + h2 + h3;
 
     bodyH += itemH + (idx > 0 ? ITEM_GAP : 0);
 
@@ -156,7 +152,7 @@ function computeCardMetrics(line, displayLogs, totalLogs) {
     };
   });
 
-  const totalH = Math.ceil(Math.max(64, headerH + PADDING_TOP + bodyH + FOOTER_H + PADDING_BOT));
+  const totalH = Math.ceil(headerH + PADDING_TOP + bodyH + FOOTER_H + PADDING_BOT);
   return { headerH, cardH: totalH, logLayouts };
 }
 
@@ -375,12 +371,12 @@ export function computeCalloutLayout({
 
   const placedCards = [];
 
-  // 1. Zona Atas Left (St. Jatinegara): 2 shelves above Y=382 (185, 290)
+  // 1. Zona Atas Left (St. Jatinegara): shelves above Y=382 (184, 248, 310)
   placeOnStaggeredShelves(
     topLeftCards,
-    (card) => [286 - Math.min(20, Math.max(0, card.h - 75)), 186],
+    (card) => [315 - Math.min(20, Math.max(0, card.h - 48)), 250, 186],
     placedCards,
-    110
+    95
   );
 
   // 2. Zona Atas Right (Klender/Buaran HILIR): large blank space Y=185..705 -> staggered bottom-up from track label
@@ -388,38 +384,40 @@ export function computeCalloutLayout({
     topRightCards,
     (card) => [
       705 - card.h, // Closest clean tier above ST. KLENDER / ST. BUARAN (Y ~ 715)
-      595 - Math.round(card.h * 0.5),
-      475,
-      360,
-      250,
-      185,
+      635 - Math.round(card.h * 0.5),
+      560,
+      485,
+      410,
+      335,
+      260,
+      186,
     ],
     placedCards,
-    110
+    95
   );
 
   // 3. Zona Tengah Upper (points at Y ~ 850..900 -> arrows point UP): staggered shelves from Y=924 downwards
   placeOnStaggeredShelves(
     midUpperCards,
-    (card) => [924, 1006, 1084 - Math.min(24, Math.max(0, card.h - 75)), 962, 1042],
+    (card) => [924, 984, 1044, 1102 - Math.min(20, Math.max(0, card.h - 48)), 954, 1014],
     placedCards,
-    115
+    100
   );
 
   // 4. Zona Tengah Lower (points at Y ~ 1190..1310 -> arrows point DOWN): staggered shelves from bottom Y=1158 upwards
   placeOnStaggeredShelves(
     midLowerCards,
-    (card) => [1156 - card.h, 1068 - Math.round(card.h * 0.4), 988, 924],
+    (card) => [1156 - card.h, 1094 - Math.round(card.h * 0.4), 1034, 974, 924],
     placedCards,
-    115
+    100
   );
 
-  // 5. Zona Bawah (points at Y > 1320 -> arrows point UP): 2–3 staggered shelves starting at Y = 1536
+  // 5. Zona Bawah (points at Y > 1320 -> arrows point UP): compact staggered shelves starting at Y = 1536
   placeOnStaggeredShelves(
     bottomCards,
-    (card) => [1538, 1630, 1720],
+    (card) => [1536, 1602, 1668, 1734],
     placedCards,
-    120
+    100
   );
 
   const allCards = placedCards;
@@ -569,10 +567,6 @@ function wrapCanvasText(ctx, text, maxWidth, maxLines = 2) {
 
   if (currentLine && lines.length < maxLines) {
     lines.push(currentLine);
-  }
-
-  if (lines.length === maxLines) {
-    lines[maxLines - 1] = truncateText(ctx, lines[maxLines - 1], maxWidth);
   }
 
   return lines.slice(0, maxLines);
