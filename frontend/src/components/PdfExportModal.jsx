@@ -684,9 +684,9 @@ export default function PdfExportModal({
               }}
               className="bg-white border-2 border-slate-700 relative overflow-hidden shadow-2xl shrink-0"
             >
-              {/* 1. CAD Blueprint Map Image Native AutoCAD (3275 x 1835 + Model 3 Legend) */}
+              {/* 1. CAD Blueprint Map Image Native AutoCAD (3275 x 1835 + Model 4 Legend) */}
               <img
-                src="/peta-laa-model3-hd.png?v=model3"
+                src="/peta-laa-model4-hd.png?v=model4"
                 alt="Peta Wilayah LAA UPT Resor 1.9 Jatinegara"
                 style={{
                   position: 'absolute',
@@ -846,40 +846,48 @@ export default function PdfExportModal({
                         <GripVertical className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                       </div>
 
-                      {/* Body Work Log Items (Compact CAD tight vertical packing, 0 ellipsis) */}
+                      {/* Body Work Log Items (Urutan 4 baris persis DAFTAR SINGKAT PEKERJAAN, 0 ellipsis) */}
                       <div className="pl-[7px] pr-[5px] py-[3px] flex-1 flex flex-col justify-start bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
                           const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, card.line);
-                          const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
 
                           return (
                             <div
                               key={idx}
                               className={idx > 0 ? 'border-t border-slate-200/80 mt-[2px] pt-[2px]' : ''}
                             >
-                              {/* Baris 1: Jenis Pekerjaan */}
+                              {/* Baris 1: Nama Pekerjaan (Acuan utama) */}
                               <div
                                 className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words"
                                 title={actionName}
                               >
                                 {actionName}
                               </div>
-                              {/* Baris 2: BULAN TAHUN • KILOMETER */}
-                              {subLine && (
+                              {/* Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru bersih, tanpa bullet & waktu) */}
+                              {kilometer && (
                                 <div
-                                  className="text-[5.8px] leading-[7px] font-medium text-slate-600 whitespace-normal break-words mt-[1px]"
-                                  title={subLine}
+                                  className="font-bold text-[6.0px] leading-[7.2px] text-blue-600 whitespace-normal break-words mt-[1px]"
+                                  title={kilometer}
                                 >
-                                  {subLine}
+                                  {kilometer}
                                 </div>
                               )}
-                              {/* Baris 3: Uraian (Hanya tampil jika bukan '-') */}
+                              {/* Baris 3: Uraian (Sama 100% dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
                               {hasDescription && (
                                 <div
-                                  className="text-[5.6px] leading-[6.8px] font-semibold text-blue-700 whitespace-normal break-words mt-[1px]"
+                                  className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words mt-[1px]"
                                   title={description}
                                 >
                                   {description}
+                                </div>
+                              )}
+                              {/* Baris 4: Waktu Pekerjaan (Sama 100% dengan Nama Pekerjaan) */}
+                              {timeLabel && (
+                                <div
+                                  className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words mt-[1px]"
+                                  title={timeLabel}
+                                >
+                                  {timeLabel}
                                 </div>
                               )}
                             </div>

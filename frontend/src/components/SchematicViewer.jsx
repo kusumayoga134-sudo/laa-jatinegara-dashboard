@@ -29,7 +29,7 @@ import {
 } from '../utils/workLogHelpers';
 import {
   CategoryBeaconIcon,
-  detectBeaconCategories,
+  computeBeaconIconLayout,
 } from './CategoryBeaconIcons';
 
 // =========================================================================
@@ -5909,7 +5909,7 @@ export default function SchematicViewer({
     }
   };
 
-  const imageSrc = '/peta-laa-model3-hd.png?v=model3';
+  const imageSrc = '/peta-laa-model4-hd.png?v=model4';
 
   // Complete List of Catenary Lines:
   // - Horizontal Naspan Tracks (46 Segments)
@@ -5924,6 +5924,12 @@ export default function SchematicViewer({
 
   // Pre-calculate lines that have active maintenance work logs
   const linesWithLogs = React.useMemo(() => computeLinesWithLogs(logs), [logs]);
+
+  // Pre-calculate collision-free icon placements above each active radar dot
+  const beaconIconLayoutMap = React.useMemo(
+    () => computeBeaconIconLayout(linesWithLogs),
+    [linesWithLogs]
+  );
 
   const hoveredLogs = hoveredLine ? getLineLogs(hoveredLine) : [];
 
@@ -6353,33 +6359,30 @@ export default function SchematicViewer({
                   return (
                     <div
                       key={idx}
-                      className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 text-xs space-y-1.5"
+                      className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 sm:p-3 text-xs space-y-1"
                     >
-                      {/* Baris 1: Nama Pekerjaan */}
+                      {/* Baris 1: Nama Pekerjaan (Acuan Utama) */}
                       <div className="font-bold text-slate-900 text-xs leading-snug">
                         {formatAction(log.actionType)}
                       </div>
 
-                      {/* Baris 2: Lokasi Pekerjaan / Kilometer */}
+                      {/* Baris 2: Lokasi Pekerjaan / Kilometer (100% sama dengan teks KM header popup) */}
                       {kmLabel && (
-                        <div>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold inline-block truncate max-w-full">
-                            {kmLabel}
-                          </span>
-                        </div>
+                        <span className="text-[11px] sm:text-xs text-blue-600 font-mono font-bold block leading-snug">
+                          {kmLabel}
+                        </span>
                       )}
 
-                      {/* Baris 3: Uraian (sembunyikan jika kosong atau '-') */}
+                      {/* Baris 3: Uraian (Sama gaya dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
                       {showDesc && (
-                        <div className="text-slate-700 text-[11px] leading-snug bg-white px-2 py-1 rounded-lg border border-slate-200/80 line-clamp-2">
+                        <div className="font-bold text-slate-900 text-xs leading-snug line-clamp-2">
                           {descText}
                         </div>
                       )}
 
-                      {/* Baris 4: Waktu Pekerjaan */}
-                      <div className="flex items-center text-blue-700 font-mono font-bold text-[11px]">
-                        <Clock className="w-3 h-3 mr-1 text-orange-500 shrink-0" />
-                        <span>{timeLabel}</span>
+                      {/* Baris 4: Waktu Pekerjaan (Sama gaya dengan Nama Pekerjaan, tanpa ikon jam/monospace) */}
+                      <div className="font-bold text-slate-900 text-xs leading-snug">
+                        {timeLabel}
                       </div>
                     </div>
                   );
@@ -6639,16 +6642,19 @@ export default function SchematicViewer({
                   - Menampilkan ikon kategori unik (tanpa duplikasi) berjejer rapi tepat di atas titik radar.
                   - Hovering triggers detailed popup card, clicking opens drawer.
                   ======================================================== */}
-              {linesWithLogs.map(({ line, logs: lineLogs, center }) => {
+              {linesWithLogs.map(({ line, center }) => {
                 const dotX = center.x;
                 const dotY = center.y;
-                const categories = detectBeaconCategories(lineLogs);
-                const iconSpacing = 22;
-                const iconY = dotY - 22;
-                const startIconX = dotX - ((categories.length - 1) * iconSpacing) / 2;
-                const iconsSpanW = categories.length > 0 ? (categories.length - 1) * iconSpacing + 24 : 0;
-                const hitW = Math.max(36, iconsSpanW);
-                const hitTop = categories.length > 0 ? iconY - 13 : dotY - 18;
+                const iconLayout = beaconIconLayoutMap.get(line.id) || {
+                  placements: [],
+                  minX: dotX,
+                  maxX: dotX,
+                  minY: dotY,
+                };
+                const { placements } = iconLayout;
+                const hitLeft = Math.min(dotX - 18, placements.length > 0 ? iconLayout.minX : dotX - 18);
+                const hitRight = Math.max(dotX + 18, placements.length > 0 ? iconLayout.maxX : dotX + 18);
+                const hitTop = Math.min(dotY - 18, placements.length > 0 ? iconLayout.minY : dotY - 18);
                 const hitBottom = dotY + 18;
 
                 return (
@@ -6744,15 +6750,15 @@ export default function SchematicViewer({
                       opacity="0.95"
                     />
 
-                    {/* 5. Ikon Kategori KETERANGAN (berjejer rapi tepat di atas titik radar merah) */}
-                    {categories.length > 0 && (
+                    {/* 5. Ikon Kategori KETERANGAN (multi-row upward stacking anti-tabrakan) */}
+                    {placements.length > 0 && (
                       <g data-beacon-icons={line.id}>
-                        {categories.map((cat, cIdx) => (
+                        {placements.map(({ category, cx, cy }) => (
                           <CategoryBeaconIcon
-                            key={`${line.id}-cat-${cat.key}`}
-                            category={cat}
-                            cx={startIconX + cIdx * iconSpacing}
-                            cy={iconY}
+                            key={`${line.id}-cat-${category.key}`}
+                            category={category}
+                            cx={cx}
+                            cy={cy}
                           />
                         ))}
                       </g>
@@ -6760,9 +6766,9 @@ export default function SchematicViewer({
 
                     {/* Combined Generous Hit-Area for effortless cursor hovering & clicking */}
                     <rect
-                      x={dotX - hitW / 2}
+                      x={hitLeft}
                       y={hitTop}
-                      width={hitW}
+                      width={hitRight - hitLeft}
                       height={hitBottom - hitTop}
                       rx="14"
                       fill="transparent"

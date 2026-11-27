@@ -115,6 +115,7 @@ export function estimateWrappedLineCount(text, maxCharsPerLine = 28, maxLines = 
 
 /**
  * Compute per-log wrapped line counts & tight Compact CAD card height
+ * Urutan 4 baris: Nama Pekerjaan -> Kilometer (biru) -> Uraian (opsional, bold gelap) -> Waktu (bold gelap)
  */
 function computeCardMetrics(line, displayLogs, totalLogs) {
   const titleText = String(line?.title || line?.code || '').trim();
@@ -122,32 +123,33 @@ function computeCardMetrics(line, displayLogs, totalLogs) {
   const headerH = Math.ceil(5 + titleLines * 8.2);
 
   const PADDING_TOP = 3;
-  const PADDING_BOT = 3;
-  const ITEM_GAP = 4;
+  const PADDING_BOT = 3.5;
+  const ITEM_GAP = 4.5;
   const FOOTER_H = totalLogs > 3 ? 10 : 0;
 
   let bodyH = 0;
   const logLayouts = displayLogs.map((log, idx) => {
     const details = getCleanLogDetails(log, line);
-    const subLine = [details.timeLabel, details.kilometer].filter(Boolean).join(' • ');
 
-    const lines1 = estimateWrappedLineCount(details.actionName, 29, 4);
-    const lines2 = estimateWrappedLineCount(subLine, 35, 4);
-    const lines3 = details.hasDescription ? estimateWrappedLineCount(details.description, 36, 4) : 0;
+    const lines1 = estimateWrappedLineCount(details.actionName, 28, 4);
+    const linesKm = details.kilometer ? estimateWrappedLineCount(details.kilometer, 31, 4) : 0;
+    const linesDesc = details.hasDescription ? estimateWrappedLineCount(details.description, 28, 4) : 0;
+    const linesTime = details.timeLabel ? estimateWrappedLineCount(details.timeLabel, 28, 4) : 0;
 
     const h1 = lines1 * 7.6;
-    const h2 = lines2 > 0 ? 1 + lines2 * 7.0 : 0;
-    const h3 = lines3 > 0 ? 1 + lines3 * 6.8 : 0;
-    const itemH = h1 + h2 + h3;
+    const hKm = linesKm > 0 ? 1 + linesKm * 7.2 : 0;
+    const hDesc = linesDesc > 0 ? 1 + linesDesc * 7.6 : 0;
+    const hTime = linesTime > 0 ? 1 + linesTime * 7.6 : 0;
+    const itemH = h1 + hKm + hDesc + hTime;
 
     bodyH += itemH + (idx > 0 ? ITEM_GAP : 0);
 
     return {
       ...details,
-      subLine,
       lines1,
-      lines2,
-      lines3,
+      linesKm,
+      linesDesc,
+      linesTime,
       itemH,
     };
   });
@@ -216,9 +218,9 @@ export function computeCalloutLayout({
   // Sort items by radarX ascending
   items.sort((a, b) => a.radarX - b.radarX);
 
-  // CAD Static Obstacle Regions (Legend Model 3, Banner, Station Titles, Track Bands)
+  // CAD Static Obstacle Regions (Legend Model 4, Banner, Station Titles, Track Bands)
   const CAD_OBSTACLES = [
-    // Model 3 Legend Top-Right Box (X=2990..3191, Y=216..415 with protective clearance)
+    // Model 4 Legend Top-Right Box (X=2990..3191, Y=215..415 with protective clearance)
     { x: 2945, y: 175, w: 325, h: 265 },
     // ST. JATINEGARA Station Header
     { x: 900, y: 382, w: 410, h: 86 },
@@ -399,25 +401,25 @@ export function computeCalloutLayout({
   // 3. Zona Tengah Upper (points at Y ~ 850..900 -> arrows point UP): staggered shelves from Y=924 downwards
   placeOnStaggeredShelves(
     midUpperCards,
-    (card) => [924, 984, 1044, 1102 - Math.min(20, Math.max(0, card.h - 48)), 954, 1014],
+    (card) => [924, 996, 1068, 958, 1030],
     placedCards,
-    100
+    105
   );
 
   // 4. Zona Tengah Lower (points at Y ~ 1190..1310 -> arrows point DOWN): staggered shelves from bottom Y=1158 upwards
   placeOnStaggeredShelves(
     midLowerCards,
-    (card) => [1156 - card.h, 1094 - Math.round(card.h * 0.4), 1034, 974, 924],
+    (card) => [1156 - card.h, 1084 - Math.round(card.h * 0.4), 1014, 944, 924],
     placedCards,
-    100
+    105
   );
 
   // 5. Zona Bawah (points at Y > 1320 -> arrows point UP): compact staggered shelves starting at Y = 1536
   placeOnStaggeredShelves(
     bottomCards,
-    (card) => [1536, 1602, 1668, 1734],
+    (card) => [1536, 1614, 1692, 1770],
     placedCards,
-    100
+    105
   );
 
   const allCards = placedCards;
@@ -762,16 +764,15 @@ function drawCalloutBox(ctx, card, scale) {
       ctx.moveTo(cardX + 7 * scale, currentLogY);
       ctx.lineTo(cardX + cardW - 5 * scale, currentLogY);
       ctx.stroke();
-      currentLogY += 2 * scale;
+      currentLogY += 2.5 * scale;
     }
 
     const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, line);
-    const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
 
-    // Baris 1: Jenis Pekerjaan (6.4px bold, lineHeight 7.6px)
+    // Baris 1: Nama Pekerjaan (Acuan utama: 6.4px bold, Slate-900, lineHeight 7.6px)
     ctx.fillStyle = '#0f172a';
     ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 4);
@@ -780,27 +781,39 @@ function drawCalloutBox(ctx, card, scale) {
       currentLogY += 7.6 * scale;
     });
 
-    // Baris 2: BULAN TAHUN • KILOMETER (5.8px medium, lineHeight 7.0px)
-    if (subLine) {
+    // Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru #2563eb, tanpa bullet, 6.0px bold, lineHeight 7.2px)
+    if (kilometer) {
       currentLogY += 1 * scale;
-      ctx.fillStyle = '#475569';
-      ctx.font = `500 ${5.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      const wrappedSub = wrapCanvasText(ctx, subLine, itemContentW, 4);
-      wrappedSub.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 3.5 * scale);
-        currentLogY += 7.0 * scale;
+      ctx.fillStyle = '#2563eb';
+      ctx.font = `bold ${6.0 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedKm = wrapCanvasText(ctx, kilometer, itemContentW, 4);
+      wrappedKm.forEach((txtLine) => {
+        ctx.fillText(txtLine, itemContentX, currentLogY + 3.6 * scale);
+        currentLogY += 7.2 * scale;
       });
     }
 
-    // Baris 3 (jika Uraian != '-'): Uraian (5.6px semibold, lineHeight 6.8px)
+    // Baris 3 (jika Uraian != '-'): Uraian (100% sama dengan Nama Pekerjaan: 6.4px bold, Slate-900)
     if (hasDescription) {
       currentLogY += 1 * scale;
-      ctx.fillStyle = '#1d4ed8';
-      ctx.font = `600 ${5.6 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 4);
       wrappedDesc.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 3.4 * scale);
-        currentLogY += 6.8 * scale;
+        ctx.fillText(txtLine, itemContentX, currentLogY + 3.8 * scale);
+        currentLogY += 7.6 * scale;
+      });
+    }
+
+    // Baris 4: Waktu Pekerjaan (100% sama dengan Nama Pekerjaan: 6.4px bold, Slate-900)
+    if (timeLabel) {
+      currentLogY += 1 * scale;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedTime = wrapCanvasText(ctx, timeLabel, itemContentW, 4);
+      wrappedTime.forEach((txtLine) => {
+        ctx.fillText(txtLine, itemContentX, currentLogY + 3.8 * scale);
+        currentLogY += 7.6 * scale;
       });
     }
   });
@@ -820,8 +833,20 @@ function drawCalloutBox(ctx, card, scale) {
 }
 
 /**
+ * Smart canvas scale guard for iOS Safari / iPadOS (max ~4096px / 16.7M px canvas memory limit)
+ */
+export function resolveSafeExportScale(requestedScale = 3.0) {
+  if (typeof navigator === 'undefined') return requestedScale;
+  const ua = navigator.userAgent || '';
+  const isIOS = /iP(ad|hone|od)/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  if (!isIOS) return requestedScale;
+  // 3275 * 1.25 = 4093 px, 1835 * 1.25 = 2293 px (~9.38M px < 16.7M iOS Safari limit)
+  return Math.min(requestedScale, 1.25);
+}
+
+/**
  * Generate Ultra HD Canvas from CAD base map + radar dots + callout cards
- * Uses Native AutoCAD Model 2 Canvas (3275 x 1835 px) scaled by `scale` (e.g. 3.0 = 9825 x 5505 px)
+ * Uses Native AutoCAD Model 4 Canvas (3275 x 1835 px) scaled by `scale` (e.g. 3.0 = 9825 x 5505 px)
  */
 export async function renderUltraHdCanvas({
   linesWithLogs = [],
@@ -831,9 +856,10 @@ export async function renderUltraHdCanvas({
   customCardPositions = {},
 }) {
   const { CANVAS_W, CANVAS_H } = VIRTUAL_CANVAS;
+  const safeScale = resolveSafeExportScale(scale);
 
-  const totalWidth = Math.round(CANVAS_W * scale);
-  const totalHeight = Math.round(CANVAS_H * scale);
+  const totalWidth = Math.round(CANVAS_W * safeScale);
+  const totalHeight = Math.round(CANVAS_H * safeScale);
 
   const canvas = document.createElement('canvas');
   canvas.width = totalWidth;
@@ -841,17 +867,20 @@ export async function renderUltraHdCanvas({
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Failed to get 2D canvas context');
 
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
   // 1. White paper background
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-  // Load CAD Background image (with cache-buster)
+  // Load Model 4 Ultra-HD Lossless CAD Background image (9825 x 5505 px, cache-buster ?v=model4)
   const img = new Image();
   img.crossOrigin = 'anonymous';
   await new Promise((resolve, reject) => {
     img.onload = () => resolve();
     img.onerror = () => reject(new Error('Failed to load base CAD map image'));
-    img.src = '/peta-laa-model3-hd.png?v=model3';
+    img.src = '/peta-laa-model4-hd.png?v=model4';
   });
 
   // Draw CAD map precisely in full canvas
@@ -859,7 +888,7 @@ export async function renderUltraHdCanvas({
 
   // Outer blueprint border
   ctx.strokeStyle = '#0f172a';
-  ctx.lineWidth = 2 * scale;
+  ctx.lineWidth = 2 * safeScale;
   ctx.strokeRect(0, 0, totalWidth, totalHeight);
 
   // Calculate layout of callout cards
@@ -871,12 +900,12 @@ export async function renderUltraHdCanvas({
   // 2. Draw Radar Glow Beacons (clean point beacons, without covering CAD track lines)
   if (showRadar) {
     preparedCards.forEach((card) => {
-      const cx = card.radarX * scale;
-      const cy = card.radarY * scale;
+      const cx = card.radarX * safeScale;
+      const cy = card.radarY * safeScale;
       const count = card.logs.length;
 
       ctx.save();
-      const grad = ctx.createRadialGradient(cx, cy, 2 * scale, cx, cy, 22 * scale);
+      const grad = ctx.createRadialGradient(cx, cy, 2 * safeScale, cx, cy, 22 * safeScale);
       grad.addColorStop(0, 'rgba(239, 68, 68, 0.95)');
       grad.addColorStop(0.4, 'rgba(239, 68, 68, 0.45)');
       grad.addColorStop(0.8, 'rgba(239, 68, 68, 0.15)');
@@ -884,49 +913,49 @@ export async function renderUltraHdCanvas({
 
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(cx, cy, 22 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 22 * safeScale, 0, Math.PI * 2);
       ctx.fill();
 
       // Ripple Rings
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
-      ctx.lineWidth = 1.6 * scale;
+      ctx.lineWidth = 1.6 * safeScale;
       ctx.beginPath();
-      ctx.arc(cx, cy, 11 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 11 * safeScale, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.55)';
-      ctx.lineWidth = 1.2 * scale;
+      ctx.lineWidth = 1.2 * safeScale;
       ctx.beginPath();
-      ctx.arc(cx, cy, 16 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 16 * safeScale, 0, Math.PI * 2);
       ctx.stroke();
 
       // Center Core
       ctx.fillStyle = '#dc2626';
       ctx.beginPath();
-      ctx.arc(cx, cy, 5.5 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 5.5 * safeScale, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(cx, cy, 2.2 * scale, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 2.2 * safeScale, 0, Math.PI * 2);
       ctx.fill();
 
       // Number of Jobs Badge
       if (count > 1) {
-        const badgeX = cx + 9 * scale;
-        const badgeY = cy - 9 * scale;
-        const badgeR = 6 * scale;
+        const badgeX = cx + 9 * safeScale;
+        const badgeY = cy - 9 * safeScale;
+        const badgeR = 6 * safeScale;
 
         ctx.fillStyle = '#b91c1c';
         ctx.beginPath();
         ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1 * scale;
+        ctx.lineWidth = 1 * safeScale;
         ctx.stroke();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${7 * scale}px sans-serif`;
+        ctx.font = `bold ${7 * safeScale}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(String(count), badgeX, badgeY);
@@ -939,12 +968,12 @@ export async function renderUltraHdCanvas({
   if (showCallouts && preparedCards.length > 0) {
     // Step 4A: Render ALL Leader Lines FIRST
     preparedCards.forEach((card) => {
-      drawOrthogonalElbow(ctx, card, scale);
+      drawOrthogonalElbow(ctx, card, safeScale);
     });
 
     // Step 4B: Render ALL Callout Boxes ON TOP
     preparedCards.forEach((card) => {
-      drawCalloutBox(ctx, card, scale);
+      drawCalloutBox(ctx, card, safeScale);
     });
   }
 
@@ -952,15 +981,14 @@ export async function renderUltraHdCanvas({
 }
 
 /**
- * Pure JavaScript PDF 1.4 Binary Generator
- * Wraps JPEG data stream into an authentic, standalone PDF document.
+ * Assemble a valid PDF 1.4 binary document wrapping an image XObject buffer
  */
-export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthPt, pageHeightPt) {
+function assembleSingleImagePdf(imageDictHeader, streamBuffer, pageWidthPt, pageHeightPt) {
   const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
   const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
   const obj3 = `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidthPt.toFixed(2)} ${pageHeightPt.toFixed(2)}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`;
 
-  const imgHeader = `4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${widthPx} /Height ${heightPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBuffer.length} >>\nstream\n`;
+  const imgHeader = `4 0 obj\n${imageDictHeader}\nstream\n`;
   const imgFooter = '\nendstream\nendobj\n';
 
   const contentStream = `q\n${pageWidthPt.toFixed(2)} 0 0 ${pageHeightPt.toFixed(2)} 0 0 cm\n/Im1 Do\nQ\n`;
@@ -981,7 +1009,7 @@ export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthP
   currentOffset += obj3.length;
 
   offsets.push(currentOffset);
-  currentOffset += imgHeader.length + jpegBuffer.length + imgFooter.length;
+  currentOffset += imgHeader.length + streamBuffer.length + imgFooter.length;
 
   offsets.push(currentOffset);
   currentOffset += obj5.length;
@@ -1000,7 +1028,7 @@ export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthP
     obj2.length +
     obj3.length +
     imgHeader.length +
-    jpegBuffer.length +
+    streamBuffer.length +
     imgFooter.length +
     obj5.length +
     xref.length +
@@ -1020,8 +1048,8 @@ export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthP
   writeStr(obj2);
   writeStr(obj3);
   writeStr(imgHeader);
-  uint8.set(jpegBuffer, pos);
-  pos += jpegBuffer.length;
+  uint8.set(streamBuffer, pos);
+  pos += streamBuffer.length;
   writeStr(imgFooter);
   writeStr(obj5);
   writeStr(xref);
@@ -1031,31 +1059,83 @@ export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthP
 }
 
 /**
- * 1-Click Direct Download PDF File
+ * Pure JavaScript Lossless PDF 1.4 Binary Generator (FlateDecode + PNG Sub Predictor /Predictor 11)
+ * Keeps crisp 1px CAD lines & tiny callout text 100% lossless (NO JPEG artifacts) with streaming low-RAM memory usage.
+ */
+export async function buildPdfFromLosslessCanvas(canvas, pageWidthPt, pageHeightPt) {
+  const widthPx = canvas.width;
+  const heightPx = canvas.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Canvas 2D context unavailable');
+
+  const cs = new CompressionStream('deflate');
+  const writer = cs.writable.getWriter();
+  const compressedPromise = new Response(cs.readable).arrayBuffer();
+
+  const BAND_ROWS = 128;
+  const rowRgbBytes = widthPx * 3;
+  const rowStride = rowRgbBytes + 1;
+
+  for (let startY = 0; startY < heightPx; startY += BAND_ROWS) {
+    const bandH = Math.min(BAND_ROWS, heightPx - startY);
+    const imgData = ctx.getImageData(0, startY, widthPx, bandH).data;
+    const outBand = new Uint8Array(rowStride * bandH);
+
+    for (let y = 0; y < bandH; y++) {
+      const srcRowStart = y * widthPx * 4;
+      const dstRowStart = y * rowStride;
+      outBand[dstRowStart] = 1; // PNG Sub filter (type 1)
+
+      // Pixel 0 (no left neighbor)
+      outBand[dstRowStart + 1] = imgData[srcRowStart];
+      outBand[dstRowStart + 2] = imgData[srcRowStart + 1];
+      outBand[dstRowStart + 3] = imgData[srcRowStart + 2];
+
+      for (let x = 1; x < widthPx; x++) {
+        const s = srcRowStart + x * 4;
+        const d = dstRowStart + 1 + x * 3;
+        outBand[d] = (imgData[s] - imgData[s - 4]) & 0xff;
+        outBand[d + 1] = (imgData[s + 1] - imgData[s - 3]) & 0xff;
+        outBand[d + 2] = (imgData[s + 2] - imgData[s - 2]) & 0xff;
+      }
+    }
+
+    await writer.write(outBand);
+  }
+
+  await writer.close();
+  const compressedBuffer = new Uint8Array(await compressedPromise);
+
+  const imgDict = `<< /Type /XObject /Subtype /Image /Width ${widthPx} /Height ${heightPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /DecodeParms << /Predictor 11 /Colors 3 /BitsPerComponent 8 /Columns ${widthPx} >> /Length ${compressedBuffer.length} >>`;
+  return assembleSingleImagePdf(imgDict, compressedBuffer, pageWidthPt, pageHeightPt);
+}
+
+/**
+ * Fallback JPEG PDF 1.4 Binary Generator (used only if CompressionStream is unavailable)
+ */
+export function buildPdfFromJpegBuffer(jpegBuffer, widthPx, heightPx, pageWidthPt, pageHeightPt) {
+  const imgDict = `<< /Type /XObject /Subtype /Image /Width ${widthPx} /Height ${heightPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBuffer.length} >>`;
+  return assembleSingleImagePdf(imgDict, jpegBuffer, pageWidthPt, pageHeightPt);
+}
+
+/**
+ * 1-Click Direct Download PDF File (Lossless FlateDecode 600 DPI)
  */
 export async function downloadMapPdf({
   linesWithLogs = [],
   showCallouts = true,
   showRadar = true,
-  paperSize = 'NATIVE', // 'NATIVE' (Default CAD 600 DPI) | 'A3' | 'A4'
-  quality = 0.96,
+  paperSize = 'NATIVE', // 'NATIVE' (Default CAD 3275:1835) | 'A3' | 'A4'
+  quality = 0.98,
   customCardPositions = {},
 }) {
   const canvas = await renderUltraHdCanvas({
     linesWithLogs,
     showCallouts,
     showRadar,
-    scale: 3.0, // 3.0 gives 9825 x 5505 px (True 600 DPI Ultra HD)
+    scale: 3.0, // 3.0 gives 9825 x 5505 px on Desktop (auto-clamped safely on iOS)
     customCardPositions,
   });
-
-  const jpegBlob = await new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
-  });
-  if (!jpegBlob) throw new Error('Failed to generate JPEG blob from canvas');
-
-  const arrayBuffer = await jpegBlob.arrayBuffer();
-  const jpegBuffer = new Uint8Array(arrayBuffer);
 
   let pageWPt = 1200;
   let pageHPt = (1200 * canvas.height) / canvas.width;
@@ -1068,7 +1148,18 @@ export async function downloadMapPdf({
     pageHPt = 841.89;
   }
 
-  const pdfBytes = buildPdfFromJpegBuffer(jpegBuffer, canvas.width, canvas.height, pageWPt, pageHPt);
+  let pdfBytes;
+  if (typeof CompressionStream !== 'undefined') {
+    pdfBytes = await buildPdfFromLosslessCanvas(canvas, pageWPt, pageHPt);
+  } else {
+    const jpegBlob = await new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+    });
+    if (!jpegBlob) throw new Error('Failed to generate JPEG blob from canvas');
+    const jpegBuffer = new Uint8Array(await jpegBlob.arrayBuffer());
+    pdfBytes = buildPdfFromJpegBuffer(jpegBuffer, canvas.width, canvas.height, pageWPt, pageHPt);
+  }
+
   const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
 
   const now = new Date();
@@ -1080,7 +1171,7 @@ export async function downloadMapPdf({
 }
 
 /**
- * 1-Click Direct Download Ultra HD PNG (600 DPI)
+ * 1-Click Direct Download Ultra HD PNG (600 DPI Lossless PNG)
  */
 export async function downloadMapPng({
   linesWithLogs = [],
@@ -1092,7 +1183,7 @@ export async function downloadMapPng({
     linesWithLogs,
     showCallouts,
     showRadar,
-    scale: 3.0, // 9825 x 5505 px Ultra HD
+    scale: 3.0, // 9825 x 5505 px Ultra HD on Desktop (auto-clamped safely on iOS)
     customCardPositions,
   });
 
@@ -1110,7 +1201,7 @@ export async function downloadMapPng({
 }
 
 /**
- * Native Browser Print to PDF (Opens print dialog with 600 DPI resolution)
+ * Native Browser Print to PDF (Opens print dialog with Lossless PNG Ultra HD resolution)
  */
 export async function printMapWindow({
   linesWithLogs = [],
@@ -1122,14 +1213,19 @@ export async function printMapWindow({
     linesWithLogs,
     showCallouts,
     showRadar,
-    scale: 3.5,
+    scale: 3.0,
     customCardPositions,
   });
 
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
+  const pngBlob = await new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), 'image/png');
+  });
+  if (!pngBlob) throw new Error('Failed to generate lossless PNG for printing');
+  const blobUrl = URL.createObjectURL(pngBlob);
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
+    URL.revokeObjectURL(blobUrl);
     alert('Popup diblokir oleh browser. Harap izinkan popup untuk mencetak PDF.');
     return;
   }
@@ -1162,7 +1258,7 @@ export async function printMapWindow({
         </style>
       </head>
       <body>
-        <img src="${dataUrl}" onload="window.print();window.close();" />
+        <img src="${blobUrl}" onload="window.print();setTimeout(()=>{window.close();},500);" />
       </body>
     </html>
   `);
