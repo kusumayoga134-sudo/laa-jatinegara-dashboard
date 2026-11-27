@@ -667,16 +667,16 @@ function drawCalloutBox(ctx, card, scale) {
 
   ctx.save();
 
-  const cardRadius = 6 * scale;
+  const cardRadius = 4 * scale;
   const trackColor = line.color || '#334155';
-  const headerHeight = (card.headerH || 24) * scale;
+  const headerHeight = (card.headerH || 14) * scale;
 
   // 1. Drop Shadow
   ctx.save();
-  ctx.shadowColor = 'rgba(15, 23, 42, 0.14)';
-  ctx.shadowBlur = 8 * scale;
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+  ctx.shadowBlur = 5 * scale;
   ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 3 * scale;
+  ctx.shadowOffsetY = 2 * scale;
   ctx.fillStyle = '#ffffff';
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.fill();
@@ -691,19 +691,19 @@ function drawCalloutBox(ctx, card, scale) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(cardX, cardY, cardW, cardH);
 
-  // Left Accent Strip in Track color
+  // Left Accent Strip in Track color (Compact CAD 2.5px)
   ctx.fillStyle = trackColor;
-  ctx.fillRect(cardX, cardY, 3.5 * scale, cardH);
+  ctx.fillRect(cardX, cardY, 2.5 * scale, cardH);
 
   // Header Background Banner
   ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(cardX + 3.5 * scale, cardY, cardW - 3.5 * scale, headerHeight);
+  ctx.fillRect(cardX + 2.5 * scale, cardY, cardW - 2.5 * scale, headerHeight);
 
   // Header Divider Line
   ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 1 * scale;
+  ctx.lineWidth = 0.8 * scale;
   ctx.beginPath();
-  ctx.moveTo(cardX + 3.5 * scale, cardY + headerHeight);
+  ctx.moveTo(cardX + 2.5 * scale, cardY + headerHeight);
   ctx.lineTo(cardX + cardW, cardY + headerHeight);
   ctx.stroke();
 
@@ -711,55 +711,56 @@ function drawCalloutBox(ctx, card, scale) {
 
   // 3. Outer Border Frame
   ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1 * scale;
+  ctx.lineWidth = 0.8 * scale;
   roundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
   ctx.stroke();
 
   // ==========================================
-  // Header Information (Dot + Nama Lokasi penuh, tanpa badge Pkj & tanpa GripVertical)
+  // Header Information Compact CAD (Dot + Nama Lokasi utuh tanpa elipsis, tanpa badge Pkj)
   // ==========================================
-  const headerDotX = cardX + 10.5 * scale;
+  const headerDotX = cardX + 9.5 * scale;
   const headerDotY = cardY + headerHeight / 2;
 
-  // Track color circle
+  // Track color circle (5px diameter)
   ctx.fillStyle = trackColor;
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 3.2 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 2.5 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(headerDotX, headerDotY, 1.1 * scale, 0, Math.PI * 2);
+  ctx.arc(headerDotX, headerDotY, 0.9 * scale, 0, Math.PI * 2);
   ctx.fill();
 
-  // Track Title (1–2 wrapped lines utilizing full header width)
+  // Track Title (Compact CAD 6.8px bold, wrapped cleanly without ellipsis)
   ctx.fillStyle = '#0f172a';
-  ctx.font = `bold ${8.5 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `bold ${6.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  const maxTitleW = cardW - 24 * scale;
-  const wrappedTitle = wrapCanvasText(ctx, line.title || line.code, maxTitleW, 2);
-  const titleLineH = 10.5 * scale;
+  const maxTitleW = cardW - 21 * scale;
+  const wrappedTitle = wrapCanvasText(ctx, line.title || line.code, maxTitleW, 4);
+  const titleLineH = 8.2 * scale;
   const totalTitleH = wrappedTitle.length * titleLineH;
   const firstTitleY = cardY + (headerHeight - totalTitleH) / 2 + titleLineH / 2;
   wrappedTitle.forEach((txtLine, idx) => {
-    ctx.fillText(txtLine, cardX + 17 * scale, firstTitleY + idx * titleLineH);
+    ctx.fillText(txtLine, cardX + 15.5 * scale, firstTitleY + idx * titleLineH);
   });
 
   // ==========================================
-  // Work Log Items (Wrapped cleanly max 2 lines per field)
+  // Work Log Items (Compact CAD tight packing, zero ellipsis)
   // ==========================================
-  let currentLogY = cardY + headerHeight + 5 * scale;
-  const itemContentX = cardX + 10.5 * scale;
-  const itemContentW = cardW - 17 * scale;
+  let currentLogY = cardY + headerHeight + 3 * scale;
+  const itemContentX = cardX + 7 * scale;
+  const itemContentW = cardW - 12 * scale;
 
   displayLogs.forEach((log, logIdx) => {
     if (logIdx > 0) {
-      ctx.strokeStyle = '#f1f5f9';
-      ctx.lineWidth = 0.8 * scale;
+      currentLogY += 2 * scale;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 0.7 * scale;
       ctx.beginPath();
-      ctx.moveTo(cardX + 7 * scale, currentLogY - 2 * scale);
-      ctx.lineTo(cardX + cardW - 7 * scale, currentLogY - 2 * scale);
+      ctx.moveTo(cardX + 7 * scale, currentLogY);
+      ctx.lineTo(cardX + cardW - 5 * scale, currentLogY);
       ctx.stroke();
       currentLogY += 2 * scale;
     }
@@ -770,47 +771,46 @@ function drawCalloutBox(ctx, card, scale) {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
 
-    // Baris 1: Jenis Pekerjaan (Wrapped up to 2 lines, bold Slate-900)
+    // Baris 1: Jenis Pekerjaan (6.4px bold, lineHeight 7.6px)
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${8.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 2);
+    ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 4);
     wrappedAction.forEach((txtLine) => {
-      ctx.fillText(txtLine, itemContentX, currentLogY + 5.25 * scale);
-      currentLogY += 10.5 * scale;
+      ctx.fillText(txtLine, itemContentX, currentLogY + 3.8 * scale);
+      currentLogY += 7.6 * scale;
     });
 
-    // Baris 2: BULAN TAHUN • KILOMETER (Wrapped up to 2 lines, Slate-600)
+    // Baris 2: BULAN TAHUN • KILOMETER (5.8px medium, lineHeight 7.0px)
     if (subLine) {
-      currentLogY += 1.5 * scale;
+      currentLogY += 1 * scale;
       ctx.fillStyle = '#475569';
-      ctx.font = `500 ${7.2 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      const wrappedSub = wrapCanvasText(ctx, subLine, itemContentW, 2);
+      ctx.font = `500 ${5.8 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedSub = wrapCanvasText(ctx, subLine, itemContentW, 4);
       wrappedSub.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 4.75 * scale);
-        currentLogY += 9.5 * scale;
+        ctx.fillText(txtLine, itemContentX, currentLogY + 3.5 * scale);
+        currentLogY += 7.0 * scale;
       });
     }
 
-    // Baris 3 (jika Uraian != '-'): Uraian (Wrapped up to 2 lines, Blue-700)
+    // Baris 3 (jika Uraian != '-'): Uraian (5.6px semibold, lineHeight 6.8px)
     if (hasDescription) {
-      currentLogY += 1.5 * scale;
+      currentLogY += 1 * scale;
       ctx.fillStyle = '#1d4ed8';
-      ctx.font = `600 ${6.9 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 2);
+      ctx.font = `600 ${5.6 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 4);
       wrappedDesc.forEach((txtLine) => {
-        ctx.fillText(txtLine, itemContentX, currentLogY + 4.75 * scale);
-        currentLogY += 9.5 * scale;
+        ctx.fillText(txtLine, itemContentX, currentLogY + 3.4 * scale);
+        currentLogY += 6.8 * scale;
       });
     }
-
-    currentLogY += 3 * scale;
   });
 
   // Footer: +N pekerjaan lainnya (if logs > 3)
   if (logs.length > 3) {
-    const footerY = currentLogY + 5 * scale;
+    currentLogY += 2 * scale;
+    const footerY = currentLogY + 3.5 * scale;
     ctx.fillStyle = '#94a3b8';
-    ctx.font = `italic 600 ${7.0 * scale}px sans-serif`;
+    ctx.font = `italic 600 ${5.5 * scale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`+ ${logs.length - 3} pekerjaan lainnya`, cardX + cardW / 2, footerY);

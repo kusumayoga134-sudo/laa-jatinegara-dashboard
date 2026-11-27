@@ -813,41 +813,41 @@ export default function PdfExportModal({
                         touchAction: 'none',
                         userSelect: 'none',
                       }}
-                      className={`rounded-xl bg-white border ${
+                      className={`rounded-[4px] bg-white border ${
                         isDraggingThis
-                          ? 'ring-4 ring-blue-500 shadow-2xl scale-[1.02] border-blue-500'
-                          : 'border-slate-300 shadow-xl hover:shadow-2xl hover:border-slate-400'
+                          ? 'ring-2 ring-blue-500 shadow-lg scale-[1.02] border-blue-500'
+                          : 'border-slate-300 shadow-md hover:shadow-lg hover:border-slate-400'
                       } select-none overflow-hidden flex flex-col transition-shadow`}
                     >
-                      {/* Left Accent Bar */}
+                      {/* Left Accent Bar (Compact CAD 2.5px) */}
                       <div
-                        className="absolute left-0 top-0 bottom-0 w-[3.5px]"
+                        className="absolute left-0 top-0 bottom-0 w-[2.5px]"
                         style={{ backgroundColor: trackColor }}
                       />
 
-                      {/* Header (Tanpa badge Pkj; ruang penuh untuk Nama Lokasi + ikon drag di kanan) */}
+                      {/* Header Compact CAD (Tanpa badge Pkj; padding 2.5px vertikal, 5-7px horizontal) */}
                       <div
-                        className="bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-1 px-1.5 pl-2.5 py-1 shrink-0"
-                        style={{ minHeight: `${card.headerH || 22}px` }}
+                        className="bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-1 pl-[7px] pr-[5px] py-[2.5px] shrink-0"
+                        style={{ minHeight: `${card.headerH || 14}px` }}
                       >
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
                           <span
-                            className="w-2 h-2 rounded-full shrink-0 border border-white shadow-xs"
+                            className="w-[5px] h-[5px] rounded-full shrink-0 border border-white shadow-2xs"
                             style={{ backgroundColor: trackColor }}
                           />
                           <span
-                            className="font-bold text-[8.5px] leading-[10.5px] text-slate-900 whitespace-normal break-words line-clamp-2"
+                            className="font-bold text-[6.8px] leading-[8.2px] text-slate-900 whitespace-normal break-words"
                             title={card.line.title || card.line.code}
                           >
                             {card.line.title || card.line.code}
                           </span>
                         </div>
 
-                        <GripVertical className="w-3 h-3 text-slate-400 shrink-0" />
+                        <GripVertical className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                       </div>
 
-                      {/* Body Work Log Items (Wrapped cleanly max 2 lines per field) */}
-                      <div className="px-1.5 pl-2.5 py-1 flex-1 flex flex-col justify-center gap-1 bg-white overflow-hidden">
+                      {/* Body Work Log Items (Compact CAD tight vertical packing, 0 ellipsis) */}
+                      <div className="pl-[7px] pr-[5px] py-[3px] flex-1 flex flex-col justify-start bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
                           const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, card.line);
                           const subLine = [timeLabel, kilometer].filter(Boolean).join(' • ');
@@ -855,11 +855,11 @@ export default function PdfExportModal({
                           return (
                             <div
                               key={idx}
-                              className={idx > 0 ? 'border-t border-slate-100 pt-1' : ''}
+                              className={idx > 0 ? 'border-t border-slate-200/80 mt-[2px] pt-[2px]' : ''}
                             >
                               {/* Baris 1: Jenis Pekerjaan */}
                               <div
-                                className="font-bold text-[8.2px] leading-[10.5px] text-slate-900 whitespace-normal break-words line-clamp-2"
+                                className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words"
                                 title={actionName}
                               >
                                 {actionName}
@@ -867,7 +867,7 @@ export default function PdfExportModal({
                               {/* Baris 2: BULAN TAHUN • KILOMETER */}
                               {subLine && (
                                 <div
-                                  className="text-[7.2px] leading-[9.5px] font-medium text-slate-600 whitespace-normal break-words line-clamp-2 mt-0.5"
+                                  className="text-[5.8px] leading-[7px] font-medium text-slate-600 whitespace-normal break-words mt-[1px]"
                                   title={subLine}
                                 >
                                   {subLine}
@@ -876,7 +876,7 @@ export default function PdfExportModal({
                               {/* Baris 3: Uraian (Hanya tampil jika bukan '-') */}
                               {hasDescription && (
                                 <div
-                                  className="text-[6.9px] leading-[9.5px] font-semibold text-blue-700 whitespace-normal break-words line-clamp-2 mt-0.5"
+                                  className="text-[5.6px] leading-[6.8px] font-semibold text-blue-700 whitespace-normal break-words mt-[1px]"
                                   title={description}
                                 >
                                   {description}
@@ -888,7 +888,7 @@ export default function PdfExportModal({
 
                         {/* Footer: +N pekerjaan lainnya (jika logs > 3) */}
                         {card.logs.length > 3 && (
-                          <div className="text-center text-[7px] font-semibold italic text-slate-400 border-t border-slate-100/80 pt-0.5 leading-none">
+                          <div className="text-center text-[5.5px] leading-[7px] font-semibold italic text-slate-400 border-t border-slate-200/80 mt-[2px] pt-[1px]">
                             + {card.logs.length - 3} pekerjaan lainnya
                           </div>
                         )}
