@@ -216,10 +216,10 @@ export function computeCalloutLayout({
   // Sort items by radarX ascending
   items.sort((a, b) => a.radarX - b.radarX);
 
-  // CAD Static Obstacle Regions (Legend, Banner, Station Titles, Track Bands)
+  // CAD Static Obstacle Regions (Legend Model 3, Banner, Station Titles, Track Bands)
   const CAD_OBSTACLES = [
-    // Legend Top-Right Box
-    { x: 2825, y: 150, w: 460, h: 300 },
+    // Model 3 Legend Top-Right Box (X=2990..3191, Y=216..415 with protective clearance)
+    { x: 2945, y: 175, w: 325, h: 265 },
     // ST. JATINEGARA Station Header
     { x: 900, y: 382, w: 410, h: 86 },
     // Jatinegara Tracks Left/Center Band
@@ -851,7 +851,7 @@ export async function renderUltraHdCanvas({
   await new Promise((resolve, reject) => {
     img.onload = () => resolve();
     img.onerror = () => reject(new Error('Failed to load base CAD map image'));
-    img.src = '/peta-laa-cropped-hd.png?v=model2';
+    img.src = '/peta-laa-model3-hd.png?v=model3';
   });
 
   // Draw CAD map precisely in full canvas

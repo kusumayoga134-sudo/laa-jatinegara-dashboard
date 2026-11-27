@@ -684,9 +684,9 @@ export default function PdfExportModal({
               }}
               className="bg-white border-2 border-slate-700 relative overflow-hidden shadow-2xl shrink-0"
             >
-              {/* 1. CAD Blueprint Map Image Native AutoCAD Model 2 */}
+              {/* 1. CAD Blueprint Map Image Native AutoCAD (3275 x 1835 + Model 3 Legend) */}
               <img
-                src="/peta-laa-cropped-hd.png?v=model2"
+                src="/peta-laa-model3-hd.png?v=model3"
                 alt="Peta Wilayah LAA UPT Resor 1.9 Jatinegara"
                 style={{
                   position: 'absolute',
