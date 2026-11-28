@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
 import { matchLineLogs, findBestLineForLog, ALL_TRACK_LINES } from './SchematicViewer';
+import { CategoryBadgeIcon, detectLogCategories } from './CategoryBeaconIcons';
 import {
   MONTH_NAMES_ID,
   YEAR_OPTIONS,
@@ -392,6 +393,15 @@ export default function WorkHistoryPanel({
       return t.includes(q) || c.includes(q) || km.includes(q) || cat.includes(q);
     });
   }, [suggestSearchQuery, suggestCategory]);
+
+  const previewCategories = useMemo(
+    () =>
+      detectLogCategories({
+        actionType: formData.actionType,
+        description: formData.description,
+      }),
+    [formData.actionType, formData.description]
+  );
 
   if (!locationData) return null;
 
@@ -840,6 +850,7 @@ export default function WorkHistoryPanel({
               const kmLabel = resolveLogKilometer(log, matchedLine);
               const descText = resolveLogDescription(log);
               const showDesc = hasRealDescription(log);
+              const itemCategories = detectLogCategories(log);
 
               return (
                 <div
@@ -855,7 +866,7 @@ export default function WorkHistoryPanel({
                     }}
                   />
 
-                  {/* Penanda Lokasi Tunggal (HANYA di Daftar Riwayat Seluruh Lintas, dihapus di mode Seksi) */}
+                  {/* Penanda Lokasi Tunggal (HANYA di Daftar Riwayat Seluruh Lintas, dihapus di mode Lokasi) */}
                   {isAllLogsMode && (
                     <div className="pl-1.5 pb-0.5 flex items-center">
                       <span
@@ -881,10 +892,21 @@ export default function WorkHistoryPanel({
 
                   {/* Isi Kartu: Tepat 4 Baris Berurutan Persis DAFTAR SINGKAT PEKERJAAN */}
                   <div className="pl-1.5 space-y-1">
-                    {/* Baris 1: Nama Pekerjaan (Acuan Utama) */}
-                    <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug">
-                      {formatActionName(log.actionType)}
-                    </h4>
+                    {/* Baris 1: Nama Pekerjaan + Ikon Kategori (Acuan Utama) */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug min-w-0">
+                        {formatActionName(log.actionType)}
+                      </h4>
+                      {itemCategories.length > 0 && (
+                        <div className="flex items-center gap-1 shrink-0 pt-0.5" data-history-category-icons="true">
+                          {itemCategories.map((cat) => (
+                            <span key={cat.key} title={cat.label} className="inline-flex shrink-0">
+                              <CategoryBadgeIcon category={cat} size={21} />
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru bersih, 100% sama dengan header KM popup) */}
                     {kmLabel && (
@@ -1043,7 +1065,7 @@ export default function WorkHistoryPanel({
                 </div>
               </div>
 
-              {/* 2. JENIS PEKERJAAN (Wajib — input teks) */}
+              {/* 2. JENIS PEKERJAAN (Wajib — input teks dengan pratinjau ikon kategori real-time) */}
               <div className="space-y-1">
                 <label className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
@@ -1052,14 +1074,33 @@ export default function WorkHistoryPanel({
                   </span>
                   <span className="text-[10px] text-rose-500 font-bold">*Wajib</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.actionType}
-                  onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-                  placeholder="Contoh: PENGGANTIAN KAWAT OHGW, PEMASANGAN GROUNDING..."
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={formData.actionType}
+                    onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+                    placeholder="Contoh: PENGGANTIAN KAWAT OHGW, PEMASANGAN GROUNDING..."
+                    style={
+                      previewCategories.length > 0
+                        ? { paddingRight: `${previewCategories.length * 25 + 14}px` }
+                        : undefined
+                    }
+                    className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                  />
+                  {previewCategories.length > 0 && (
+                    <div
+                      data-form-category-preview="true"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1"
+                    >
+                      {previewCategories.map((cat) => (
+                        <span key={cat.key} title={cat.label} className="inline-flex shrink-0">
+                          <CategoryBadgeIcon category={cat} size={21} />
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* 3. LOKASI (Wajib — dropdown dengan pencarian & indikator warna jalur, Exact ID Binding) */}

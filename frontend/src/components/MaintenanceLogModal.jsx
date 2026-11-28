@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Wrench, Plus, Clock, Send, Train, MapPin } from 'lucide-react';
 import { ALL_MAP_LOCATIONS } from '../data/allMapLocations';
+import { CategoryBadgeIcon, detectLogCategories } from './CategoryBeaconIcons';
 import {
   MONTH_NAMES_ID,
   YEAR_OPTIONS,
@@ -28,6 +29,14 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const locationOptions = useMemo(() => ALL_MAP_LOCATIONS, []);
+  const previewCategories = useMemo(
+    () =>
+      detectLogCategories({
+        actionType: formData.actionType,
+        description: formData.description,
+      }),
+    [formData.actionType, formData.description]
+  );
 
   const handleLocationChange = (selectedId) => {
     const found = locationOptions.find((loc) => loc.id === selectedId);
@@ -152,14 +161,33 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
           {/* 2. JENIS PEKERJAAN */}
           <div>
             <label className="block text-slate-400 text-xs font-semibold mb-1">2. Jenis Pekerjaan *</label>
-            <input
-              type="text"
-              required
-              placeholder="Contoh: PENGGANTIAN KAWAT OHGW, PEMASANGAN GROUNDING..."
-              value={formData.actionType}
-              onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                required
+                placeholder="Contoh: PENGGANTIAN KAWAT OHGW, PEMASANGAN GROUNDING..."
+                value={formData.actionType}
+                onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+                style={
+                  previewCategories.length > 0
+                    ? { paddingRight: `${previewCategories.length * 25 + 14}px` }
+                    : undefined
+                }
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-base sm:text-xs text-white focus:outline-none focus:border-blue-500"
+              />
+              {previewCategories.length > 0 && (
+                <div
+                  data-form-category-preview="true"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1"
+                >
+                  {previewCategories.map((cat) => (
+                    <span key={cat.key} title={cat.label} className="inline-flex shrink-0">
+                      <CategoryBadgeIcon category={cat} size={21} />
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 3. LOKASI & 4. KILOMETER */}
@@ -249,7 +277,21 @@ export default function MaintenanceLogModal({ logs = [], onAddLog, isLoading }) 
                       {timeLabel}
                     </td>
                     <td className="py-3 px-4 font-bold text-white">
-                      {log.actionType}
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="min-w-0">{log.actionType}</span>
+                        {(() => {
+                          const itemCats = detectLogCategories(log);
+                          return itemCats.length > 0 ? (
+                            <div className="flex items-center gap-1 shrink-0">
+                              {itemCats.map((cat) => (
+                                <span key={cat.key} title={cat.label} className="inline-flex shrink-0">
+                                  <CategoryBadgeIcon category={cat} size={20} />
+                                </span>
+                              ))}
+                            </div>
+                          ) : null;
+                        })()}
+                      </div>
                     </td>
                     <td className="py-3 px-4 font-mono text-cyan-300 whitespace-nowrap">
                       {log.targetCode}
