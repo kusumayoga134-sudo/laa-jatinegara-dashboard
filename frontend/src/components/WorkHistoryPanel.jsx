@@ -855,75 +855,58 @@ export default function WorkHistoryPanel({
                     }}
                   />
 
-                  {/* Header Row: Waktu (BULAN TAHUN) on left, Lokasi Badge on right */}
-                  <div className="flex items-center justify-between text-xs pl-1.5 flex-wrap gap-1.5">
-                    <div className="flex items-center space-x-1 text-blue-700 font-mono font-bold text-[11px]">
-                      <Clock className="w-3 h-3 text-orange-500 shrink-0" />
-                      <span>{timeLabel}</span>
-                    </div>
-
-                    <span
-                      className="px-2 py-0.5 rounded-md text-[10.5px] font-mono font-extrabold flex items-center space-x-1 shadow-2xs"
-                      style={{
-                        backgroundColor: `${lineInfo.color}15`,
-                        color: '#0f172a',
-                        border: `1px solid ${lineInfo.color}60`,
-                      }}
-                    >
+                  {/* Penanda Lokasi Tunggal (HANYA di Daftar Riwayat Seluruh Lintas, dihapus di mode Seksi) */}
+                  {isAllLogsMode && (
+                    <div className="pl-1.5 pb-0.5 flex items-center">
                       <span
-                        className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
+                        className="px-2 py-0.5 rounded-md text-[10.5px] font-mono font-extrabold inline-flex items-center space-x-1.5 shadow-2xs max-w-full"
                         style={{
-                          backgroundColor: lineInfo.color,
-                          boxShadow: `0 0 4px ${lineInfo.color}`,
+                          backgroundColor: `${lineInfo.color}15`,
+                          color: '#0f172a',
+                          border: `1px solid ${lineInfo.color}60`,
                         }}
-                      />
-                      <span className="truncate max-w-[180px]">{log.targetCode || 'LAA 1.9'}</span>
-                    </span>
-                  </div>
-
-                  {/* Jenis Pekerjaan */}
-                  <div className="pl-1.5">
-                    <h4 className="text-xs sm:text-[13px] font-extrabold text-slate-900 flex items-center gap-1.5 leading-snug">
-                      <Wrench
-                        className="w-3.5 h-3.5 shrink-0"
-                        style={{ color: lineInfo.color === '#f8d731' ? '#ca8a04' : lineInfo.color }}
-                      />
-                      <span>{formatActionName(log.actionType)}</span>
-                    </h4>
-                  </div>
-
-                  {/* Kilometer & Seksi */}
-                  <div className="pl-1.5 flex items-center justify-between flex-wrap gap-1.5">
-                    {kmLabel ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-                        <span>{kmLabel}</span>
+                        title={log.targetCode || lineInfo.label || 'LAA 1.9'}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
+                          style={{
+                            backgroundColor: lineInfo.color,
+                            boxShadow: `0 0 4px ${lineInfo.color}`,
+                          }}
+                        />
+                        <span className="truncate">{log.targetCode || lineInfo.label || 'LAA 1.9'}</span>
                       </span>
-                    ) : (
-                      <span />
-                    )}
-
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-md truncate max-w-[200px]"
-                      style={{
-                        backgroundColor: `${lineInfo.color}12`,
-                        color: lineInfo.color === '#f8d731' ? '#854d0e' : lineInfo.color,
-                        border: `1px solid ${lineInfo.color}25`,
-                      }}
-                      title={lineInfo.label}
-                    >
-                      {lineInfo.label}
-                    </span>
-                  </div>
-
-                  {/* Uraian Box (Hanya ditampilkan jika tidak '-') */}
-                  {showDesc && (
-                    <div className="pl-1.5">
-                      <div className="bg-slate-50/90 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-normal break-words">
-                        {descText}
-                      </div>
                     </div>
                   )}
+
+                  {/* Isi Kartu: Tepat 4 Baris Berurutan Persis DAFTAR SINGKAT PEKERJAAN */}
+                  <div className="pl-1.5 space-y-1">
+                    {/* Baris 1: Nama Pekerjaan (Acuan Utama) */}
+                    <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug">
+                      {formatActionName(log.actionType)}
+                    </h4>
+
+                    {/* Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru bersih, 100% sama dengan header KM popup) */}
+                    {kmLabel && (
+                      <span className="text-[11px] sm:text-xs text-blue-600 font-mono font-bold block leading-snug">
+                        {kmLabel}
+                      </span>
+                    )}
+
+                    {/* Baris 3: Uraian (Merah cerah #DC2626, font/ukuran/bold sama dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
+                    {showDesc && (
+                      <div className="text-xs sm:text-[13px] font-bold text-[#DC2626] leading-snug break-words">
+                        {descText}
+                      </div>
+                    )}
+
+                    {/* Baris 4: Waktu Pekerjaan (Sama 100% dengan Nama Pekerjaan, tanpa ikon jam/monospace) */}
+                    {timeLabel && (
+                      <div className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug">
+                        {timeLabel}
+                      </div>
+                    )}
+                  </div>
 
                   {/* Admin Action Row (Edit & Delete) */}
                   {isAdmin && (

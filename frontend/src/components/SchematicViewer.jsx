@@ -6373,9 +6373,9 @@ export default function SchematicViewer({
                         </span>
                       )}
 
-                      {/* Baris 3: Uraian (Sama gaya dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
+                      {/* Baris 3: Uraian (Merah cerah #DC2626, gaya sama dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
                       {showDesc && (
-                        <div className="font-bold text-slate-900 text-xs leading-snug line-clamp-2">
+                        <div className="font-bold text-[#DC2626] text-xs leading-snug line-clamp-2">
                           {descText}
                         </div>
                       )}

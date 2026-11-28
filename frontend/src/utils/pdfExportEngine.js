@@ -793,10 +793,10 @@ function drawCalloutBox(ctx, card, scale) {
       });
     }
 
-    // Baris 3 (jika Uraian != '-'): Uraian (100% sama dengan Nama Pekerjaan: 6.4px bold, Slate-900)
+    // Baris 3 (jika Uraian != '-'): Uraian (Merah cerah #dc2626, font/ukuran/bold sama dengan Nama Pekerjaan)
     if (hasDescription) {
       currentLogY += 1 * scale;
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = '#dc2626';
       ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       const wrappedDesc = wrapCanvasText(ctx, description, itemContentW, 4);
       wrappedDesc.forEach((txtLine) => {

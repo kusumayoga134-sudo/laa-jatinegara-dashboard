@@ -872,10 +872,10 @@ export default function PdfExportModal({
                                   {kilometer}
                                 </div>
                               )}
-                              {/* Baris 3: Uraian (Sama 100% dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
+                              {/* Baris 3: Uraian (Merah cerah #DC2626, font/ukuran/bold sama dengan Nama Pekerjaan, sembunyikan bila kosong/'-') */}
                               {hasDescription && (
                                 <div
-                                  className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words mt-[1px]"
+                                  className="font-bold text-[6.4px] leading-[7.6px] text-[#DC2626] whitespace-normal break-words mt-[1px]"
                                   title={description}
                                 >
                                   {description}
