@@ -655,7 +655,7 @@ export default function WorkHistoryPanel({
               {!isAllLogsMode && (
                 <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 mb-1">
                   <span className="px-2 py-0.5 text-[10.5px] font-black rounded-full border uppercase bg-blue-50 text-blue-800 border-blue-200">
-                    {locationData.category || 'SEKSI NASPAN LAA'}
+                    {locationData.category || 'NASPAN LAA'}
                   </span>
                   {locationData.km && (
                     <span className="text-[10.5px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -674,7 +674,7 @@ export default function WorkHistoryPanel({
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
                 {isAllLogsMode
                   ? `Total ${logs.length} catatan pekerjaan pemeliharaan LAA 1.9`
-                  : 'Riwayat inspeksi, pemeliharaan teknis, dan pencatatan pekerjaan seksi'}
+                  : 'Riwayat inspeksi, pemeliharaan teknis, dan pencatatan pekerjaan lokasi'}
               </p>
             </div>
           </div>
@@ -819,7 +819,7 @@ export default function WorkHistoryPanel({
               <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
               {isAllLogsMode
                 ? `Daftar Riwayat Pekerjaan Seluruh Lintas (${filteredLogs.length} Catatan)`
-                : `Riwayat Pekerjaan Seksi (${filteredLogs.length} Catatan)`}
+                : `Riwayat Pekerjaan (${filteredLogs.length} Catatan)`}
             </span>
           </div>
 
@@ -1083,7 +1083,7 @@ export default function WorkHistoryPanel({
                         setSuggestSearchQuery(e.target.value);
                         setIsSuggestOpen(true);
                       }}
-                      placeholder="Ketik / pilih lokasi seksi atau simbol..."
+                      placeholder="Ketik / pilih lokasi atau simbol..."
                       className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-xs font-bold px-3 py-1.5 sm:py-2 rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition shadow-2xs text-slate-900 placeholder:text-slate-400 placeholder:font-normal pr-14"
                     />
 
@@ -1158,7 +1158,7 @@ export default function WorkHistoryPanel({
                             type="text"
                             value={suggestSearchQuery}
                             onChange={(e) => setSuggestSearchQuery(e.target.value)}
-                            placeholder="Cari jalur, stasiun, seksi, wesel..."
+                            placeholder="Cari jalur, stasiun, naspan, wesel..."
                             className="w-full bg-transparent text-slate-800 text-base sm:text-xs font-semibold focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
                           />
                         </div>

@@ -28,7 +28,7 @@ export default function AssetListModal({ assets = [], sections = [] }) {
             Inventaris Aset & Komponen Catenary LAA 1.9
           </h2>
           <p className="text-xs text-slate-400">
-            Daftar Air Joint (AJ), Air Section (AS), Isolator Seksi FRP, dan Seksi Rentangan (NASPAN)
+            Daftar Air Joint (AJ), Air Section (AS), Isolator FRP, dan Rentangan (NASPAN)
           </p>
         </div>
 
