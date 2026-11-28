@@ -82,7 +82,7 @@ export default function AssetListModal({ assets = [], sections = [] }) {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Seksi (NASPAN) ({sections.length})
+            Rentangan (NASPAN) ({sections.length})
           </button>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function AssetListModal({ assets = [], sections = [] }) {
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
-                  <th className="py-3 px-4">Nama Seksi Rentangan</th>
+                  <th className="py-3 px-4">Nama Rentangan</th>
                   <th className="py-3 px-4">Tipe Lintasan</th>
                   <th className="py-3 px-4">Rentang KM</th>
                   <th className="py-3 px-4">Gardu Penyuplai</th>

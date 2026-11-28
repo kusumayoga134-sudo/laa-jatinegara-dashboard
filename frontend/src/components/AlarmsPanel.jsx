@@ -33,7 +33,7 @@ export default function AlarmsPanel({ alerts = [], onAcknowledgeAlert }) {
         {unacknowledged.length === 0 ? (
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">
             <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-            Tidak ada alarm aktif saat ini. Semua seksi LAA beroperasi normal.
+            Tidak ada alarm aktif saat ini. Semua lokasi LAA beroperasi normal.
           </div>
         ) : (
           unacknowledged.map((alt) => (
