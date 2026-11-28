@@ -78,3 +78,66 @@ export function hasRealDescription(log) {
   const desc = resolveLogDescription(log);
   return Boolean(desc && desc !== '-');
 }
+
+/**
+ * 9 Kategori Ikon dari Kotak "KETERANGAN :" Model 4 (Single Source of Truth)
+ */
+export const BEACON_CATEGORIES = [
+  {
+    key: 'GROUNDING',
+    label: 'GROUNDING',
+    pattern: /grounding|pentanahan|arde/i,
+  },
+  {
+    key: 'GUY',
+    label: 'GUY',
+    pattern: /\bguy\b|guy\s*wire|tali\s*guy/i,
+  },
+  {
+    key: 'FEEDING_BRANCH',
+    label: 'FEEDING BRANCH',
+    pattern: /feeding\s*branch|feeding/i,
+  },
+  {
+    key: 'ISOLATOR',
+    label: 'ISOLATOR',
+    pattern: /isolator|insulator/i,
+  },
+  {
+    key: 'PULLOFF_STEADY',
+    label: 'PULLOFF/STEADY BRACE',
+    pattern: /pull[\s-]*off|steady\s*brace|\bsteady\b/i,
+  },
+  {
+    key: 'TROLLEY_WIRE',
+    label: 'TROLLEY WIRE',
+    pattern: /trolley|troli|kawat\s*kontak|contact\s*wire/i,
+  },
+  {
+    key: 'MESSENGER_WIRE',
+    label: 'MESSENGER WIRE',
+    pattern: /messenger/i,
+  },
+  {
+    key: 'FEEDER_WIRE',
+    label: 'FEEDER WIRE',
+    pattern: /feeder/i,
+  },
+  {
+    key: 'OHGW',
+    label: 'OHGW',
+    pattern: /ohgw|kawat\s*petir|ground\s*wire/i,
+  },
+];
+
+/**
+ * Deteksi unik kategori untuk 1 item pekerjaan (cek actionType & description)
+ */
+export function detectLogCategories(log) {
+  if (!log) return [];
+  const desc = log.description && String(log.description).trim() !== '-' ? log.description : '';
+  const haystack = `${log.actionType || ''} ${log.title || ''} ${desc}`.trim();
+  if (!haystack) return [];
+
+  return BEACON_CATEGORIES.filter((cat) => cat.pattern.test(haystack));
+}

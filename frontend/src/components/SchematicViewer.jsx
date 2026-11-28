@@ -28,7 +28,9 @@ import {
 } from '../utils/workLogHelpers';
 import {
   CategoryBeaconIcon,
+  CategoryBadgeIcon,
   computeBeaconIconLayout,
+  detectLogCategories,
 } from './CategoryBeaconIcons';
 
 // =========================================================================
@@ -6336,15 +6338,31 @@ export default function SchematicViewer({
                   const kmLabel = resolveLogKilometer(log, hoveredLine);
                   const descText = resolveLogDescription(log);
                   const showDesc = hasRealDescription(log);
+                  const itemCategories = detectLogCategories(log);
 
                   return (
                     <div
                       key={idx}
                       className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 sm:p-3 text-xs space-y-1"
                     >
-                      {/* Baris 1: Nama Pekerjaan (Acuan Utama) */}
-                      <div className="font-bold text-slate-900 text-xs leading-snug">
-                        {formatAction(log.actionType)}
+                      {/* Baris 1: Nama Pekerjaan + Ikon Kategori KETERANGAN di kanan */}
+                      <div
+                        className={
+                          itemCategories.length > 0
+                            ? 'flex items-start justify-between gap-2'
+                            : ''
+                        }
+                      >
+                        <div className="font-bold text-slate-900 text-xs leading-snug min-w-0">
+                          {formatAction(log.actionType)}
+                        </div>
+                        {itemCategories.length > 0 && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            {itemCategories.map((cat) => (
+                              <CategoryBadgeIcon key={cat.key} category={cat} size={21} />
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* Baris 2: Lokasi Pekerjaan / Kilometer (100% sama dengan teks KM header popup) */}

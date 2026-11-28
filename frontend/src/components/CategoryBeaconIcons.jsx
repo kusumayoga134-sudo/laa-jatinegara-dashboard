@@ -1,56 +1,7 @@
 import React from 'react';
+import { BEACON_CATEGORIES, detectLogCategories } from '../utils/workLogHelpers';
 
-/**
- * 9 Kategori Ikon dari Kotak "KETERANGAN :" Model 4
- * Digunakan KHUSUS pada tampilan Monitoring Utama (SchematicViewer.jsx)
- */
-export const BEACON_CATEGORIES = [
-  {
-    key: 'GROUNDING',
-    label: 'GROUNDING',
-    pattern: /grounding|pentanahan|arde/i,
-  },
-  {
-    key: 'GUY',
-    label: 'GUY',
-    pattern: /\bguy\b|guy\s*wire|tali\s*guy/i,
-  },
-  {
-    key: 'FEEDING_BRANCH',
-    label: 'FEEDING BRANCH',
-    pattern: /feeding\s*branch|feeding/i,
-  },
-  {
-    key: 'ISOLATOR',
-    label: 'ISOLATOR',
-    pattern: /isolator|insulator/i,
-  },
-  {
-    key: 'PULLOFF_STEADY',
-    label: 'PULLOFF/STEADY BRACE',
-    pattern: /pull[\s-]*off|steady\s*brace|\bsteady\b/i,
-  },
-  {
-    key: 'TROLLEY_WIRE',
-    label: 'TROLLEY WIRE',
-    pattern: /trolley|troli|kawat\s*kontak|contact\s*wire/i,
-  },
-  {
-    key: 'MESSENGER_WIRE',
-    label: 'MESSENGER WIRE',
-    pattern: /messenger/i,
-  },
-  {
-    key: 'FEEDER_WIRE',
-    label: 'FEEDER WIRE',
-    pattern: /feeder/i,
-  },
-  {
-    key: 'OHGW',
-    label: 'OHGW',
-    pattern: /ohgw|kawat\s*petir|ground\s*wire/i,
-  },
-];
+export { BEACON_CATEGORIES, detectLogCategories };
 
 /**
  * Deteksi unik kategori pekerjaan untuk 1 segmen (tanpa duplikasi ikon)
@@ -60,16 +11,7 @@ export function detectBeaconCategories(logs = []) {
 
   const matched = new Set();
   logs.forEach((log) => {
-    if (!log) return;
-    const desc = log.description && String(log.description).trim() !== '-' ? log.description : '';
-    const haystack = `${log.actionType || ''} ${log.title || ''} ${desc}`.trim();
-    if (!haystack) return;
-
-    BEACON_CATEGORIES.forEach((cat) => {
-      if (cat.pattern.test(haystack)) {
-        matched.add(cat.key);
-      }
-    });
+    detectLogCategories(log).forEach((cat) => matched.add(cat.key));
   });
 
   return BEACON_CATEGORIES.filter((cat) => matched.has(cat.key));
@@ -307,7 +249,7 @@ function renderCategorySymbol(key) {
 }
 
 /**
- * Komponen ikon vektor SVG crisp di dalam lingkaran putih berborder abu-abu tipis
+ * Komponen ikon vektor SVG crisp di dalam lingkaran putih berborder abu-abu tipis (untuk SVG peta)
  */
 export function CategoryBeaconIcon({ category, cx = 0, cy = 0 }) {
   if (!category) return null;
@@ -321,5 +263,27 @@ export function CategoryBeaconIcon({ category, cx = 0, cy = 0 }) {
       <circle cx="0" cy="0" r="9.5" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.15" />
       {renderCategorySymbol(category.key)}
     </g>
+  );
+}
+
+/**
+ * Komponen badge ikon SVG inline proporsional (untuk kartu DAFTAR SINGKAT PEKERJAAN & Callout Preview PDF)
+ */
+export function CategoryBadgeIcon({ category, size = 21, className = '' }) {
+  if (!category) return null;
+
+  return (
+    <svg
+      viewBox="-11 -11 22 22"
+      width={size}
+      height={size}
+      className={`shrink-0 block ${className}`}
+      role="img"
+      aria-label={category.label}
+    >
+      <title>{category.label}</title>
+      <circle cx="0" cy="0" r="9.8" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.25" />
+      {renderCategorySymbol(category.key)}
+    </svg>
   );
 }
