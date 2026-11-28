@@ -10,6 +10,7 @@ import {
   resolveLogKilometer,
   resolveLogDescription,
   hasRealDescription,
+  detectLogCategories,
 } from './workLogHelpers';
 
 export const VIRTUAL_CANVAS = {
@@ -130,13 +131,17 @@ function computeCardMetrics(line, displayLogs, totalLogs) {
   let bodyH = 0;
   const logLayouts = displayLogs.map((log, idx) => {
     const details = getCleanLogDetails(log, line);
+    const categories = detectLogCategories(log);
+    const catCount = categories.length;
+    const iconsReserveW = catCount > 0 ? catCount * 10.5 + (catCount - 1) * 1.5 + 3 : 0;
+    const actionMaxChars = catCount > 0 ? Math.max(11, Math.floor(((124 - iconsReserveW) / 124) * 26)) : 28;
 
-    const lines1 = estimateWrappedLineCount(details.actionName, 28, 4);
+    const lines1 = estimateWrappedLineCount(details.actionName, actionMaxChars, 4);
     const linesKm = details.kilometer ? estimateWrappedLineCount(details.kilometer, 31, 4) : 0;
     const linesDesc = details.hasDescription ? estimateWrappedLineCount(details.description, 28, 4) : 0;
     const linesTime = details.timeLabel ? estimateWrappedLineCount(details.timeLabel, 28, 4) : 0;
 
-    const h1 = lines1 * 7.6;
+    const h1 = Math.max(lines1 * 7.6, catCount > 0 ? 10.5 : 0);
     const hKm = linesKm > 0 ? 1 + linesKm * 7.2 : 0;
     const hDesc = linesDesc > 0 ? 1 + linesDesc * 7.6 : 0;
     const hTime = linesTime > 0 ? 1 + linesTime * 7.6 : 0;
@@ -146,6 +151,7 @@ function computeCardMetrics(line, displayLogs, totalLogs) {
 
     return {
       ...details,
+      categories,
       lines1,
       linesKm,
       linesDesc,
@@ -657,8 +663,196 @@ function drawOrthogonalElbow(ctx, card, scale) {
 }
 
 /**
+ * Draw 1 of the 9 KETERANGAN : circular vector category icons natively on Canvas 2D
+ * Matches CategoryBeaconIcons.jsx SVG shapes & colors 1:1
+ */
+function drawCategoryBadgeCanvas(ctx, key, cx, cy, size) {
+  const r = size * 0.445; // matches r=9.8 inside 22x22 viewBox
+  const u = r / 9.8;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // White circle + thin slate-400 border
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1.25 * u;
+  ctx.stroke();
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  switch (key) {
+    case 'GROUNDING':
+      ctx.strokeStyle = '#A8B018';
+      ctx.lineWidth = 1.35 * u;
+      ctx.beginPath();
+      ctx.moveTo(0, -6.5 * u);
+      ctx.lineTo(0, 2.5 * u);
+      ctx.moveTo(-5.5 * u, 2.5 * u);
+      ctx.lineTo(5.5 * u, 2.5 * u);
+      ctx.moveTo(-3.7 * u, 4.8 * u);
+      ctx.lineTo(3.7 * u, 4.8 * u);
+      ctx.moveTo(-1.9 * u, 7.0 * u);
+      ctx.lineTo(1.9 * u, 7.0 * u);
+      ctx.stroke();
+      break;
+
+    case 'GUY':
+      ctx.fillStyle = 'rgba(57, 168, 44, 0.18)';
+      ctx.beginPath();
+      ctx.arc(-5.2 * u, 0, 2.4 * u, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#39A82C';
+      ctx.lineWidth = 1.2 * u;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.lineWidth = 0.8 * u;
+      ctx.moveTo(-6.7 * u, -0.8 * u);
+      ctx.lineTo(-3.7 * u, -0.8 * u);
+      ctx.moveTo(-6.7 * u, 0.8 * u);
+      ctx.lineTo(-3.7 * u, 0.8 * u);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.lineWidth = 1.2 * u;
+      ctx.moveTo(-5.2 * u, -2.4 * u);
+      ctx.lineTo(7.2 * u, 0);
+      ctx.moveTo(-5.2 * u, 2.4 * u);
+      ctx.lineTo(7.2 * u, 0);
+      ctx.moveTo(3.5 * u, -3 * u);
+      ctx.lineTo(7.2 * u, 0);
+      ctx.lineTo(3.5 * u, 3 * u);
+      ctx.stroke();
+      break;
+
+    case 'FEEDING_BRANCH':
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.2 * u;
+      ctx.beginPath();
+      ctx.moveTo(-7.8 * u, -4.2 * u);
+      ctx.lineTo(7.8 * u, -4.2 * u);
+      ctx.stroke();
+      ctx.save();
+      ctx.setLineDash([2.5 * u, 1.8 * u]);
+      ctx.beginPath();
+      ctx.moveTo(-7.8 * u, 4.2 * u);
+      ctx.lineTo(7.8 * u, 4.2 * u);
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = '#C026D3';
+      ctx.lineWidth = 1.4 * u;
+      ctx.beginPath();
+      ctx.moveTo(0, -4.2 * u);
+      ctx.lineTo(0, 4.2 * u);
+      ctx.stroke();
+      ctx.fillStyle = '#C026D3';
+      ctx.beginPath();
+      ctx.arc(0, -4.2 * u, 1.6 * u, 0, Math.PI * 2);
+      ctx.arc(0, 4.2 * u, 1.6 * u, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'ISOLATOR':
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.15 * u;
+      ctx.beginPath();
+      ctx.moveTo(-8 * u, 0);
+      ctx.lineTo(8 * u, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#1D6FE2';
+      ctx.lineWidth = 1.2 * u;
+      for (const [tipX, baseX] of [[-4.2, 0], [0, 4.2]]) {
+        ctx.beginPath();
+        ctx.moveTo(tipX * u, 0);
+        ctx.lineTo(baseX * u, -3.2 * u);
+        ctx.lineTo(baseX * u, 3.2 * u);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      break;
+
+    case 'PULLOFF_STEADY':
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.25 * u;
+      ctx.beginPath();
+      ctx.moveTo(-7.5 * u, 4.8 * u);
+      ctx.lineTo(7.5 * u, 4.8 * u);
+      ctx.stroke();
+      ctx.strokeStyle = '#F59E0B';
+      ctx.lineWidth = 1.4 * u;
+      ctx.beginPath();
+      ctx.moveTo(0, 4.6 * u);
+      ctx.lineTo(0, -5.8 * u);
+      ctx.moveTo(-3.2 * u, -2.4 * u);
+      ctx.lineTo(0, -5.8 * u);
+      ctx.lineTo(3.2 * u, -2.4 * u);
+      ctx.stroke();
+      break;
+
+    case 'TROLLEY_WIRE':
+      ctx.strokeStyle = '#DC2626';
+      ctx.lineWidth = 1.7 * u;
+      ctx.beginPath();
+      ctx.moveTo(-7.5 * u, 0);
+      ctx.lineTo(7.5 * u, 0);
+      ctx.stroke();
+      break;
+
+    case 'MESSENGER_WIRE':
+      ctx.strokeStyle = '#F43F5E';
+      ctx.lineWidth = 1.2 * u;
+      ctx.beginPath();
+      ctx.moveTo(-7.5 * u, -2.1 * u);
+      ctx.lineTo(7.5 * u, -2.1 * u);
+      ctx.moveTo(-7.5 * u, 2.1 * u);
+      ctx.lineTo(7.5 * u, 2.1 * u);
+      ctx.stroke();
+      break;
+
+    case 'FEEDER_WIRE':
+      ctx.strokeStyle = '#86B886';
+      ctx.lineWidth = 1.25 * u;
+      ctx.beginPath();
+      ctx.moveTo(-7.8 * u, 0);
+      ctx.lineTo(7.8 * u, 0);
+      ctx.moveTo(-3.3 * u, 4.6 * u);
+      ctx.lineTo(0.4 * u, -4.6 * u);
+      ctx.moveTo(-0.2 * u, 4.6 * u);
+      ctx.lineTo(3.5 * u, -4.6 * u);
+      ctx.stroke();
+      break;
+
+    case 'OHGW':
+      ctx.strokeStyle = '#06D6E8';
+      ctx.lineWidth = 1.35 * u;
+      ctx.beginPath();
+      ctx.moveTo(-8 * u, 0);
+      ctx.lineTo(8 * u, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.lineWidth = 1.05 * u;
+      for (const dotX of [-5.6, -1.9, 1.9, 5.6]) {
+        ctx.beginPath();
+        ctx.arc(dotX * u, 0, 1.35 * u, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  ctx.restore();
+}
+
+/**
  * Render Callout Box on Canvas (at given scale)
- * Structured Format: Jenis Pekerjaan, BULAN TAHUN • KILOMETER, Uraian (jika != "-")
  */
 function drawCalloutBox(ctx, card, scale) {
   const cardX = card.x * scale;
@@ -768,18 +962,36 @@ function drawCalloutBox(ctx, card, scale) {
     }
 
     const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, line);
+    const itemCategories = detectLogCategories(log);
+    const catCount = itemCategories.length;
+    const iconSize = 10.5 * scale;
+    const iconGap = 1.5 * scale;
+    const iconsReserveW = catCount > 0 ? catCount * iconSize + (catCount - 1) * iconGap + 3 * scale : 0;
+    const actionTextW = itemContentW - iconsReserveW;
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
 
-    // Baris 1: Nama Pekerjaan (Acuan utama: 6.4px bold, Slate-900, lineHeight 7.6px)
+    // Baris 1: Nama Pekerjaan + Ikon Kategori KETERANGAN di sebelah kanan
     ctx.fillStyle = '#0f172a';
     ctx.font = `bold ${6.4 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const wrappedAction = wrapCanvasText(ctx, actionName, itemContentW, 4);
-    wrappedAction.forEach((txtLine) => {
-      ctx.fillText(txtLine, itemContentX, currentLogY + 3.8 * scale);
-      currentLogY += 7.6 * scale;
+    const wrappedAction = wrapCanvasText(ctx, actionName, actionTextW, 4);
+    const actionStartY = currentLogY;
+    wrappedAction.forEach((txtLine, tIdx) => {
+      ctx.fillText(txtLine, itemContentX, actionStartY + (3.8 + tIdx * 7.6) * scale);
     });
+
+    if (catCount > 0) {
+      const totalIconsW = catCount * iconSize + (catCount - 1) * iconGap;
+      const iconsStartX = itemContentX + itemContentW - totalIconsW;
+      const iconCy = actionStartY + iconSize / 2;
+      itemCategories.forEach((cat, cIdx) => {
+        const iconCx = iconsStartX + cIdx * (iconSize + iconGap) + iconSize / 2;
+        drawCategoryBadgeCanvas(ctx, cat.key, iconCx, iconCy, iconSize);
+      });
+    }
+
+    currentLogY += Math.max(wrappedAction.length * 7.6 * scale, catCount > 0 ? iconSize : 0);
 
     // Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru #2563eb, tanpa bullet, 6.0px bold, lineHeight 7.2px)
     if (kilometer) {

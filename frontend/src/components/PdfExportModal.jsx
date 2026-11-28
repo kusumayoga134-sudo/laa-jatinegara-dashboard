@@ -24,6 +24,7 @@ import {
   downloadMapPng,
   printMapWindow,
 } from '../utils/pdfExportEngine';
+import { CategoryBadgeIcon, detectLogCategories } from './CategoryBeaconIcons';
 
 export default function PdfExportModal({
   isOpen,
@@ -850,18 +851,34 @@ export default function PdfExportModal({
                       <div className="pl-[7px] pr-[5px] py-[3px] flex-1 flex flex-col justify-start bg-white overflow-hidden">
                         {card.displayLogs.map((log, idx) => {
                           const { actionName, timeLabel, kilometer, description, hasDescription } = getCleanLogDetails(log, card.line);
+                          const itemCategories = detectLogCategories(log);
 
                           return (
                             <div
                               key={idx}
                               className={idx > 0 ? 'border-t border-slate-200/80 mt-[2px] pt-[2px]' : ''}
                             >
-                              {/* Baris 1: Nama Pekerjaan (Acuan utama) */}
+                              {/* Baris 1: Nama Pekerjaan + Ikon Kategori KETERANGAN di kanan (proporsional 10.5px) */}
                               <div
-                                className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words"
-                                title={actionName}
+                                className={
+                                  itemCategories.length > 0
+                                    ? 'flex items-start justify-between gap-[3px] min-h-[10.5px]'
+                                    : ''
+                                }
                               >
-                                {actionName}
+                                <div
+                                  className="font-bold text-[6.4px] leading-[7.6px] text-slate-900 whitespace-normal break-words min-w-0 flex-1"
+                                  title={actionName}
+                                >
+                                  {actionName}
+                                </div>
+                                {itemCategories.length > 0 && (
+                                  <div className="flex items-center gap-[1.5px] shrink-0">
+                                    {itemCategories.map((cat) => (
+                                      <CategoryBadgeIcon key={cat.key} category={cat} size={10.5} />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               {/* Baris 2: Lokasi Pekerjaan / Kilometer (Warna biru bersih, tanpa bullet & waktu) */}
                               {kilometer && (
