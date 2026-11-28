@@ -6036,19 +6036,8 @@ export default function SchematicViewer({
           ======================================================== */}
       <div className="hidden md:flex md:items-center md:justify-between bg-white/95 border-b border-slate-200 px-5 py-2.5 z-20 backdrop-blur-md">
         
-        {/* Left Instruction & Active Work Status */}
-        <div className="flex items-center space-x-3 shrink-0">
-          <div className="flex items-center space-x-1.5 shrink-0">
-            <div className="p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <p className="text-sm text-slate-700 font-medium leading-tight">
-              <span>
-                Pemisah seksi: <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, <strong className="text-orange-700 font-bold">DS</strong>
-              </span>
-            </p>
-          </div>
-
+        {/* Left Active Work Status (Rata Kiri bersih: hanya badge Lokasi Berpenanda) */}
+        <div className="flex items-center shrink-0">
           {linesWithLogs.length > 0 && (
             <div
               className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-2xs animate-in fade-in"
@@ -6311,7 +6300,7 @@ export default function SchematicViewer({
               <div className="mt-2.5 bg-slate-50 border border-slate-200/90 rounded-xl p-2.5 text-xs space-y-1.5">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                   <Layers className="w-3 h-3 text-blue-600" />
-                  <span>Batas Pemisahan Seksi LAA:</span>
+                  <span>Batas Pemisahan LAA:</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[11px]">
@@ -6339,7 +6328,7 @@ export default function SchematicViewer({
 
               {hoveredLogs.length === 0 ? (
                 <div className="text-xs text-slate-500 italic py-2 bg-slate-50 rounded-xl px-3 border border-slate-200 text-center">
-                  Belum ada catatan pekerjaan pada seksi ini.
+                  Belum ada catatan pekerjaan pada lokasi ini.
                 </div>
               ) : (
                 hoveredLogs.slice(0, 2).map((log, idx) => {
@@ -6399,7 +6388,7 @@ export default function SchematicViewer({
                 <button
                   onClick={() => onOpenAddLog(hoveredLine)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center space-x-1 shadow-sm cursor-pointer transition-all active:scale-98 shrink-0"
-                  title="Catat Pekerjaan Baru pada Seksi Ini"
+                  title="Catat Pekerjaan Baru pada Lokasi Ini"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Catat</span>
