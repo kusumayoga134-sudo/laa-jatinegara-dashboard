@@ -10,7 +10,6 @@ import {
   HardHat,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   PlusCircle,
   Layers,
   GitCommit,
