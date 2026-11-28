@@ -46,7 +46,7 @@ export default function LegendGuide() {
             </div>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Pemisah elektrik melalui celah udara antar seksi suplai gardu traksi untuk mencegah hubung singkat dua sumber daya berbeda.
+            Pemisah elektrik melalui celah udara antar suplai gardu traksi untuk mencegah hubung singkat dua sumber daya berbeda.
           </p>
         </div>
 
