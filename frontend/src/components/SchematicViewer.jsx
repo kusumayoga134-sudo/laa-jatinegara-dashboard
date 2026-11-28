@@ -5967,28 +5967,21 @@ export default function SchematicViewer({
           1. MOBILE TOOLBAR (< md) - COMPACT 2-COLUMN FULL-WIDTH GRID
           ======================================================== */}
       <div className="md:hidden bg-white/95 border-b border-slate-200 px-2 py-1.5 flex flex-col gap-1.5 z-20 backdrop-blur-md shrink-0">
-        {/* Row 1: Strip Tipis Penanda Selebar Layar */}
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center space-x-1.5 text-[10px] text-slate-700 font-medium">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span>
-              Pemisah seksi: <strong className="text-blue-700 font-bold">AJ</strong>, <strong className="text-emerald-700 font-bold">AS</strong>, <strong className="text-purple-700 font-bold">FRP</strong>, <strong className="text-orange-700 font-bold">DS</strong>
-            </span>
-          </div>
-
-          {linesWithLogs.length > 0 && (
+        {/* Row 1: Badge Lokasi Berpenanda Rata Kiri */}
+        {linesWithLogs.length > 0 && (
+          <div className="flex items-center justify-start w-full">
             <div
-              className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[9.5px] font-bold shadow-2xs shrink-0"
+              className="flex items-center space-x-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[9.5px] font-bold shadow-2xs shrink-0"
               title="Garis lintasan dengan tanda merah kedip menandakan ada riwayat pekerjaan"
             >
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-600"></span>
               </span>
-              <span>{linesWithLogs.length} Lokasi</span>
+              <span>{linesWithLogs.length} Lokasi Berpenanda</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Row 2: Grid 2 Kolom Penuh Seimbang (Total Kerja & Export PDF) */}
         <div className="grid grid-cols-2 gap-2 w-full">
